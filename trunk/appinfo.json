@@ -1,0 +1,9 @@
+{
+	"id": "com.osm.mojotracker",
+	"version": "0.1.27",
+	"vendor": "Ian Wilson",
+	"type": "web",
+	"main": "index.html",
+	"title": "Mojo Tracker",
+	"icon": "icon.png"
+}
