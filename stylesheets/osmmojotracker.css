@@ -1,1 +1,8 @@
 /* Put Application specific CSS here. */
+
+.export-track{
+    background: url(../images/gpx-icon.png) center center no-repeat;
+    float:right;
+    width:80px;
+    height:40px;
+}
