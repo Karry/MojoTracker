@@ -101,11 +101,12 @@ FirstAssistant.prototype.handleStartButtonPress = function(event)
 FirstAssistant.prototype.handleStopButtonPress = function(event)
 {
 	mojotracker = Mojotracker.getInstance();
+	nodes = mojotracker.getNodes();
 	mojotracker.closeTrack();
 
 	// increment the total and update the display
 	$('messagearea').innerHTML = "Deactivated GPS";
-	this.controller.get("headermsg").update("Num Tracks: " + mojotracker.getNodes());
+	this.controller.get("headermsg").update("Num of nodes: " + nodes);
 	this.trackingHandle.cancel();
 	this.StartbuttonModel.disabled = false;
 	this.controller.modelChanged(this.StartbuttonModel);
@@ -138,7 +139,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	$('vertAccuracy').innerHTML 	= "Vertical accuracy: " 	+ this.config.userSmallDistance(vertAccuracy, false);
 	
 	$('tracknum').innerHTML 	= "No. of nodes: " 		+ mojotracker.getNodes();
-	$('headermsg').innerHTML 	= 				this.formatDate(now, 3);
+	$('headermsg').innerHTML 	= "Last update: "		+ this.formatDate(now, 3);
 
 	if (event.errorCode != 0)
 		$('headermsg').innerHTML = "GPS warning: " + event.errorCode;
