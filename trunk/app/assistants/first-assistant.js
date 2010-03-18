@@ -14,6 +14,8 @@ FirstAssistant.prototype.setup = function()
 	/* add event handlers to listen to events from widgets */
 	// set the initial total and display it
 
+	this.config = Config.getInstance();
+
 	$('messagearea').innerHTML = "Latitude: 0, Longitude: 0";
 	
 	// a local object for button attributes    
@@ -117,22 +119,32 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	// obj = new GPShelper(event.latitude,event.longitude,event.altitude,event.errorCode,event.heading,event.horizAccuracy,event.vertAccuracy,event.velocity,event.timestamp);
 	// Display GPS data, log to Db
 	now = new Date();
-	speed = event.velocity * 2.237;
+	velocity = event.velocity;
 	lat = event.latitude.toFixed(6);
 	lon = event.longitude.toFixed(6);
 	alt = event.altitude.toFixed(0);
 	strUTC = this.formatDate(now, 2);
-	$('messagearea').innerHTML = "GPS Operating...";
-	$('latitude').innerHTML = "Latitude: " + lat;
-	$('longitude').innerHTML = "Longitude: " + lon;
-	$('tracknum').innerHTML = "No. of Tracks: " + mojotracker.getNodes();
-	$('speed').innerHTML = "Speed(MPH): " + String(speed.toFixed(0));
-	$('headermsg').innerHTML = this.formatDate(now, 3);
+	horizAccuracy = event.horizAccuracy.toFixed(0);
+	vertAccuracy = event.vertAccuracy.toFixed(0);
+	
+	$('messagearea').innerHTML 	= "GPS Operating...";
+
+	$('latitude').innerHTML 	= "Latitude: " 			+ this.config.userLatitude( lat );
+	$('longitude').innerHTML 	= "Longitude: " 		+ this.config.userLongitude( lon );
+	$('horizAccuracy').innerHTML 	= "Horizontal accuracy: " 	+ this.config.userSmallDistance(horizAccuracy, false);
+	$('speed').innerHTML 		= "Speed: " 			+ this.config.userVelocity(velocity);
+
+	$('altitude').innerHTML 	= "Altitude: " 			+ this.config.userSmallDistance(alt, true);
+	$('vertAccuracy').innerHTML 	= "Vertical accuracy: " 	+ this.config.userSmallDistance(vertAccuracy, false);
+	
+	$('tracknum').innerHTML 	= "No. of nodes: " 		+ mojotracker.getNodes();
+	$('headermsg').innerHTML 	= 				this.formatDate(now, 3);
+
 	if (event.errorCode != 0)
 		$('headermsg').innerHTML = "GPS warning: " + event.errorCode;
 	this.nullHandleCount = 0;
 	
-	mojotracker.addNode( lat, lon, alt, strUTC, this.tableErrorHandler.bind(this) );
+	mojotracker.addNode( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, this.tableErrorHandler.bind(this) );
 	
 }
 

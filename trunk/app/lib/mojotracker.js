@@ -38,7 +38,14 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
         
     // create table
     this.tracename = name;
-    var strSQL = 'CREATE TABLE ' + this.tracename + ' (lat TEXT NOT NULL DEFAULT "nothing", lon TEXT NOT NULL DEFAULT "nothing", altitude TEXT NOT NULL DEFAULT "nothing", time TEXT NOT NULL DEFAULT "nothing"); GO;';
+    var strSQL = 'CREATE TABLE ' + this.tracename + ' (lat TEXT NOT NULL DEFAULT "nothing", '
+        + 'lon TEXT NOT NULL DEFAULT "nothing", '
+        + 'altitude TEXT NOT NULL DEFAULT "nothing", '
+        + 'time TEXT NOT NULL DEFAULT "nothing", '
+        + 'velocity INT NOT NULL DEFAULT -1, '
+        + 'horizAccuracy INT NOT NULL DEFAULT -1, '
+        + 'vertAccuracy INT NOT NULL DEFAULT -1'
+        +'); GO;';
     this.db.transaction
     ( 
             (function (transaction)
@@ -54,13 +61,14 @@ Mojotracker.prototype.isActive = function( name){
     return this.tracename == name;
 }
 
-Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, errorHandler ){
+Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, errorHandler ){
     if ((!this.tracename) || (!this.db)){
         Mojo.log("no track is opened");
         return;
     }
     
-    var strSQL = 'INSERT INTO ' + this.tracename + ' (lat, lon, altitude, time) VALUES ("' + lat + '","' + lon + '","' + alt + '","' + strUTC + '"); GO;';
+    var strSQL = 'INSERT INTO ' + this.tracename + ' (lat, lon, altitude, time, velocity, horizAccuracy, vertAccuracy)'
+        + 'VALUES ("' + lat + '","' + lon + '","' + alt + '","' + strUTC + '",  '+velocity+', '+horizAccuracy+', '+vertAccuracy+'); GO;';
     this.executeSQL(strSQL, this.createRecordDataHandler.bind(this), errorHandler); 
     this.total ++;
 }
@@ -113,6 +121,9 @@ Mojotracker.prototype.createRecordDataHandler = function(transaction, results) {
 Mojotracker.prototype.storeGpx = function(name, errorHandler, successHandler) {
     try {
         /*
+         FIXME: add export function here... We have permitted use code from MappingTool from its author
+         and I have filemgr api documentation... 
+         
         this.controller.serviceRequest('palm://ca.canucksoftware.filemgr', {
                 method: 'createFile',
                 parameters: {
