@@ -61,6 +61,10 @@ Mojotracker.prototype.isActive = function( name){
     return this.tracename == name;
 }
 
+Mojotracker.prototype.getCurrentTrack = function(){
+    return tracename;
+}
+
 Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, errorHandler ){
     if ((!this.tracename) || (!this.db)){
         Mojo.log("no track is opened");
