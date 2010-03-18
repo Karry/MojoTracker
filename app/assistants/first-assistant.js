@@ -126,6 +126,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	strUTC = this.formatDate(now, 2);
 	horizAccuracy = event.horizAccuracy.toFixed(0);
 	vertAccuracy = event.vertAccuracy.toFixed(0);
+	direction = event.heading.toFixed(0);
 	
 	$('messagearea').innerHTML 	= "GPS Operating...";
 
@@ -140,12 +141,15 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	$('tracknum').innerHTML 	= "No. of nodes: " 		+ mojotracker.getNodes();
 	$('headermsg').innerHTML 	= "Last update: "		+ this.formatDate(now, 3);
 	
-	direction = event.heading.toFixed(0);
 	compass = document.getElementById("compass");
 	compass.style.display = "block";
 	compass.style.MozTransform = "rotate(" + direction + "deg)";
-	compass.style.webkitTransform = "rotate(" + direction + "deg)";	    
-		
+	compass.style.webkitTransform = "rotate(" + direction + "deg)";
+
+	opacity = (direction < 1)? 0.3:0.8;
+	//compass.style.MozOpacity = opacity;
+	compass.style.opacity = opacity;
+	
 	if (event.errorCode != 0)
 		$('headermsg').innerHTML = "GPS warning: " + event.errorCode;
 	this.nullHandleCount = 0;
