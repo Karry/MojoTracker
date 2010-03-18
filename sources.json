@@ -2,6 +2,7 @@
     {"source": "app/assistants/stage-assistant.js"},
     {"source": "app/assistants/app-assistant.js" },
     {"source": "app/lib/mojotracker.js" },
+    {"source": "app/lib/config.js" },
     {
         "scenes": "first",
         "source": "app/assistants/first-assistant.js"
