@@ -69,8 +69,7 @@ FirstAssistant.prototype.handleStartButtonPress = function(event)
 	this.StartbuttonModel.disabled = true;
 	this.controller.modelChanged(this.StartbuttonModel);
 	this.StopbuttonModel.disabled = false;
-	this.controller.modelChanged(this.StopbuttonModel);
-	
+	this.controller.modelChanged(this.StopbuttonModel);	
 
 	tracename = "G" + this.formatDate(now, 1);
 	try{
@@ -140,7 +139,13 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	
 	$('tracknum').innerHTML 	= "No. of nodes: " 		+ mojotracker.getNodes();
 	$('headermsg').innerHTML 	= "Last update: "		+ this.formatDate(now, 3);
-
+	
+	direction = event.heading.toFixed(0);
+	compass = document.getElementById("compass");
+	compass.style.display = "block";
+	compass.style.MozTransform = "rotate(" + direction + "deg)";
+	compass.style.webkitTransform = "rotate(" + direction + "deg)";	    
+		
 	if (event.errorCode != 0)
 		$('headermsg').innerHTML = "GPS warning: " + event.errorCode;
 	this.nullHandleCount = 0;
