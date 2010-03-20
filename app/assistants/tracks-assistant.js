@@ -75,8 +75,7 @@ TracksAssistant.prototype.reveal = function(){
     this.trackList.mojo.revealItem(350, true);
 }
 
-TracksAssistant.prototype.tableErrorHandler = function(transaction, error)
-{
+TracksAssistant.prototype.tableErrorHandler = function(transaction, error){
     $('trackHeadermsg').update('table Error was ' + error.message + ' (Code ' + error.code + ')');
     return true;
 }
@@ -93,7 +92,13 @@ TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results
 }
 
 TracksAssistant.prototype.storeGpx = function(name){
-    Mojotracker.getInstance().storeGpx(name, this.createStoreErrorHandler.bind(this), this.createStoreSuccessHandler.bind(this));
+    callback = {
+        errorHandler : this.createStoreErrorHandler.bind(this),
+        successHandler : this.createStoreSuccessHandler.bind(this),
+        progress : this.showProgress.bind(this)
+    }
+    
+    Mojotracker.getInstance().storeGpx(this.controller, name, callback);
 }
 
 TracksAssistant.prototype.createStoreErrorHandler = function(e){
@@ -104,7 +109,12 @@ TracksAssistant.prototype.createStoreSuccessHandler = function(name){
     this.showDialog("Info","Track stored to "+name);
 }
 
-TracksAssistant.prototype.showDialog = function(title, message){
+TracksAssistant.prototype.showDialog = function(title, message){    
+    if (this.progressDialog){
+        this.progressDialog.close();
+        this.progressDialog = null;
+    }
+
     uncancellableAlertAttributes = {
         //	preventCancel
         // requires the user to push a button to close the dialog, instead of being about to cancel out
@@ -119,7 +129,22 @@ TracksAssistant.prototype.showDialog = function(title, message){
         ]
     };
 
-    this.controller.showAlertDialog(uncancellableAlertAttributes);      
+    this.controller.showAlertDialog(uncancellableAlertAttributes);
+}
+
+TracksAssistant.prototype.showProgress = function(value, max, message){
+    if (this.progressDialog){
+        this.progressDialog.setProgress(value, max, message);
+        return;
+    }
+    
+    this.progressDialog = new ProgressDialogAssistant(this.controller, value, max, message);
+        
+    this.controller.showDialog({
+           template: 'dialogs/progress-dialog',
+           assistant: this.progressDialog,
+           preventCancel:true
+     });
 }
 
 TracksAssistant.prototype.createTrackNamesHandler = function(transaction, results) {

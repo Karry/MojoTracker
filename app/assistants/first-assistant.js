@@ -61,8 +61,8 @@ FirstAssistant.prototype.setup = function()
 
 }
 
-FirstAssistant.prototype.handleStartButtonPress = function(event)
-{
+FirstAssistant.prototype.handleStartButtonPress = function(event){	
+    
 	// increment the total and update the display
 	now = new Date();
 	$('messagearea').innerHTML = "Activating GPS...";
@@ -70,7 +70,7 @@ FirstAssistant.prototype.handleStartButtonPress = function(event)
 	this.controller.modelChanged(this.StartbuttonModel);
 	this.StopbuttonModel.disabled = false;
 	this.controller.modelChanged(this.StopbuttonModel);	
-
+	
 	tracename = "G" + this.formatDate(now, 1);
 	try{
 		mojotracker = Mojotracker.getInstance();
@@ -84,17 +84,17 @@ FirstAssistant.prototype.handleStartButtonPress = function(event)
 	this.setScreenTimeout(1);
 	// Start GPS
 	this.trackingHandle = this.controller.serviceRequest('palm://com.palm.location',
-	                                                     {
-	                                                      method : 'startTracking',
-	                                                      parameters: {
-	                                                                   accuracy: 1, 
-	                                                                   maximumAge: 1,
-	                                                                   responseTime: 1,
-	                                                                   subscribe: true
-	                                                                  },
-	                                                      onSuccess: this.handleGpsResponse.bind(this),
-	                                                      onFailure: this.handleGpsResponseError.bind(this)
-	                                                     } );
+							     {
+							      method : 'startTracking',
+							      parameters: {
+									   accuracy: 1, 
+									   maximumAge: 1,
+									   responseTime: 1,
+									   subscribe: true
+									  },
+							      onSuccess: this.handleGpsResponse.bind(this),
+							      onFailure: this.handleGpsResponseError.bind(this)
+							     } );
 }
 
 FirstAssistant.prototype.handleStopButtonPress = function(event)
@@ -161,9 +161,31 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	
 }
 
+FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){
+	switch(code){
+		case 0:
+			return "Success";
+		case 1:
+			return "Timeout"; 
+		case 2:
+			return "Position_Unavailable"; 
+		case 5:
+			return "LocationServiceOFF"; 
+		case 6:
+			return "Permission Denied - The user has not accepted the terms of use for the GPS Services."; 
+		case 7:
+			return "The application already has a pending message"; 
+		case 8:
+			return "The application has been temporarily blacklisted.";		
+		case 3: 
+		default:
+			return "Unknown";
+	}
+}
+
 FirstAssistant.prototype.handleGpsResponseError = function(event)
 {
-	$('headermsg').innerHTML = "A GPS Error occurred:" + Object.toJSON(event);
+	$('headermsg').innerHTML = "A GPS Error occurred:" + this.getMessageForGpsErrorCode(event.errorCode);
 }
 
 FirstAssistant.prototype.tableErrorHandler = function(transaction, error) 
