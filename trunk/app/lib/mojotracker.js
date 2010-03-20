@@ -122,27 +122,149 @@ Mojotracker.prototype.createRecordDataHandler = function(transaction, results) {
     // nothing to do 
 }
 
-Mojotracker.prototype.storeGpx = function(name, errorHandler, successHandler) {
+Mojotracker.prototype.storeGpx = function(controller, name, callback) {
+    var strSQL = "SELECT * FROM `" + name + "` ; GO;";
+    
+    this.executeSQL(strSQL,
+            function(tx, result) {
+                this.createGPXContent(controller, result, name, callback);
+            }.bind(this),
+            function(tx, error) {
+                callback.errorHandler(error);
+            }.bind(this)                    
+        );
+}
+
+/*    
+Mojotracker.prototype.createGPX = function(controller, result, name, callback) {
+        
     try {
-        /*
-         FIXME: add export function here... We have permitted use code from MappingTool from its author
-         and I have filemgr api documentation... 
-         
-        this.controller.serviceRequest('palm://ca.canucksoftware.filemgr', {
+        controller.serviceRequest('palm://ca.canucksoftware.filemgr', {
                 method: 'createFile',
                 parameters: {
-                        path: "/media/internal/MapTool",
-                        newFile: name + ".loc",
+                        path: "/media/internal",
+                        newFile: name + ".part1.gpx",
                         offset: 0
                 },
-                onSuccess: function() {this.createLocFile(tx, result, name);}.bind(this),
-                onFailure: errorHandler
+                onSuccess: function() {
+                    this.createGPXContent(controller, result, name, callback);
+                    }.bind(this),
+                onFailure: callback.errorHandler
         });
-        */
-        errorHandler("Not implemented yet.");
+        //errorHandler("Not implemented yet.");
     } catch (e) {
         Mojo.Log.error("Catch in storeGpx");
         errorHandler(e);
     }
 }
+*/
+
+
+Mojotracker.prototype.createGPXContent = function(controller, result, name, callback) {
+    if (!result.rows){
+        callback.errorHandler("BAD base result");
+        Mojo.Log.error("BAD base result");
+        return;
+    }
+
+    Mojo.Log.error("len = "+result.rows.length);
+    try {
+	var msg2 = "<?xml version='1.0' encoding='ISO-8859-1'?>\n";
+	msg2 += "<gpx version='1.1'\n";
+	msg2 += "creator='MojoTracker - http://code.google.com/p/mojotracker/'\n";
+	msg2 += "xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n";
+	msg2 += "xmlns='http://www.topografix.com/GPX/1/1'\n";
+	msg2 += "xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd'>\n";
+	msg2 += "<trk>\n<name>" + name + "</name>\n<trkseg>\n";
+	for (var i = 0; i < result.rows.length; i++) {
+            try {
+		var row = result.rows.item(i);
+		msg2 += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
+		msg2 += "\t<time>" + row.time + "</time>\n";
+		msg2 += (row.altitude)?"\t<ele>" + row.altitude + "</ele>\n":"";
+                msg2 += (row.velocity) && (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n": "";
+                msg2 += (row.horizAccuracy)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n":"";
+                msg2 += (row.vertAccuracy)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n":"";
+		msg2 += "</trkpt>\n";
+                
+                if (i % 10 == 0){
+                    callback.progress(i, result.rows.length, "building xml data ("+i+")...");
+                }
+            } catch (e) {
+                Mojo.Log.error("Error 1");
+                Mojo.Log.error("Error 1: "+e);
+            }
+        }
+        msg2 += "</trkseg>\n</trk>\n";
+        msg2 += "</gpx>\n";
+
+        callback.progress(1,1, "xml data builded...");
+
+        setTimeout(this.writeGPXFile.bind(this), 500,
+                   controller, name, msg2,
+                   callback, 0);
+        //writeGPXFile();
+    } catch (e) {
+        Mojo.Log.error(e);
+        callback.errorHandler("Error 2: "+e);
+    }
+}
+
+Mojotracker.prototype.fillZeros = function(num){
+    res = "" + num;
+    if (num < 10) res = "0"+res;
+    if (num < 100) res = "0"+res;
+    return res;
+}
+
+Mojotracker.prototype.writeGPXFile = function(controller, name, content, callback, offset) {
+    
+    // WARNING: filemgr fails with writing from offset...
+    // FIXME: respect config property "split files"
+    limit = 50000;
+    splitFile = content.length > limit;
+    
+    if (splitFile){
+        from = 0;
+        fileName = name +".gpx."+this.fillZeros(((offset / limit)+1));
+    }else{
+        from = offset;
+        fileName = name + ".gpx";
+    }
+    callback.progress(offset, content.length, "Saving data ("+offset+" / "+content.length+")...");
+    
+    try {  
+        controller.serviceRequest('palm://ca.canucksoftware.filemgr', {
+            method: 'write',
+            parameters: {
+                    file: "/media/internal/" + fileName,
+                    str: content.substr(offset, limit),
+                    offset: from
+            },
+            onSuccess: function(){
+                //offset += limit;
+                if ((content.length - offset)> limit) {
+                    //this.writeGPXFile(controller, name,  content.substr(limit), errorHandler, successHandler, offset+limit);
+                    setTimeout(this.writeGPXFile.bind(this), 500,
+                                   controller, name, content,
+                                   callback, offset + limit);                    
+                } else {
+                    callback.successHandler(fileName);
+                }
+                    
+                }.bind(this),
+            onFailure: function(err) {
+
+                Mojo.Log.error("onFailure: ", err.errorText);
+                callback.errorHandler(err.errorText + " ["+name + ".gpx len " + offset + "+" +content.length  + "]");
+            }
+            });
+
+	} catch (e) {
+            Mojo.Log.error("Error 3");
+            Mojo.Log.error(e);
+            callback.errorHandler("Error 3: "+e);
+	}
+};
+
 
