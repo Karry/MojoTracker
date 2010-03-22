@@ -46,7 +46,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
         + 'velocity INT NOT NULL DEFAULT -1, '
         + 'horizAccuracy INT NOT NULL DEFAULT -1, '
         + 'vertAccuracy INT NOT NULL DEFAULT -1,'
-        + 'distanceFromPrev INT NOT NULL DEFAULT 0'
+        + 'distanceFromPrev DOUBLE NOT NULL DEFAULT 0'
         +'); GO;';
     this.db.transaction
     ( 
