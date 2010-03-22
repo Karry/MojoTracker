@@ -38,13 +38,15 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
         
     // create table
     this.tracename = name;
-    var strSQL = 'CREATE TABLE ' + this.tracename + ' (lat TEXT NOT NULL DEFAULT "nothing", '
+    var strSQL = 'CREATE TABLE ' + this.tracename + ' ('
+        + 'lat TEXT NOT NULL DEFAULT "nothing", '
         + 'lon TEXT NOT NULL DEFAULT "nothing", '
         + 'altitude TEXT NOT NULL DEFAULT "nothing", '
         + 'time TEXT NOT NULL DEFAULT "nothing", '
         + 'velocity INT NOT NULL DEFAULT -1, '
         + 'horizAccuracy INT NOT NULL DEFAULT -1, '
-        + 'vertAccuracy INT NOT NULL DEFAULT -1'
+        + 'vertAccuracy INT NOT NULL DEFAULT -1,'
+        + 'distanceFromPrev INT NOT NULL DEFAULT 0'
         +'); GO;';
     this.db.transaction
     ( 
@@ -55,6 +57,10 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
             } ).bind(this) 
     );
     this.total = 0;
+    this.lastPoint = false;
+    this.trackLength = 0;
+    this.minAltitude = null;
+    this.maxAltitude = null;
 }
 
 Mojotracker.prototype.isActive = function( name){
@@ -65,16 +71,62 @@ Mojotracker.prototype.getCurrentTrack = function(){
     return tracename;
 }
 
+Mojotracker.prototype.getTrackLength = function(){
+    return  this.trackLength;
+}
+
 Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, errorHandler ){
     if ((!this.tracename) || (!this.db)){
         Mojo.log("no track is opened");
         return;
     }
     
-    var strSQL = 'INSERT INTO ' + this.tracename + ' (lat, lon, altitude, time, velocity, horizAccuracy, vertAccuracy)'
-        + 'VALUES ("' + lat + '","' + lon + '","' + alt + '","' + strUTC + '",  '+velocity+', '+horizAccuracy+', '+vertAccuracy+'); GO;';
+    var distance = 0;
+    if (this.lastPoint){
+        var lat1Rad = this.lastPoint.lat*( Math.PI / 180);
+        var lon1Rad = this.lastPoint.lon*( Math.PI / 180);
+        var lat2Rad = lat*( Math.PI / 180);
+        var lon2Rad = lon*( Math.PI / 180);
+        
+        var R = 6371000; // Earth radius in metres
+        var dLat = lat2Rad - lat1Rad;
+        var dLon = lon2Rad - lon1Rad; 
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1Rad) * Math.cos(lat2Rad) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2); 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        distance = R * c;
+        this.lastPoint = {
+            lat: lat,
+            lon: lon
+        }
+    }
+    this.trackLength += distance;
+    
+    if ((alt != null) && (this.minAltitude == null || alt < this.minAltitude ))
+        this.minAltitude = alt;
+    if ((alt != null) && (this.maxAltitude == null || alt > this.maxAltitude ))
+        this.maxAltitude = alt;
+    if (this.maxVelocity == null || velocity > this.maxVelocity)
+        this.maxVelocity = velocity;
+    
+    var strSQL = 'INSERT INTO ' + this.tracename + ' '
+        + '(lat, lon, altitude, time, velocity, horizAccuracy, vertAccuracy, distanceFromPrev)'
+        + 'VALUES ("' + lat + '","' + lon + '","' + alt + '","' + strUTC + '",  '+velocity+', '+horizAccuracy+', '+vertAccuracy+', '+distance+'); GO;';
     this.executeSQL(strSQL, this.createRecordDataHandler.bind(this), errorHandler); 
     this.total ++;
+}
+
+Mojotracker.prototype.getMaxVelocity = function(){
+    return this.maxVelocity;
+}
+
+Mojotracker.prototype.getMaxAltitude = function(){
+    return this.maxAltitude;
+}
+
+Mojotracker.prototype.getMinAltitude = function(){
+    return this.minAltitude;
 }
 
 Mojotracker.prototype.getTrackNames = function(resultHandler, errorHandler){
@@ -102,7 +154,12 @@ Mojotracker.prototype.removeTrack = function(name, errorHandler){
 
 
 Mojotracker.prototype.getTrackInfo = function( name, infoHandler, errorHandler ){
-    var strSQL = "SELECT '"+name+"' AS name, COUNT(*) AS nodes, MIN(`time`) AS start, MAX(`time`) AS stop FROM `"+name+"` ; GO;";
+    var strSQL = "SELECT '"+name+"' AS name, " +
+        "COUNT(*) AS nodes, " +
+        "MIN(`time`) AS start, " +
+        "MAX(`time`) AS stop, " +
+        "SUM(`distanceFromPrev`) AS trackLength " +
+        "FROM `"+name+"` ; GO;";
     this.executeSQL(strSQL, infoHandler, errorHandler);
 }
 

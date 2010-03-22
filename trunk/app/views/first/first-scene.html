@@ -7,7 +7,7 @@
 	<div id="btnStop" x-mojo-element="Button">xx</div>
 	
 	<div style="position: relative;">
-		<div style="position:absolute; right:0px">
+		<div style="position:absolute; right:0px; z-index:100">
 			<img src="images/compass.png" id="compass" style="display:none"/>
 		</div>
 	</div>
@@ -17,10 +17,19 @@
 	<div id="latitude" class="palm-body-text"></div>
 	<div id="longitude" class="palm-body-text"></div>
 	<div id="horizAccuracy" class="palm-body-text"></div>
-	<div id="speed" class="palm-body-text"></div>
+	<div class="palm-body-text">
+		<span id="speed"></span>
+		&nbsp;<span id="maxSpeed"></span>
+	</div>
 
-	<div id="altitude" class="palm-body-text"></div>
+	<div class="palm-body-text">
+		<span id="altitude"></span>
+		&nbsp;<span id="maxAltitude"></span>
+		&nbsp;<span id="minAltitude"></span>
+	</div>
 	<div id="vertAccuracy" class="palm-body-text"></div>
+	
+	<div id="trackLength" class="palm-body-text"></div>
 
 	<div id="tracknum" class="palm-body-text"></div>
 </div>
