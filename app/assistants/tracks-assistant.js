@@ -83,6 +83,7 @@ TracksAssistant.prototype.tableErrorHandler = function(transaction, error){
 TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results){
     if ((results.rows) && (results.rows.length == 1)){
         newItem = results.rows.item(0);
+        newItem.trackLengthFormated =  Config.getInstance().userDistance( newItem.trackLength , false);
         this.currentModel.items.push(newItem);
         this.trackList.mojo.noticeAddedItems(this.currentModel.items.length, [newItem]);
         //$('trackHeadermsg').update('result: ' + results +"["+results.rows.length+"]");

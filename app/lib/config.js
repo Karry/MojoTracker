@@ -17,7 +17,7 @@ Config.METRIC = 0;
 Config.IMPERIAL = 1;
 
 Config.prototype.userVelocity = function(velocityMPS){
-    if (velocityMPS<0)
+    if (velocityMPS == null || velocityMPS<0)
         return "?";
     
     switch(this.velocityUnits){
@@ -32,7 +32,7 @@ Config.prototype.userVelocity = function(velocityMPS){
 
 
 Config.prototype.userSmallDistance = function(distanceM, canNegative){
-    if ((distanceM < 0) && (!canNegative))
+    if ((distanceM == null) || ((distanceM < 0) && (!canNegative)))
         return "?";
     
     switch(this.distanceUnits){
@@ -42,6 +42,22 @@ Config.prototype.userSmallDistance = function(distanceM, canNegative){
         case Config.METRIC:
         default:
             return (distanceM * 1.0).toFixed(0)+" m";
+    }
+}
+
+Config.prototype.userDistance = function(distanceM, canNegative){
+    if ((distanceM == null) || ((distanceM < 0) && (!canNegative)))
+        return "?";
+    
+    switch(this.distanceUnits){
+        case Config.IMPERIAL:
+            /* FIXME: I'am not sure that it is right */
+            tmp = (distanceM / 1609.344);
+            return (tmp >= 10? tmp.toFixed(0): tmp.toFixed(1))+" miles";
+        case Config.METRIC:
+        default:
+            tmp = (distanceM / 1000);
+            return (tmp >= 10? tmp.toFixed(0): tmp.toFixed(1))+" km";
     }
 }
 

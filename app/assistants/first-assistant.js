@@ -130,15 +130,24 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	vertAccuracy = event.vertAccuracy.toFixed(0);
 	direction = event.heading.toFixed(0);
 	
+	// fix bad values from gps
+	if (alt < -200)
+		alt = null;
+	
 	$('messagearea').innerHTML 	= "GPS Operating...";
 
 	$('latitude').innerHTML 	= "Latitude: " 			+ this.config.userLatitude( lat );
 	$('longitude').innerHTML 	= "Longitude: " 		+ this.config.userLongitude( lon );
 	$('horizAccuracy').innerHTML 	= "Horizontal accuracy: " 	+ this.config.userSmallDistance(horizAccuracy, false);
 	$('speed').innerHTML 		= "Speed: " 			+ this.config.userVelocity(velocity);
+	$('maxSpeed').innerHTML 	= "max: " 			+ this.config.userVelocity(mojotracker.getMaxVelocity());
 
+	$('trackLength').innerHTML 	= "Track Length: " 		+ this.config.userDistance( mojotracker.getTrackLength(), false);
+	
 	$('altitude').innerHTML 	= "Altitude: " 			+ this.config.userSmallDistance(alt, true);
 	$('vertAccuracy').innerHTML 	= "Vertical accuracy: " 	+ this.config.userSmallDistance(vertAccuracy, false);
+	$('maxAltitude').innerHTML 	= "min: " 			+ this.config.userSmallDistance(mojotracker.getMinAltitude(), true);
+	$('minAltitude').innerHTML 	= "max: " 			+ this.config.userSmallDistance(mojotracker.getMaxAltitude(), true);
 	
 	$('tracknum').innerHTML 	= "Number of nodes: " 		+ mojotracker.getNodes();
 	$('headermsg').innerHTML 	= "Current track: " 		+ mojotracker.getCurrentTrack() + "<br />"
@@ -179,7 +188,7 @@ FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){
 			return "The application has been temporarily blacklisted.";		
 		case 3: 
 		default:
-			return "Unknown";
+			return "Unknown ("+code+")";
 	}
 }
 
