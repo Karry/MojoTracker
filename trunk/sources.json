@@ -13,6 +13,10 @@
         "source": "app/assistants/tracks-assistant.js"
     },
     {
+        "scenes": "preferences",
+        "source": "app/assistants/preferences-assistant.js"
+    },
+    {
         "scenes": "about",
         "source": "app/assistants/about-assistant.js"
     }

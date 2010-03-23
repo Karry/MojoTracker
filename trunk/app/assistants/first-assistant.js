@@ -53,6 +53,7 @@ FirstAssistant.prototype.setup = function()
 		items:
 		[
 		    { label: "Saved tracks", command: "tracks" },
+		    { label: "Preferences", command: "preferences" },
 		    { label: "About", command: "about" }
 		]
 	    }

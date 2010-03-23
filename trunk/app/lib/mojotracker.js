@@ -88,7 +88,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
         var lat2Rad = lat*( Math.PI / 180);
         var lon2Rad = lon*( Math.PI / 180);
         
-        var R = 6371000; // Earth radius in metres
+        var R = 6371000; // Earth radius (mean) in metres
         var dLat = lat2Rad - lat1Rad;
         var dLon = lon2Rad - lon1Rad; 
         var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -96,11 +96,11 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
                 Math.sin(dLon/2) * Math.sin(dLon/2); 
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         distance = R * c;
-        this.lastPoint = {
-            lat: lat,
-            lon: lon
-        }
     }
+    this.lastPoint = {
+        lat: lat,
+        lon: lon
+    }    
     this.trackLength += distance;
     
     if ((alt != null) && (this.minAltitude == null || alt < this.minAltitude ))
@@ -279,9 +279,9 @@ Mojotracker.prototype.writeGPXFile = function(controller, name, content, callbac
     // WARNING: filemgr fails with writing from offset...
     // FIXME: respect config property "split files"
     limit = 50000;
-    splitFile = content.length > limit;
+    largeFile = content.length > limit;
     
-    if (splitFile){
+    if (largeFile && Config.getInstance().splitExportFiles()){
         from = 0;
         fileName = name +".gpx."+this.fillZeros(((offset / limit)+1));
     }else{

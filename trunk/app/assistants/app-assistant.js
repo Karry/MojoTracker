@@ -27,6 +27,9 @@ AppAssistant.prototype.handleCommand = function(event)
             case "tracks":
                 Mojo.Controller.stageController.pushScene("tracks");
                 break;
+            case "preferences":
+                Mojo.Controller.stageController.pushScene("preferences");
+                break;
         }
     }
 };
