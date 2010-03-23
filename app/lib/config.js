@@ -1,8 +1,9 @@
 
 function Config(){
     /* FIXME: load this config from cookies */ 
-    this.velocityUnits = Config.METRIC;
-    this.distanceUnits = Config.METRIC;
+    this.units = Config.METRIC;
+    
+    this.splitExportFile = true;
 }
 
 Config.instance = null;
@@ -16,11 +17,29 @@ Config.getInstance = function(){
 Config.METRIC = 0;
 Config.IMPERIAL = 1;
 
+Config.prototype.splitExportFiles = function(){
+    return this.splitExportFile;
+}
+
+Config.prototype.setSplitExportFiles = function( b ){
+    // FIXME: save this value to cookie
+    this.splitExportFile = b;
+}
+
+Config.prototype.setUnits = function( units ){
+    // FIXME: save this values to cookie
+    this.units = units;
+}
+
+Config.prototype.getUnits = function(){
+    return this.units;
+}
+
 Config.prototype.userVelocity = function(velocityMPS){
     if (velocityMPS == null || velocityMPS<0)
         return "?";
     
-    switch(this.velocityUnits){
+    switch(this.units){
         case Config.IMPERIAL:
             /* FIXME: I'am not sure that it is right */
             return (velocityMPS * 2.237).toFixed(0)+" MPH";
@@ -35,7 +54,7 @@ Config.prototype.userSmallDistance = function(distanceM, canNegative){
     if ((distanceM == null) || ((distanceM < 0) && (!canNegative)))
         return "?";
     
-    switch(this.distanceUnits){
+    switch(this.units){
         case Config.IMPERIAL:
             /* FIXME: I'am not sure that it is right */
             return (distanceM * 3.2808).toFixed(0)+" ft";
@@ -49,7 +68,7 @@ Config.prototype.userDistance = function(distanceM, canNegative){
     if ((distanceM == null) || ((distanceM < 0) && (!canNegative)))
         return "?";
     
-    switch(this.distanceUnits){
+    switch(this.units){
         case Config.IMPERIAL:
             /* FIXME: I'am not sure that it is right */
             tmp = (distanceM / 1609.344);
