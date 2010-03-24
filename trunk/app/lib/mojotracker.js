@@ -106,7 +106,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
     this.trackLength += distance;
     
     if ((vertAccuracy < Config.getInstance().getMaxVertAccuracy()) && (alt != null) &&
-        (this.total > 2)) // beginning data has mostly bad...
+        (this.total > 2)) // beginning data is mostly bad...
     {
         if ((this.minAltitude == null) || (alt < this.minAltitude))
             this.minAltitude = alt;
