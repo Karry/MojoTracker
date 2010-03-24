@@ -13,20 +13,6 @@ TracksAssistant.prototype.setup = function(){
 
     TracksAssistant.instance = this;
 
-    // Setup application menu
-    this.controller.setupWidget(Mojo.Menu.appMenu,
-        {
-            omitDefaultItems: false
-        },
-        {
-            visible: true,
-            items:
-            [
-                { label: "About", command: "about" }
-            ]
-        }
-    );
-
     // Set up a few models so we can test setting the widget model:
     this.currentModel = {listTitle:$L('Saved tracks'), items:[]};
 

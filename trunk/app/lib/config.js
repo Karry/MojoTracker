@@ -4,6 +4,11 @@ function Config(){
     this.units = Config.METRIC;
     
     this.splitExportFile = true;
+    
+    this.maxHorizAccuracy = 100;
+    this.maxVertAccuracy = 100;
+    
+    this.posFormat = Config.DEFAULT;
 }
 
 Config.instance = null;
@@ -17,6 +22,9 @@ Config.getInstance = function(){
 Config.METRIC = 0;
 Config.IMPERIAL = 1;
 
+Config.DEFAULT = 0;
+Config.DEGREES = 1;
+
 Config.prototype.splitExportFiles = function(){
     return this.splitExportFile;
 }
@@ -26,9 +34,18 @@ Config.prototype.setSplitExportFiles = function( b ){
     this.splitExportFile = b;
 }
 
+Config.prototype.setPosFormat = function(format){
+    this.posFormat = format;
+}
+
+Config.prototype.getPosFormat = function(){
+    return this.posFormat;
+}
+
 Config.prototype.setUnits = function( units ){
     // FIXME: save this values to cookie
     this.units = units;
+    Mojo.Log.info("units: "+this.units);
 }
 
 Config.prototype.getUnits = function(){
@@ -39,14 +56,14 @@ Config.prototype.userVelocity = function(velocityMPS){
     if (velocityMPS == null || velocityMPS<0)
         return "?";
     
-    switch(this.units){
-        case Config.IMPERIAL:
-            /* FIXME: I'am not sure that it is right */
-            return (velocityMPS * 2.237).toFixed(0)+" MPH";
-        case Config.METRIC:
-        default:
-            return (velocityMPS * 3.6).toFixed(0)+" km/h";
+    if (this.units == Config.IMPERIAL){
+        /* FIXME: I'am not sure that it is right */
+        return (velocityMPS * 2.237).toFixed(0)+" MPH";
     }
+    if (this.units == Config.METRIC){
+        return (velocityMPS * 3.6).toFixed(0)+" km/h";
+    }
+    return velocityMPS+ " m/s";
 }
 
 
@@ -54,33 +71,45 @@ Config.prototype.userSmallDistance = function(distanceM, canNegative){
     if ((distanceM == null) || ((distanceM < 0) && (!canNegative)))
         return "?";
     
-    switch(this.units){
-        case Config.IMPERIAL:
-            /* FIXME: I'am not sure that it is right */
-            return (distanceM * 3.2808).toFixed(0)+" ft";
-        case Config.METRIC:
-        default:
-            return (distanceM * 1.0).toFixed(0)+" m";
+    if (this.units == Config.IMPERIAL){
+        /* FIXME: I'am not sure that it is right */
+        return (distanceM * 3.2808).toFixed(0)+" ft";
     }
+    if (this.units == Config.METRIC){
+        return (distanceM * 1.0).toFixed(0)+" m";
+    }
+    return distanceM+" m";
+}
+
+Config.prototype.getMaxVertAccuracy = function(){
+    return this.maxVertAccuracy;
+}
+
+Config.prototype.getMaxHorizAccuracy = function(){
+    return this.maxHorizAccuracy;
 }
 
 Config.prototype.userDistance = function(distanceM, canNegative){
     if ((distanceM == null) || ((distanceM < 0) && (!canNegative)))
         return "?";
     
-    switch(this.units){
-        case Config.IMPERIAL:
-            /* FIXME: I'am not sure that it is right */
-            tmp = (distanceM / 1609.344);
-            return (tmp >= 10? tmp.toFixed(0): tmp.toFixed(1))+" miles";
-        case Config.METRIC:
-        default:
+    if (this.units == Config.METRIC){        
             tmp = (distanceM / 1000);
             return (tmp >= 10? tmp.toFixed(0): tmp.toFixed(1))+" km";
     }
+    if (this.units == Config.IMPERIAL){
+            /* FIXME: I'am not sure that it is right */
+            tmp = (distanceM / 1609.344);
+            return (tmp >= 10? tmp.toFixed(0): tmp.toFixed(1))+" miles";
+    }
+    
+    return distanceM+" m";    
 }
 
 Config.prototype.userDegree = function(degree){
+    if (this.posFormat == Config.DEGREES)
+        return degree;
+    
     minutes = (degree - Math.floor(degree)) * 60;
     seconds = (minutes - Math.floor(minutes )) * 60;
     return Math.floor(degree) + "°"
