@@ -82,32 +82,38 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
     }
     
     var distance = 0;
-    if (this.lastPoint){
-        var lat1Rad = this.lastPoint.lat*( Math.PI / 180);
-        var lon1Rad = this.lastPoint.lon*( Math.PI / 180);
-        var lat2Rad = lat*( Math.PI / 180);
-        var lon2Rad = lon*( Math.PI / 180);
-        
-        var R = 6371000; // Earth radius (mean) in metres
-        var dLat = lat2Rad - lat1Rad;
-        var dLon = lon2Rad - lon1Rad; 
-        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1Rad) * Math.cos(lat2Rad) * 
-                Math.sin(dLon/2) * Math.sin(dLon/2); 
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-        distance = R * c;
+    if (horizAccuracy > Config.getInstance().getMaxHorizAccuracy()){
+        if (this.lastPoint != null){
+            var lat1Rad = this.lastPoint.lat*( Math.PI / 180);
+            var lon1Rad = this.lastPoint.lon*( Math.PI / 180);
+            var lat2Rad = lat*( Math.PI / 180);
+            var lon2Rad = lon*( Math.PI / 180);
+            
+            var R = 6371000; // Earth radius (mean) in metres
+            var dLat = lat2Rad - lat1Rad;
+            var dLon = lon2Rad - lon1Rad; 
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1Rad) * Math.cos(lat2Rad) * 
+                    Math.sin(dLon/2) * Math.sin(dLon/2); 
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            distance = R * c;
+        }
+        this.lastPoint = {
+            lat: lat,
+            lon: lon
+        }
     }
-    this.lastPoint = {
-        lat: lat,
-        lon: lon
-    }    
     this.trackLength += distance;
     
-    if ((alt != null) && (this.minAltitude == null || alt < this.minAltitude ))
-        this.minAltitude = alt;
-    if ((alt != null) && (this.maxAltitude == null || alt > this.maxAltitude ))
-        this.maxAltitude = alt;
-    if (this.maxVelocity == null || velocity > this.maxVelocity)
+    if ((vertAccuracy < Config.getInstance().getMaxVertAccuracy()) && (alt != null) &&
+        (this.total > 2)) // beginning data has mostly bad...
+    {
+        if ((this.minAltitude == null) || (alt < this.minAltitude))
+            this.minAltitude = alt;
+        if ((this.maxAltitude == null) || (alt > this.maxAltitude))
+            this.maxAltitude = alt;
+    }
+    if ((this.maxVelocity == null) || (velocity > this.maxVelocity))
         this.maxVelocity = velocity;
     
     var strSQL = 'INSERT INTO ' + this.tracename + ' '
@@ -192,31 +198,6 @@ Mojotracker.prototype.storeGpx = function(controller, name, callback) {
         );
 }
 
-/*    
-Mojotracker.prototype.createGPX = function(controller, result, name, callback) {
-        
-    try {
-        controller.serviceRequest('palm://ca.canucksoftware.filemgr', {
-                method: 'createFile',
-                parameters: {
-                        path: "/media/internal",
-                        newFile: name + ".part1.gpx",
-                        offset: 0
-                },
-                onSuccess: function() {
-                    this.createGPXContent(controller, result, name, callback);
-                    }.bind(this),
-                onFailure: callback.errorHandler
-        });
-        //errorHandler("Not implemented yet.");
-    } catch (e) {
-        Mojo.Log.error("Catch in storeGpx");
-        errorHandler(e);
-    }
-}
-*/
-
-
 Mojotracker.prototype.createGPXContent = function(controller, result, name, callback) {
     if (!result.rows){
         callback.errorHandler("BAD base result");
@@ -224,7 +205,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
         return;
     }
 
-    Mojo.Log.error("len = "+result.rows.length);
+    //Mojo.Log.error("len = "+result.rows.length);
     try {
 	var msg2 = "<?xml version='1.0' encoding='ISO-8859-1'?>\n";
 	msg2 += "<gpx version='1.1'\n";

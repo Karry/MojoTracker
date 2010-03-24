@@ -119,7 +119,7 @@ FirstAssistant.prototype.handleStopButtonPress = function(event)
 FirstAssistant.prototype.handleGpsResponse = function(event)
 {
 	mojotracker = Mojotracker.getInstance();
-	// obj = new GPShelper(event.latitude,event.longitude,event.altitude,event.errorCode,event.heading,event.horizAccuracy,event.vertAccuracy,event.velocity,event.timestamp);
+
 	// Display GPS data, log to Db
 	now = new Date();
 	velocity = event.velocity;
@@ -134,6 +134,8 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	// fix bad values from gps
 	if (alt < -200)
 		alt = null;
+	
+	mojotracker.addNode( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, this.tableErrorHandler.bind(this) );
 	
 	$('messagearea').innerHTML 	= "GPS Operating...";
 
@@ -165,10 +167,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	
 	if (event.errorCode != 0)
 		$('headermsg').innerHTML = "GPS warning: " + event.errorCode;
-	this.nullHandleCount = 0;
-	
-	mojotracker.addNode( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, this.tableErrorHandler.bind(this) );
-	
+	this.nullHandleCount = 0;	
 }
 
 FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){
