@@ -46,14 +46,14 @@ FirstAssistant.prototype.setup = function()
 	// Setup application menu
 	this.controller.setupWidget(Mojo.Menu.appMenu,
 	    {
-		omitDefaultItems: false
+		omitDefaultItems: true
 	    },
 	    {
 		visible: true,
 		items:
 		[
 		    { label: "Saved tracks", command: "tracks" },
-		    { label: "Preferences", command: "preferences" },
+		    { label: "Preferences", command: Mojo.Menu.prefsCmd },
 		    { label: "About", command: "about" }
 		]
 	    }

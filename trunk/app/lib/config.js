@@ -1,14 +1,25 @@
 
 function Config(){
-    /* FIXME: load this config from cookies */ 
-    this.units = Config.METRIC;
+    // get config cookies or define it as default
+    this.unitsCookie = new Mojo.Model.Cookie('units');
+    this.units = this.unitsCookie.get();
+    if (this.units === undefined)
+        this.setUnits(Config.METRIC_UNITS);
     
-    this.splitExportFile = true;
-    
+    this.splitExportFileCookie = new Mojo.Model.Cookie( 'splitExportFile' );
+    this.splitExportFile = this.splitExportFileCookie.get();
+    if (this.splitExportFile === undefined)
+        this.setSplitExportFiles( true );
+        
+    this.posFormatCookie = new Mojo.Model.Cookie( 'posFormat' );
+    this.posFormat = this.posFormatCookie.get();
+    if (this.posFormat === undefined)
+        this.setPosFormat(Config.DEFAULT_POS_FORMAT);
+        
+    // TODO: make this variable configurable
     this.maxHorizAccuracy = 100;
     this.maxVertAccuracy = 100;
-    
-    this.posFormat = Config.DEFAULT;
+    this.ignoredCount = 7; // num. of nodes at beginning for skip
 }
 
 Config.instance = null;
@@ -19,33 +30,37 @@ Config.getInstance = function(){
     return this.instance;
 };
 
-Config.METRIC = 0;
-Config.IMPERIAL = 1;
+Config.METRIC_UNITS = 0;
+Config.IMPERIAL_UNITS = 1;
 
-Config.DEFAULT = 0;
-Config.DEGREES = 1;
+Config.DEFAULT_POS_FORMAT = 0;
+Config.DEGREES_POS_FORMAT = 1;
 
 Config.prototype.splitExportFiles = function(){
     return this.splitExportFile;
 }
 
 Config.prototype.setSplitExportFiles = function( b ){
-    // FIXME: save this value to cookie
     this.splitExportFile = b;
+    this.splitExportFileCookie.put(b);
 }
 
 Config.prototype.setPosFormat = function(format){
     this.posFormat = format;
+    this.posFormatCookie.put(format);
 }
 
 Config.prototype.getPosFormat = function(){
     return this.posFormat;
 }
 
+Config.prototype.getIgnoredCount = function(){
+    return this.ignoredCount;
+}
+
 Config.prototype.setUnits = function( units ){
-    // FIXME: save this values to cookie
     this.units = units;
-    Mojo.Log.info("units: "+this.units);
+    this.unitsCookie.put( units );
 }
 
 Config.prototype.getUnits = function(){
@@ -56,11 +71,11 @@ Config.prototype.userVelocity = function(velocityMPS){
     if (velocityMPS == null || velocityMPS<0)
         return "?";
     
-    if (this.units == Config.IMPERIAL){
+    if (this.units == Config.IMPERIAL_UNITS){
         /* FIXME: I'am not sure that it is right */
         return (velocityMPS * 2.237).toFixed(0)+" MPH";
     }
-    if (this.units == Config.METRIC){
+    if (this.units == Config.METRIC_UNITS){
         return (velocityMPS * 3.6).toFixed(0)+" km/h";
     }
     return velocityMPS+ " m/s";
@@ -71,11 +86,11 @@ Config.prototype.userSmallDistance = function(distanceM, canNegative){
     if ((distanceM == null) || ((distanceM < 0) && (!canNegative)))
         return "?";
     
-    if (this.units == Config.IMPERIAL){
+    if (this.units == Config.IMPERIAL_UNITS){
         /* FIXME: I'am not sure that it is right */
         return (distanceM * 3.2808).toFixed(0)+" ft";
     }
-    if (this.units == Config.METRIC){
+    if (this.units == Config.METRIC_UNITS){
         return (distanceM * 1.0).toFixed(0)+" m";
     }
     return distanceM+" m";
@@ -93,11 +108,11 @@ Config.prototype.userDistance = function(distanceM, canNegative){
     if ((distanceM == null) || ((distanceM < 0) && (!canNegative)))
         return "?";
     
-    if (this.units == Config.METRIC){        
+    if (this.units == Config.METRIC_UNITS){        
             tmp = (distanceM / 1000);
             return (tmp >= 10? tmp.toFixed(0): tmp.toFixed(1))+" km";
     }
-    if (this.units == Config.IMPERIAL){
+    if (this.units == Config.IMPERIAL_UNITS){
             /* FIXME: I'am not sure that it is right */
             tmp = (distanceM / 1609.344);
             return (tmp >= 10? tmp.toFixed(0): tmp.toFixed(1))+" miles";
@@ -107,9 +122,6 @@ Config.prototype.userDistance = function(distanceM, canNegative){
 }
 
 Config.prototype.userDegree = function(degree){
-    if (this.posFormat == Config.DEGREES)
-        return degree;
-    
     minutes = (degree - Math.floor(degree)) * 60;
     seconds = (minutes - Math.floor(minutes )) * 60;
     return Math.floor(degree) + "°"
@@ -118,10 +130,16 @@ Config.prototype.userDegree = function(degree){
 }
 
 Config.prototype.userLatitude = function(degree){
+    if (this.posFormat == Config.DEGREES_POS_FORMAT)
+        return degree;
+
     return this.userDegree( Math.abs(degree) ) + (degree>0? "N":"S");
 }
 
 Config.prototype.userLongitude = function(degree){
+    if (this.posFormat == Config.DEGREES_POS_FORMAT)
+        return degree;
+
     return this.userDegree( Math.abs(degree) ) + (degree>0? "E":"W");
 }
 

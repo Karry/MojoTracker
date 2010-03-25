@@ -27,7 +27,7 @@ AppAssistant.prototype.handleCommand = function(event)
             case "tracks":
                 Mojo.Controller.stageController.pushScene("tracks");
                 break;
-            case "preferences":
+            case Mojo.Menu.prefsCmd:
                 Mojo.Controller.stageController.pushScene("preferences");
                 break;
         }
