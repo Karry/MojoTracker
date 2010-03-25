@@ -57,7 +57,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
             } ).bind(this) 
     );
     this.total = 0;
-    this.lastPoint = false;
+    this.lastPoint = null;
     this.trackLength = 0;
     this.minAltitude = null;
     this.maxAltitude = null;
@@ -75,14 +75,16 @@ Mojotracker.prototype.getTrackLength = function(){
     return  this.trackLength;
 }
 
-Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, errorHandler ){
+Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy,
+                                         vertAccuracy, errorHandler ){
+
     if ((!this.tracename) || (!this.db)){
         Mojo.log("no track is opened");
         return;
     }
     
     var distance = 0;
-    if (horizAccuracy > Config.getInstance().getMaxHorizAccuracy()){
+    if (horizAccuracy < Config.getInstance().getMaxHorizAccuracy()){
         if (this.lastPoint != null){
             var lat1Rad = this.lastPoint.lat*( Math.PI / 180);
             var lon1Rad = this.lastPoint.lon*( Math.PI / 180);
@@ -106,7 +108,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
     this.trackLength += distance;
     
     if ((vertAccuracy < Config.getInstance().getMaxVertAccuracy()) && (alt != null) &&
-        (this.total > 2)) // beginning data is mostly bad...
+        (this.total > Config.getInstance().getIgnoredCount())) // data at beginning is mostly bad...
     {
         if ((this.minAltitude == null) || (alt < this.minAltitude))
             this.minAltitude = alt;
@@ -205,7 +207,6 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
         return;
     }
 
-    //Mojo.Log.error("len = "+result.rows.length);
     try {
 	var msg2 = "<?xml version='1.0' encoding='ISO-8859-1'?>\n";
 	msg2 += "<gpx version='1.1'\n";
@@ -241,7 +242,6 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
         setTimeout(this.writeGPXFile.bind(this), 500,
                    controller, name, msg2,
                    callback, 0);
-        //writeGPXFile();
     } catch (e) {
         Mojo.Log.error(e);
         callback.errorHandler("Error 2: "+e);
@@ -258,7 +258,6 @@ Mojotracker.prototype.fillZeros = function(num){
 Mojotracker.prototype.writeGPXFile = function(controller, name, content, callback, offset) {
     
     // WARNING: filemgr fails with writing from offset...
-    // FIXME: respect config property "split files"
     limit = 50000;
     largeFile = content.length > limit;
     

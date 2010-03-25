@@ -9,8 +9,8 @@ PreferencesAssistant.prototype.setup = function(){
     this.unitsAttributes = {
         label: $L('Units'),
         choices: [
-            {label: $L('Metric'), value: Config.METRIC},
-            {label: $L('Imperial'), value: Config.IMPERIAL}
+            {label: $L('Metric'), value: Config.METRIC_UNITS},
+            {label: $L('Imperial'), value: Config.IMPERIAL_UNITS}
         ],
 
         // Store selected value in 'firstValue' instead of the default of 'value'
@@ -23,8 +23,8 @@ PreferencesAssistant.prototype.setup = function(){
     this.posFormatAttributes = {
         label: $L('Degrees'),
         choices: [
-            {label: $L('49°8\'6.22"'), value: Config.DEFAULT},
-            {label: $L('49.135060'), value: Config.DEGREES}
+            {label: $L('49°08\'06.22"'), value: Config.DEFAULT_POS_FORMAT},
+            {label: $L('49.135060'), value: Config.DEGREES_POS_FORMAT}
         ],
         modelProperty:'posFormat'
     };
@@ -33,21 +33,21 @@ PreferencesAssistant.prototype.setup = function(){
     
     this.splitAttributes = {
             property: "value",
-            trueValue: "ON",
-            falseValue: "OFF",
+            trueValue: true,
+            falseValue: false,
             fieldName: 'checkboxstuff'
     };
     this.splitModel = {
-            value: "ON",
+            value: true,
             disabled: false
     };
-    this.splitModel.value = Config.getInstance().splitExportFiles() ? "ON": "OFF";
+    this.splitModel.value = Config.getInstance().splitExportFiles();
     
     
     //	Instantiate each selector
     this.controller.setupWidget('unitsSelector',  this.unitsAttributes, this.unitsModel);
     this.controller.setupWidget('posFormatSelector',  this.posFormatAttributes, this.posFormatModel);
-    this.controller.setupWidget('split-checkbox', this.splitAttributes, this.splitModel);
+    this.controller.setupWidget('splitCheckbox', this.splitAttributes, this.splitModel);
 
 
     // Events
@@ -55,9 +55,7 @@ PreferencesAssistant.prototype.setup = function(){
     //	the framework is updated to do that for itself. Helps with memory management
     this.controller.listen('unitsSelector', Mojo.Event.propertyChange, this.selectorChanged.bind(this));
     this.controller.listen('posFormatSelector', Mojo.Event.propertyChange, this.posFormatChanged.bind(this));    
-    this.controller.listen('split-checkbox', Mojo.Event.propertyChange, this.splitFileChanged);
-    
-    
+    this.controller.listen('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
 }
 
 PreferencesAssistant.prototype.selectorChanged = function(event) {
@@ -69,18 +67,20 @@ PreferencesAssistant.prototype.posFormatChanged = function(event) {
 }
 
 PreferencesAssistant.prototype.splitFileChanged = function(event){
-    Config.getInstance().setSplitExportFiles( event.value == "ON" );
+    Config.getInstance().setSplitExportFiles( event.value );
 }
 
 PreferencesAssistant.prototype.cleanup = function(){
     // We need to manually stop listening to events until the framework is updated to clean these up automatically
     this.controller.stopListening('unitsSelector', Mojo.Event.propertyChange, this.selectorChanged.bind(this));
+    this.controller.stopListening('posFormatSelector', Mojo.Event.propertyChange, this.posFormatChanged.bind(this));    
+    this.controller.stopListening('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
 }
 
 PreferencesAssistant.prototype.unitsModel = {
-    unitsValue: Config.METRIC
+    unitsValue: Config.METRIC_UNITS
 };
 
 PreferencesAssistant.prototype.posFormatModel = {
-    posFormat : Config.DEFAULT
+    posFormat : Config.DEFAULT_POS_FORMAT
 };
