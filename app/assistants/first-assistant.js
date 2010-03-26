@@ -125,7 +125,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	velocity = event.velocity;
 	lat = event.latitude.toFixed(6);
 	lon = event.longitude.toFixed(6);
-	alt = event.altitude.toFixed(0);
+	alt = event.altitude;
 	strUTC = this.formatDate(now, 2);
 	horizAccuracy = event.horizAccuracy.toFixed(0);
 	vertAccuracy = event.vertAccuracy.toFixed(0);
@@ -158,11 +158,13 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	
 	compass = document.getElementById("compass");
 	compass.style.display = "block";
-	compass.style.MozTransform = "rotate(" + direction + "deg)";
-	compass.style.webkitTransform = "rotate(" + direction + "deg)";
+	if (direction >= 0){
+		var rot = 360 - direction;
+		compass.style.MozTransform = "rotate(" + rot + "deg)";
+		compass.style.webkitTransform = "rotate(" + rot + "deg)";
+	}
 
 	opacity = (direction < 1)? 0.3:0.8;
-	//compass.style.MozOpacity = opacity;
 	compass.style.opacity = opacity;
 	
 	if (event.errorCode != 0)
