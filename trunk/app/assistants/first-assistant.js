@@ -180,10 +180,12 @@ FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){
 			return "Timeout"; 
 		case 2:
 			return "Position_Unavailable"; 
+		case 4:
+			return "Only cell and wifi fixes"; // GPS_Permanent_Error (no more GPS fix in this case, but can still get the Cell and wifi fixes)
 		case 5:
 			return "LocationServiceOFF"; 
 		case 6:
-			return "Permission Denied - The user has not accepted the terms of use for the GPS Services."; 
+			return "Permission Denied"; //  - The user has not accepted the terms of use for the GPS Services.
 		case 7:
 			return "The application already has a pending message"; 
 		case 8:
