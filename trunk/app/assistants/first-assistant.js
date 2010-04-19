@@ -15,18 +15,17 @@ FirstAssistant.prototype.setup = function()
 	// set the initial total and display it
 
 	this.config = Config.getInstance();
-
-	$('messagearea').innerHTML = "Latitude: 0, Longitude: 0";
-	
+		
+	/*
 	// a local object for button attributes    
 	this.buttonAttributes = {};
-	
 	// Start button model    
 	this.StartbuttonModel = {
 	                    buttonLabel : 'Start GPS',
 	                    buttonClass : 'affirmative',
 	                    disabled : false };
 	// set up the button, bind the button to its handler
+	
 	this.controller.setupWidget("btnStart", this.buttonAttributes, this.StartbuttonModel);
 	this.controller.listen(this.controller.get('btnStart'),
 	                  Mojo.Event.tap,
@@ -42,6 +41,22 @@ FirstAssistant.prototype.setup = function()
 	this.controller.listen(this.controller.get('btnStop'),
 	                  Mojo.Event.tap,
 					  this.handleStopButtonPress.bind(this));
+	*/
+	// TODO: add ability start tracking automaticaly
+	this.saveTrack = false;
+			    
+	//	Setup Toggles
+	this.controller.setupWidget('saveTrackToggle', {
+			modelProperty: "value"
+		},
+		{
+			value: this.saveTrack,
+			disabled: false 
+		});
+	this.controller.listen('saveTrackToggle', Mojo.Event.propertyChanged, this.handleSaveTrackHandleAction.bind(this));
+	if (this.saveTrack)
+		this.createNewTrack();
+			    
 	
 	// Setup application menu
 	this.controller.setupWidget(Mojo.Menu.appMenu,
@@ -59,29 +74,6 @@ FirstAssistant.prototype.setup = function()
 	    }
 	);
 	
-
-}
-
-FirstAssistant.prototype.handleStartButtonPress = function(event){	
-    
-	// increment the total and update the display
-	now = new Date();
-	$('messagearea').innerHTML = "Activating GPS...";
-	this.StartbuttonModel.disabled = true;
-	this.controller.modelChanged(this.StartbuttonModel);
-	this.StopbuttonModel.disabled = false;
-	this.controller.modelChanged(this.StopbuttonModel);	
-	
-	tracename = "G" + this.formatDate(now, 1);
-	try{
-		mojotracker = Mojotracker.getInstance();
-		mojotracker.createTrack( tracename, this.tableErrorHandler.bind(this));
-		$('headermsg').update("Opened OSM DB. Creating table " + tracename);
-		this.nullHandleCount = 0;
-	}catch (e){
-		$('headermsg').update("DB Error: " + e);
-	}    
-	
 	this.setScreenTimeout(1);
 	// Start GPS
 	this.trackingHandle = this.controller.serviceRequest('palm://com.palm.location',
@@ -98,22 +90,36 @@ FirstAssistant.prototype.handleStartButtonPress = function(event){
 							     } );
 }
 
-FirstAssistant.prototype.handleStopButtonPress = function(event)
-{
-	mojotracker = Mojotracker.getInstance();
-	nodes = mojotracker.getNodes();
-	lastTrack = mojotracker.getCurrentTrack();
-	mojotracker.closeTrack();
+FirstAssistant.prototype.handleSaveTrackHandleAction = function(event){
+	
+	this.saveTrack = event.value;
+	if (this.saveTrack){
+		this.createNewTrack();
+	}else{
+		this.closeTrack();
+	}
+}
 
-	// increment the total and update the display
-	$('messagearea').innerHTML = "Deactivated GPS";
-	this.controller.get("headermsg").update("Last track: " + lastTrack + "<br />"
-						+ "Number of nodes: " + nodes);
-	this.trackingHandle.cancel();
-	this.StartbuttonModel.disabled = false;
-	this.controller.modelChanged(this.StartbuttonModel);
-	this.StopbuttonModel.disabled = true;
-	this.controller.modelChanged(this.StopbuttonModel);		
+FirstAssistant.prototype.createNewTrack = function(){
+	now = new Date();
+	tracename = "G" + this.formatDate(now, 1);
+	try{
+		mojotracker = Mojotracker.getInstance();
+		mojotracker.createTrack( tracename, this.tableErrorHandler.bind(this));
+		$('statusmsg').update("Opened OSM DB. Creating table " + tracename);
+		this.nullHandleCount = 0;
+        
+        this.showTrackInformations();	
+	}catch (e){
+		$('statusmsg').update("DB Error: " + e);
+	}	
+}
+
+FirstAssistant.prototype.closeTrack = function(){
+	mojotracker = Mojotracker.getInstance();
+
+    this.showTrackInformations();
+    mojotracker.closeTrack();
 }
 
 FirstAssistant.prototype.handleGpsResponse = function(event)
@@ -134,28 +140,42 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	// fix bad values from gps
 	if (alt < -200)
 		alt = null;
-	
-	mojotracker.addNode( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, this.tableErrorHandler.bind(this) );
-	
-	$('messagearea').innerHTML 	= "GPS Operating...";
 
-	$('latitude').innerHTML 	= "Latitude: " 			+ this.config.userLatitude( lat );
-	$('longitude').innerHTML 	= "Longitude: " 		+ this.config.userLongitude( lon );
-	$('horizAccuracy').innerHTML 	= "Horizontal accuracy: " 	+ this.config.userSmallDistance(horizAccuracy, false);
-	$('speed').innerHTML 		= "Speed: " 			+ this.config.userVelocity(velocity);
-	$('maxSpeed').innerHTML 	= "max: " 			+ this.config.userVelocity(mojotracker.getMaxVelocity());
+    // save values to DB	
+	if (this.saveTrack)
+		mojotracker.addNode( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, this.tableErrorHandler.bind(this) );
 
-	$('trackLength').innerHTML 	= "Track Length: " 		+ this.config.userDistance( mojotracker.getTrackLength(), false);
+    // display values
+	$('latitude').innerHTML 	= this.config.userLatitude( lat );
+	$('longitude').innerHTML 	= this.config.userLongitude( lon );
+	$('horizAccuracy').innerHTML= this.config.userSmallDistance(horizAccuracy, false);
+	$('speed').innerHTML 		= this.config.userVelocity(velocity);
+	$('altitude').innerHTML 	= this.config.userSmallDistance(alt, true);
+	$('vertAccuracy').innerHTML = this.config.userSmallDistance(vertAccuracy, false);
+	$('lastUpdate').innerHTML 	= this.formatDate(now, 3);
+
+    this.showTrackInformations();	
+    
+    // display accuracy red, when it is high
+    vertAccuracyElement = document.getElementById("vertAccuracy");
+    vertAccuracyElement.style.color = vertAccuracy > this.config.getMaxVertAccuracy() ?
+            "rgba(200, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.5)";
+            
+    horizAccuracyElement = document.getElementById("horizAccuracy");
+    horizAccuracyElement.style.color = horizAccuracy > this.config.getMaxHorizAccuracy() ?
+            "rgba(200, 0, 0, 0.7)" : "rgba(0, 0, 0, 0.5)";
 	
-	$('altitude').innerHTML 	= "Altitude: " 			+ this.config.userSmallDistance(alt, true);
-	$('vertAccuracy').innerHTML 	= "Vertical accuracy: " 	+ this.config.userSmallDistance(vertAccuracy, false);
-	$('maxAltitude').innerHTML 	= "min: " 			+ this.config.userSmallDistance(mojotracker.getMinAltitude(), true);
-	$('minAltitude').innerHTML 	= "max: " 			+ this.config.userSmallDistance(mojotracker.getMaxAltitude(), true);
-	
-	$('tracknum').innerHTML 	= "Number of nodes: " 		+ mojotracker.getNodes();
-	$('headermsg').innerHTML 	= "Current track: " 		+ mojotracker.getCurrentTrack() + "<br />"
-					   + "Last update: "		+ this.formatDate(now, 3);
-	
+    // reset update timeout 
+    if (this.updateTimeout)
+        clearTimeout( this.updateTimeout );
+    lastUpdateElement = document.getElementById("lastUpdate");
+    lastUpdateElement.style.color = "rgba(0, 0, 0, 0.5)";
+    this.updateTimeout = setTimeout( function(){
+                lastUpdateElement = document.getElementById("lastUpdate");
+                lastUpdateElement.style.color = "rgba(200, 0, 0, 0.7)" ;
+            }, this.config.getUpdateTimeout() * 1000);
+    
+    // dispaly compas
 	compass = document.getElementById("compass");
 	compass.style.display = "block";
 	if (direction >= 0){
@@ -168,8 +188,27 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	compass.style.opacity = opacity;
 	
 	if (event.errorCode != 0)
-		$('headermsg').innerHTML = "GPS warning: " + event.errorCode;
+		$('statusmsg').innerHTML = "GPS warning: " + this.getMessageForGpsErrorCode( event.errorCode );
+    else
+    	$('statusmsg').innerHTML = "";
+
 	this.nullHandleCount = 0;	
+}
+
+FirstAssistant.prototype.showTrackInformations = function(){
+	if (this.saveTrack){
+        info = document.getElementById("trackInformations");
+        info.style.display = "block";
+        
+        mojotracker = Mojotracker.getInstance();
+		$('minAltitude').innerHTML 	= this.config.userSmallDistance(mojotracker.getMinAltitude(), true);
+		$('maxAltitude').innerHTML 	= this.config.userSmallDistance(mojotracker.getMaxAltitude(), true);
+		
+		$('maxSpeed').innerHTML 	= this.config.userVelocity(mojotracker.getMaxVelocity());
+		$('trackLength').innerHTML 	= this.config.userDistance( mojotracker.getTrackLength(), false);
+		$('tracknum').innerHTML 	= mojotracker.getNodes();
+		$('currentTrack').innerHTML = mojotracker.getCurrentTrack();
+	}    
 }
 
 FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){
@@ -179,11 +218,11 @@ FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){
 		case 1:
 			return "Timeout"; 
 		case 2:
-			return "Position_Unavailable"; 
+			return "Position unavailable"; 
 		case 4:
 			return "Only cell and wifi fixes"; // GPS_Permanent_Error (no more GPS fix in this case, but can still get the Cell and wifi fixes)
 		case 5:
-			return "LocationServiceOFF"; 
+			return "Location service is OFF"; 
 		case 6:
 			return "Permission Denied"; //  - The user has not accepted the terms of use for the GPS Services.
 		case 7:
@@ -198,12 +237,12 @@ FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){
 
 FirstAssistant.prototype.handleGpsResponseError = function(event)
 {
-	$('headermsg').innerHTML = "A GPS Error occurred:" + this.getMessageForGpsErrorCode(event.errorCode);
+	$('statusmsg').innerHTML = "A GPS Error occurred: " + this.getMessageForGpsErrorCode(event.errorCode);
 }
 
 FirstAssistant.prototype.tableErrorHandler = function(transaction, error) 
 {
-	$('headermsg').update('table Error was ' + error.message + ' (Code ' + error.code + ')'); 
+	$('statusmsg').update('table Error was ' + error.message + ' (Code ' + error.code + ')'); 
 	return true;
 }
 
@@ -245,7 +284,7 @@ FirstAssistant.prototype.activitySuccess = function()
 
 FirstAssistant.prototype.activityFailed = function()
 {
-	$('headermsg').update('Screen Power Error'); 
+	$('statusmsg').update('Screen Power Error'); 
 }
 
 FirstAssistant.prototype.activate = function(event)
@@ -264,6 +303,8 @@ FirstAssistant.prototype.cleanup = function(event)
 {
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
+	this.trackingHandle.cancel();
+	this.closeTrack();
 	this.setScreenTimeout(2);
 }
 
@@ -279,7 +320,7 @@ FirstAssistant.prototype.formatDate = function(dateobj, formattype)
 	
 	if (formattype == 1) // filename
 	{
-		strRes = strYr + strMnth + strDays + strHrs + strMins + strSecs;
+		strRes = strYr + strMnth + strDays + "-" + strHrs + strMins + strSecs;
 	}
 	if (formattype == 2) // GPX
 	{

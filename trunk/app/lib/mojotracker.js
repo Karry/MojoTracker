@@ -38,7 +38,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
         
     // create table
     this.tracename = name;
-    var strSQL = 'CREATE TABLE ' + this.tracename + ' ('
+    var strSQL = 'CREATE TABLE `' + this.tracename + '` ('
         + 'lat TEXT NOT NULL DEFAULT "nothing", '
         + 'lon TEXT NOT NULL DEFAULT "nothing", '
         + 'altitude TEXT NOT NULL DEFAULT "nothing", '
@@ -52,7 +52,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
     ( 
             (function (transaction)
             {
-                    transaction.executeSql('DROP TABLE IF EXISTS ' + this.tracename + '; GO;', []);
+                    transaction.executeSql('DROP TABLE IF EXISTS `' + this.tracename + '`; GO;', []);
                     transaction.executeSql(strSQL, [], this.createTableDataHandler.bind(this), errorHandler);
             } ).bind(this) 
     );
@@ -118,7 +118,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
     if ((this.maxVelocity == null) || (velocity > this.maxVelocity))
         this.maxVelocity = velocity;
     
-    var strSQL = 'INSERT INTO ' + this.tracename + ' '
+    var strSQL = 'INSERT INTO `' + this.tracename + '` '
         + '(lat, lon, altitude, time, velocity, horizAccuracy, vertAccuracy, distanceFromPrev)'
         + 'VALUES ("' + lat + '","' + lon + '","' + alt + '","' + strUTC + '",  '+velocity+', '+horizAccuracy+', '+vertAccuracy+', '+distance+'); GO;';
     this.executeSQL(strSQL, this.createRecordDataHandler.bind(this), errorHandler); 

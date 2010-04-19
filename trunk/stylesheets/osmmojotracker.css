@@ -6,3 +6,30 @@
     width:80px;
     height:40px;
 }
+
+.tracker-line{
+    margin-top:10px;
+    position:relative;
+}
+
+.tracker-line-header{
+    position:absolute;
+    margin-top:-10px;
+    margin-left:-4px;
+    font-size:small;
+    font-weight: bold;
+    font-variant: small-caps;
+    color: rgba(0, 0, 0, 0.3);
+    text-shadow: rgba(0,0,0, 0.2) 2px 2px 0px;
+    font-family: "Arial Black", sans-serif;
+}
+
+.indent{
+    margin-top: 20px;
+}
+
+.tracker-value{
+    font-family:monospace;
+    font-weight: bold;
+    font-size:83%;
+}
