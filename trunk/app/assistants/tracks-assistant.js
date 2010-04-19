@@ -143,13 +143,19 @@ TracksAssistant.prototype.createTrackNamesHandler = function(transaction, result
             item = results.rows.item(i);
             mojotracker.getTrackInfo( item.name, this.createTrackInfoHandler.bind(this), this.tableErrorHandler.bind(this) );
         }
-        if (results.rows.length == 0)
-            $('trackHeadermsg').update('base is empty');
-        else
-            $('trackHeadermsg').update('loaded '+results.rows.length+' item'+((results.rows.length>1)?'s':''));
+        this.trackCount = results.rows.length;
+        this.updateHeader()
     }else{
         $('trackHeadermsg').update('bad DB result...');
     }
+}
+
+TracksAssistant.prototype.updateHeader = function(){
+        if (this.trackCount == 0)
+            $('trackHeadermsg').update('base is empty');
+        else
+            $('trackHeadermsg').update('loaded '+this.trackCount+' item'+((this.trackCount>1)?'s':''));
+
 }
 
 // Called for Mojo.Event.listAdd events.
@@ -175,6 +181,9 @@ TracksAssistant.prototype.listDeleteHandler= function(event) {
     Mojo.log("EditablelistAssistant deleting '"+event.item.data+"'.");
     this.currentModel.items.splice(this.currentModel.items.indexOf(event.item), 1);
     Mojotracker.getInstance().removeTrack(event.item.name, this.tableErrorHandler.bind(this));
+    
+    this.trackCount --;
+    this.updateHeader();
 }
 
 // Called for Mojo.Event.listReorder events.
