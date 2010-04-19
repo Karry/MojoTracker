@@ -16,32 +16,6 @@ FirstAssistant.prototype.setup = function()
 
 	this.config = Config.getInstance();
 		
-	/*
-	// a local object for button attributes    
-	this.buttonAttributes = {};
-	// Start button model    
-	this.StartbuttonModel = {
-	                    buttonLabel : 'Start GPS',
-	                    buttonClass : 'affirmative',
-	                    disabled : false };
-	// set up the button, bind the button to its handler
-	
-	this.controller.setupWidget("btnStart", this.buttonAttributes, this.StartbuttonModel);
-	this.controller.listen(this.controller.get('btnStart'),
-	                  Mojo.Event.tap,
-					  this.handleStartButtonPress.bind(this));
-	
-	// Stop button model    
-	this.StopbuttonModel = {
-	                    buttonLabel : 'Stop GPS',
-	                    buttonClass : 'affirmative',
-	                    disabled : true };
-	// set up the button, bind the button to its handler
-	this.controller.setupWidget("btnStop", this.buttonAttributes, this.StopbuttonModel);
-	this.controller.listen(this.controller.get('btnStop'),
-	                  Mojo.Event.tap,
-					  this.handleStopButtonPress.bind(this));
-	*/
 	// TODO: add ability start tracking automaticaly
 	this.saveTrack = false;
 			    
@@ -88,6 +62,27 @@ FirstAssistant.prototype.setup = function()
 							      onSuccess: this.handleGpsResponse.bind(this),
 							      onFailure: this.handleGpsResponseError.bind(this)
 							     } );
+    
+    this.rot = 0;
+    //setTimeout(this.testCompas.bind(this), 100);
+}
+
+
+/** debug function for compas rotation...
+    combine opacity and rotate transform causes strange portraying */
+FirstAssistant.prototype.testCompas = function(){
+    this.rot +=2;
+    if (this.rot >= 360)
+        this.rot = 0;
+    compass = document.getElementById("compass");
+    compass.style.webkitTransform = "rotate(" + (this.rot) + "deg)";
+    //compass.style.MozTransform = "rotate(" + this.rot + "deg)";
+    compass.style.opacity = 1;
+    //compass.style.border = "1px solid red";
+
+    $('statusmsg').innerHTML = this.rot;
+
+    setTimeout(this.testCompas.bind(this), 100);    
 }
 
 FirstAssistant.prototype.handleSaveTrackHandleAction = function(event){
@@ -175,22 +170,29 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
                 lastUpdateElement.style.color = "rgba(200, 0, 0, 0.7)" ;
             }, this.config.getUpdateTimeout() * 1000);
     
-    // dispaly compas
+    // display compas
 	compass = document.getElementById("compass");
 	compass.style.display = "block";
-	if (direction >= 0){
+    opacity = 0.3;
+	if (event.heading > 0 ){
+        /** in case, when GPS is disabled (only if GSM fix is available),
+         * event.heading should be -1 and event.errorCode should be 4,
+         * but it isn't... So we use this strange condition...
+         */
+        opacity = 1; // 0.8
 		var rot = 360 - direction;
-		compass.style.MozTransform = "rotate(" + rot + "deg)";
+		//compass.style.MozTransform = "rotate(" + rot + "deg)";
 		compass.style.webkitTransform = "rotate(" + rot + "deg)";
-	}
-
-	opacity = (direction < 1)? 0.3:0.8;
+	}    
 	compass.style.opacity = opacity;
 	
 	if (event.errorCode != 0)
 		$('statusmsg').innerHTML = "GPS warning: " + this.getMessageForGpsErrorCode( event.errorCode );
     else
     	$('statusmsg').innerHTML = "";
+        
+    // for debug...
+    //$('statusmsg').innerHTML = event.heading +", " + event.errorCode;
 
 	this.nullHandleCount = 0;	
 }
