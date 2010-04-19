@@ -1,35 +1,118 @@
 <div id="main" class="palm-hasheader">
 	<div class="palm-header">MojoTracker - by Ian Wilson</div>
 	
-	<div id="headermsg" class="palm-body-text">Please click the button below ...</div>
-	
-	<div id="btnStart" x-mojo-element="Button">xx</div>
-	<div id="btnStop" x-mojo-element="Button">xx</div>
-	
-	<div style="position: relative;">
-		<div style="position:absolute; right:0px; z-index:100">
-			<img src="images/compass.png" id="compass" style="display:none"/>
+	<div class="palm-list">
+		<div class="palm-row last">
+			<div class="palm-row-wrapper">
+			<div x-mojo-element="ToggleButton" id="saveTrackToggle"></div>
+			<div class="title">
+				Save track
+			</div>
+			</div>
 		</div>
 	</div>
 	
-	<div id="messagearea" class="palm-body-text">iantemp</div>
 	
-	<div id="latitude" class="palm-body-text"></div>
-	<div id="longitude" class="palm-body-text"></div>
-	<div id="horizAccuracy" class="palm-body-text"></div>
-	<div class="palm-body-text">
-		<span id="speed"></span>
-		&nbsp;<span id="maxSpeed"></span>
+	<div class="palm-group">
+		<div class="palm-group-title">
+			Current informations
+		</div>
+		
+		<div class="tracker-line">
+			<div class="tracker-line-header">Position</div>
+            <div class="tracker-value">
+                <span id="latitude" >&nbsp;</span>
+                <span id="longitude" >&nbsp;</span>
+            </div>
+		</div>
+		
+		<div style="position: relative;">
+			<div style="position:absolute; right:0px; top:10px; z-index:100;">
+				<img src="images/compass.png" id="compass" style="opacity:0.2"/>
+			</div>
+		</div>
+
+		<div class="tracker-line">
+			<div class="tracker-line-header">Horizontal accuracy</div>
+            <div class="tracker-value">
+                <span id="horizAccuracy" >&nbsp;</span>
+            </div>
+		</div>
+
+		<div class="tracker-line indent">
+			<div class="tracker-line-header">Altitude</div>
+            <div class="tracker-value">
+                <span id="altitude" >&nbsp;</span>
+            </div>
+		</div>
+		
+		<div class="tracker-line">
+			<div class="tracker-line-header">Vertical accuracy</div>
+            <div class="tracker-value">
+                <span id="vertAccuracy" >&nbsp;</span>
+            </div>
+		</div>
+
+		<div class="tracker-line indent">
+			<div class="tracker-line-header">Speed</div>
+            <div class="tracker-value">
+                <span id="speed" >&nbsp;</span>
+            </div>
+		</div>
+
+		<div class="tracker-line indent">
+			<div class="tracker-line-header">Last update</div>
+            <div class="tracker-value">
+                <span id="lastUpdate" >&nbsp;</span>
+            </div>
+		</div>
+
 	</div>
 
-	<div class="palm-body-text">
-		<span id="altitude"></span>
-		&nbsp;<span id="maxAltitude"></span>
-		&nbsp;<span id="minAltitude"></span>
-	</div>
-	<div id="vertAccuracy" class="palm-body-text"></div>
+	<div id="statusmsg" class="palm-body-text">Waiting for GPS...</div>
 	
-	<div id="trackLength" class="palm-body-text"></div>
+	<div class="palm-group" id="trackInformations" style="display:none;">
+		<div class="palm-group-title">
+			Track informations
+		</div>
+		
+		<div class="tracker-line"  >
+			<div class="tracker-line-header">Current track</div>
+            <div class="tracker-value">
+                <div id="currentTrack" >&nbsp;</div>
+            </div>
+		</div>
+		
+		<div class="tracker-line indent" >
+            <div style="position:absolute; left:0%; width:40%">
+                <div class="tracker-line-header">Track length</div>
+                <div class="tracker-value">
+                    <div id="trackLength" >&nbsp;</div>
+                </div>
+            </div>
+            <div style="position:absolute; left:40%; width:44%" >
+                <div class="tracker-line-header">Maximum speed</div>
+                <div class="tracker-value">
+                    <div id="maxSpeed" >&nbsp;</div>
+                </div>
+            </div>
+            <div style="position:absolute; left:85%; width:20%">
+                <div class="tracker-line-header">Nodes</div>
+                <div class="tracker-value">
+                    <div id="tracknum" >&nbsp;</div>
+                </div>
+            </div>
+            &nbsp;
+		</div>
 
-	<div id="tracknum" class="palm-body-text"></div>
+		<div class="tracker-line indent" style="">
+			<div class="tracker-line-header">Minimum / maximum altitude</div>
+            <div class="tracker-value">
+                <span id="minAltitude" >&nbsp;</span> /
+                <span id="maxAltitude" >&nbsp;</span>
+            </div>
+		</div>
+		
+    </div>
+
 </div>

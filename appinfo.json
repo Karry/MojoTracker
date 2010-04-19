@@ -1,9 +1,11 @@
 {
 	"id": "com.osm.mojotracker",
 	"version": "0.1.28",
-	"vendor": "Ian Wilson",
+	"vendor": "MojoTracker team",
+    "vendorurl": "http://code.google.com/p/mojotracker/",
 	"type": "web",
 	"main": "index.html",
 	"title": "Mojo Tracker",
-	"icon": "icon.png"
+	"icon": "images/icon.png",
+    "splashBackground":"images/screen.png"
 }

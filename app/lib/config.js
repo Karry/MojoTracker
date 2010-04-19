@@ -17,8 +17,9 @@ function Config(){
         this.setPosFormat(Config.DEFAULT_POS_FORMAT);
         
     // TODO: make this variable configurable
-    this.maxHorizAccuracy = 100;
-    this.maxVertAccuracy = 100;
+    this.maxHorizAccuracy = 30;
+    this.maxVertAccuracy = 50;
+    this.updateTimeout = 30; // in second
     this.ignoredCount = 7; // num. of nodes at beginning for skip
 }
 
@@ -56,6 +57,10 @@ Config.prototype.getPosFormat = function(){
 
 Config.prototype.getIgnoredCount = function(){
     return this.ignoredCount;
+}
+
+Config.prototype.getUpdateTimeout = function(){
+    return this.updateTimeout;
 }
 
 Config.prototype.setUnits = function( units ){
