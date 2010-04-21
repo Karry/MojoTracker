@@ -133,7 +133,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	direction = event.heading.toFixed(0);
 	
 	// fix bad values from gps
-	if (alt < -200)
+	if (alt < -200 || (alt == 0 && vertAccuracy == 0))
 		alt = null;
 
     // save values to DB	
@@ -177,7 +177,8 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	if (event.heading > 0 ){
         /** in case, when GPS is disabled (only if GSM fix is available),
          * event.heading should be -1 and event.errorCode should be 4,
-         * but it isn't... So we use this strange condition...
+         * but it isn't... So we use this strange condition that don't
+         * work if we go _directly_ to north...
          */
         opacity = 1; // 0.8
 		var rot = 360 - direction;
