@@ -1,10 +1,22 @@
 /* Put Application specific CSS here. */
 
+p{
+    margin: 0px 3px 0px 2px;
+}
+
 .export-track{
     background: url(../images/gpx-icon.png) center center no-repeat;
     float:right;
     width:80px;
     height:40px;
+}
+
+.right{
+    float:right;
+}
+
+.margin10{
+    margin:10px;
 }
 
 .tracker-line{
@@ -32,4 +44,22 @@
     font-family:monospace;
     font-weight: bold;
     font-size:83%;
+}
+
+.changelog{
+    margin:3px 10px 6px 10px;
+}
+
+.changelog h2{
+    font-size:medium;
+    margin: 0px 0px 5px 0px;
+}
+
+.changelog ul{
+    font-size:small;
+    margin:0px;
+    padding:2px 0px 5px 20px;
+}
+
+.changelog li{
 }
