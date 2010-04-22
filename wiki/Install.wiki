@@ -1,0 +1,13 @@
+#summary Howto install MojoTracker application on your WebOS device.
+
+= Introduction =
+
+Here is more ways howto install MojoTracker app on your device, this document describe some commonest.
+
+
+= Stable release via Preware =
+
+This is the prefered way for most users who "only" want try or use MojoTracker. 
+
+ * You need installed [http://www.webos-internals.org/wiki/Application:Preware Preware] package manager. 
+ * For install, simply run Preware on your device, select "List of Everything", type "MojoTracker", select MojoTracker and click on Install button...
