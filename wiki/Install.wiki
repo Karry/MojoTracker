@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Here is more ways howto install MojoTracker app on your device, this document describe some commonest.
+Here is more ways howto install {{MojoTracker}} app on your device, this document describe some commonest.
 
 
 = Stable release via Preware =
