@@ -237,7 +237,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
         msg2 += "</trkseg>\n</trk>\n";
         msg2 += "</gpx>\n";
 
-        callback.progress(1,1, "xml data builded...");
+        callback.progress(1,1, "xml data built...");
 
         setTimeout(this.writeGPXFile.bind(this), 500,
                    controller, name, msg2,
