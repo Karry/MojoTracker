@@ -75,6 +75,67 @@ Mojotracker.prototype.getTrackLength = function(){
     return  this.trackLength;
 }
 
+Mojotracker.prototype.drawAltitudeProfile = function(canvas, item, callback){
+    //canvas.fillStyle = "rgb(255,0,0)";
+    //canvas.fillRect(30, 30, 50, 50);
+    
+    var strSQL = "SELECT `time`, `altitude` FROM `" + item.name + "` WHERE `altitude` != 'nothing' AND `altitude` != 'null'; GO;";
+    
+    this.executeSQL(strSQL,
+            function(tx, result) {
+                this.drawAltitudeProfile1(canvas, result, item, callback);
+            }.bind(this),
+            function(tx, error) {
+                callback.errorHandler(error);
+            }.bind(this)                    
+        );    
+}
+
+Mojotracker.prototype.drawAltitudeProfile1 = function(canvas, result, item, callback){
+    
+    canvas.strokeStyle = "rgb(0,128,0)";
+    canvas.lineWidth = 3;
+    
+    //Date.parse("2010-04-30T17:54:31Z".replace("T"," ").replace("Z"," "))
+    startTime = Date.parse( item.start.replace("T"," ").replace("Z"," "));
+    endTime = Date.parse( item.stop.replace("T"," ").replace("Z"," "));
+    length = endTime - startTime;
+    if (length == 0)
+        return;
+    
+    minAltitude = item.minAltitude;
+    maxAltitude = item.maxAltitude;
+    cant = maxAltitude - minAltitude;
+    if (cant == 0)
+        return;
+    
+    startX = 0; startY= 0; width = 315; height = 200;
+    
+    canvas.beginPath();
+    canvas.moveTo(startX, startY+height);
+    var msg = "";
+    
+
+    for (var i = 0; i < result.rows.length; i++) {
+        var row = result.rows.item(i);
+        //callback.errorHandler( row.time );
+        time = Date.parse( row.time.replace("T"," ").replace("Z"," ") );
+        alt = row.altitude;
+        x = (width * ( (time - startTime) / length)) + startX;
+        y = (startY + height) - (height * ((alt - minAltitude) / cant));
+        msg = msg+x+"x"+y+", ";
+        
+        if (x < startX || y<startY || x > (startX + width) || y > (startY+height)){
+            callback.errorHandler( "draw fail at " +x+"x"+y+" ("+i+")");
+            break;
+        }
+        canvas.lineTo(x, y);
+    }
+    
+    canvas.stroke();
+    canvas.closePath();
+}
+
 Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy,
                                          vertAccuracy, errorHandler ){
 
@@ -166,8 +227,12 @@ Mojotracker.prototype.getTrackInfo = function( name, infoHandler, errorHandler )
         "COUNT(*) AS nodes, " +
         "MIN(`time`) AS start, " +
         "MAX(`time`) AS stop, " +
+        "MIN(`altitude`) AS minAltitude, " +
+        "(SELECT MAX(`altitude`) FROM `"+name+"` WHERE `altitude` != 'nothing' AND `altitude` != 'null') AS maxAltitude, " +
+        "MAX(`velocity`) AS maxVelocity, " +
         "SUM(`distanceFromPrev`) AS trackLength " +
         "FROM `"+name+"` ; GO;";
+
     this.executeSQL(strSQL, infoHandler, errorHandler);
 }
 

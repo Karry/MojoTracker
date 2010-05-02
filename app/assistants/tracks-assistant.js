@@ -24,6 +24,7 @@ TracksAssistant.prototype.setup = function(){
     this.listAddHandler = this.listAddHandler.bind(this);
     this.listDeleteHandler = this.listDeleteHandler.bind(this);
     this.listReorderHandler = this.listReorderHandler.bind(this);
+    this.handleTrackTap = this.handleTrackTap.bind(this);
 
     // Set up the attributes for the list widget:
     this.trackAtts = {
@@ -45,6 +46,7 @@ TracksAssistant.prototype.setup = function(){
     this.controller.listen(this.trackList, Mojo.Event.listAdd, this.listAddHandler);
     this.controller.listen(this.trackList, Mojo.Event.listDelete, this.listDeleteHandler);
     this.controller.listen(this.trackList, Mojo.Event.listReorder, this.listReorderHandler);
+    this.controller.listen(this.trackList, Mojo.Event.listTap, this.handleTrackTap);
 
     // load tracks
     try{
@@ -86,6 +88,46 @@ TracksAssistant.prototype.storeGpx = function(name){
     }
     
     Mojotracker.getInstance().storeGpx(this.controller, name, callback);
+}
+
+TracksAssistant.prototype.handleTrackTap = function(event){
+
+	var trackPopupModel;
+    trackPopupModel = [
+        {label: $L('Info'), command: 'info'},
+        {label: $L('Export'), command: 'export'},
+        {label: $L('Delete'), command: 'delete'}
+    ];
+    this.controller.popupSubmenu({
+        onChoose: function(response){
+            if (response == 'info') {
+                this.showInfo( event.item );
+            } else if (response == 'export') {
+                this.storeGpx( event.item.name );
+            } else if (response == 'delete') {
+                this.controller.showAlertDialog({
+                    onChoose: function(value) {
+                        if (value == 'yes') {
+                            this.listDeleteHandler(event);
+                        }
+                    }.bind(this),
+                    title: $L("Delete?"),
+                    message: $L("Are you sure you want to delete the track #{trackname}?")
+                            .interpolate({trackname:"\"" + event.item.name +"\""}),
+                    choices:[
+                        {label:$L('Yes'), value:"yes", type:'affirmative'},
+                        {label:$L('No'), value:"no", type:'negative'}
+                    ]
+                });
+            }
+        },
+        placeNear: event.originalEvent.target,
+        items: trackPopupModel
+    });
+};
+
+TracksAssistant.prototype.showInfo = function( myItem ){
+    Mojo.Controller.stageController.pushScene("info",{item: myItem});
 }
 
 TracksAssistant.prototype.createStoreErrorHandler = function(e){
@@ -181,6 +223,7 @@ TracksAssistant.prototype.listDeleteHandler= function(event) {
     Mojo.log("EditablelistAssistant deleting '"+event.item.data+"'.");
     this.currentModel.items.splice(this.currentModel.items.indexOf(event.item), 1);
     Mojotracker.getInstance().removeTrack(event.item.name, this.tableErrorHandler.bind(this));
+    this.controller.modelChanged(this.currentModel);
     
     this.trackCount --;
     this.updateHeader();
