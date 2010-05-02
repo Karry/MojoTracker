@@ -313,6 +313,8 @@ FirstAssistant.prototype.cleanup = function(event)
 
 FirstAssistant.prototype.formatDate = function(dateobj, formattype)
 {
+    this.config = Config.getInstance();
+        
 	strRes = "NA";
 	secs = dateobj.getSeconds(); if (secs > 9) strSecs = String(secs); else strSecs = "0" + String(secs);
 	mins = dateobj.getMinutes(); if (mins > 9) strMins = String(mins); else strMins = "0" + String(mins);
@@ -320,6 +322,7 @@ FirstAssistant.prototype.formatDate = function(dateobj, formattype)
 	day  = dateobj.getDate(); if (day > 9) strDays = String(day); else strDays = "0" + String(day);
 	mnth = dateobj.getMonth() + 1; if (mnth > 9) strMnth = String(mnth); else strMnth = "0" + String(mnth);
 	yr   = dateobj.getFullYear(); strYr = String(yr);
+    //strRes = strDays + "/" + strMnth + "/" + strYr + " " + strHrs + ":" + strMins + ":" + strSecs;
 	
 	if (formattype == 1) // filename
 	{
@@ -331,7 +334,7 @@ FirstAssistant.prototype.formatDate = function(dateobj, formattype)
 	}
 	if (formattype == 3) // Display Time
 	{
-		strRes = strDays + "/" + strMnth + "/" + strYr + " " + strHrs + ":" + strMins + ":" + strSecs;
+        strRes = this.config.formatDateTime(dateobj);
 	}
 	return strRes
 }
