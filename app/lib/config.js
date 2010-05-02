@@ -126,6 +126,19 @@ Config.prototype.userDistance = function(distanceM, canNegative){
     return distanceM+" m";    
 }
 
+Config.prototype.formatDateTime = function(dateobj){
+    // FIXME: add support locale, or configurable format
+	strRes = "NA";
+	secs = dateobj.getSeconds(); if (secs > 9) strSecs = String(secs); else strSecs = "0" + String(secs);
+	mins = dateobj.getMinutes(); if (mins > 9) strMins = String(mins); else strMins = "0" + String(mins);
+	hrs  = dateobj.getHours(); if (hrs > 9) strHrs = String(hrs); else strHrs = "0" + String(hrs);
+	day  = dateobj.getDate(); if (day > 9) strDays = String(day); else strDays = "0" + String(day);
+	mnth = dateobj.getMonth() + 1; if (mnth > 9) strMnth = String(mnth); else strMnth = "0" + String(mnth);
+	yr   = dateobj.getFullYear(); strYr = String(yr);
+    
+    return strDays + "/" + strMnth + "/" + strYr + " " + strHrs + ":" + strMins + ":" + strSecs;    
+}
+
 Config.prototype.userDegree = function(degree){
     minutes = (degree - Math.floor(degree)) * 60;
     seconds = (minutes - Math.floor(minutes )) * 60;
