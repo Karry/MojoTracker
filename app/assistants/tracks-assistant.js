@@ -219,7 +219,12 @@ TracksAssistant.prototype.listAddHandler = function(event ) {
 // Called for Mojo.Event.listDelete events.
 // Removes the deleted item from the model (and would persist the changes to disk if appropriate).
 // The list's DOM elements will be updated automatically, unless event.preventDefault() is called.
-TracksAssistant.prototype.listDeleteHandler= function(event) {
+TracksAssistant.prototype.listDeleteHandler = function(event) {
+    if (event.item.name == Mojotracker.getInstance().getCurrentTrack()){
+        this.showDialog("Error","It is open track! Nothing will be done.");
+        return false;
+    }
+    
     Mojo.log("EditablelistAssistant deleting '"+event.item.data+"'.");
     this.currentModel.items.splice(this.currentModel.items.indexOf(event.item), 1);
     Mojotracker.getInstance().removeTrack(event.item.name, this.tableErrorHandler.bind(this));

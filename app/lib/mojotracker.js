@@ -68,7 +68,7 @@ Mojotracker.prototype.isActive = function( name){
 }
 
 Mojotracker.prototype.getCurrentTrack = function(){
-    return tracename;
+    return this.tracename;
 }
 
 Mojotracker.prototype.getTrackLength = function(){
