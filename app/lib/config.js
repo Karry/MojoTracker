@@ -9,7 +9,7 @@ function Config(){
     this.splitExportFileCookie = new Mojo.Model.Cookie( 'splitExportFile' );
     this.splitExportFile = this.splitExportFileCookie.get();
     if (this.splitExportFile === undefined)
-        this.setSplitExportFiles( false );
+        this.setSplitExportFiles( true );
         
     this.posFormatCookie = new Mojo.Model.Cookie( 'posFormat' );
     this.posFormat = this.posFormatCookie.get();
