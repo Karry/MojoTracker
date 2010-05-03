@@ -27,10 +27,13 @@ FirstAssistant.prototype.setup = function()
 			value: this.saveTrack,
 			disabled: false 
 		});
-	this.controller.listen('saveTrackToggle', Mojo.Event.propertyChanged, this.handleSaveTrackHandleAction.bind(this));
+	this.controller.listen('saveTrackToggle', Mojo.Event.propertyChanged,
+                           this.handleSaveTrackHandleAction.bind(this));
 	if (this.saveTrack)
 		this.createNewTrack();
 			    
+    this.controller.listen('showMoreInfoButton', Mojo.Event.tap,
+                           this.handleShowMoreButtonTap.bind(this));
 	
 	// Setup application menu
 	this.controller.setupWidget(Mojo.Menu.appMenu,
@@ -109,6 +112,29 @@ FirstAssistant.prototype.createNewTrack = function(){
 		$('statusmsg').update("DB Error: " + e);
 	}	
 }
+
+FirstAssistant.prototype.handleShowMoreButtonTap = function(event){
+	mojotracker = Mojotracker.getInstance();
+    trackName = mojotracker.getCurrentTrack();
+    if (trackName){
+        mojotracker.getTrackInfo( trackName,
+                                this.trackInfoHandler.bind(this),
+                                this.tableErrorHandler.bind(this)
+                                );
+    }
+}
+
+FirstAssistant.prototype.trackInfoHandler = function(transaction, results){
+    if ((results.rows) && (results.rows.length == 1)){
+        myItem = results.rows.item(0);
+        myItem.trackLengthFormated =  Config.getInstance().userDistance( myItem.trackLength , false);
+		//this.refreshTrackInfo();
+        Mojo.Controller.stageController.pushScene("info",{item: myItem});
+    }else{
+		this.showDialog("Error", 'DB returned bad result ['+results.rows.length+']');
+    }	
+}
+
 
 FirstAssistant.prototype.closeTrack = function(){
 	mojotracker = Mojotracker.getInstance();
@@ -211,7 +237,10 @@ FirstAssistant.prototype.showTrackInformations = function(){
 		$('trackLength').innerHTML 	= this.config.userDistance( mojotracker.getTrackLength(), false);
 		$('tracknum').innerHTML 	= mojotracker.getNodes();
 		$('currentTrack').innerHTML = mojotracker.getCurrentTrack();
-	}    
+	}else{
+        info = document.getElementById("trackInformations");
+        info.style.display = "none";        
+    }
 }
 
 FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){

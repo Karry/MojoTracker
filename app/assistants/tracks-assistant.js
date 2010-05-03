@@ -216,6 +216,8 @@ TracksAssistant.prototype.listAddHandler = function(event ) {
     this.trackList.mojo.noticeAddedItems(this.currentModel.items.length, [newItem]);
 }
 
+
+
 // Called for Mojo.Event.listDelete events.
 // Removes the deleted item from the model (and would persist the changes to disk if appropriate).
 // The list's DOM elements will be updated automatically, unless event.preventDefault() is called.
@@ -224,11 +226,12 @@ TracksAssistant.prototype.listDeleteHandler = function(event) {
         this.showDialog("Error","It is open track! Nothing will be done.");
         return false;
     }
-    
-    Mojo.log("EditablelistAssistant deleting '"+event.item.data+"'.");
+    //this.showDialog("event", event.type+"/"+(typeof event.type));
     this.currentModel.items.splice(this.currentModel.items.indexOf(event.item), 1);
+    Mojo.log("EditablelistAssistant deleting '"+event.item.data+"'.");
     Mojotracker.getInstance().removeTrack(event.item.name, this.tableErrorHandler.bind(this));
-    this.controller.modelChanged(this.currentModel);
+    if (event.type == "mojo-list-tap") // event from context menu, not from "slide" delete
+        this.controller.modelChanged(this.currentModel);
     
     this.trackCount --;
     this.updateHeader();

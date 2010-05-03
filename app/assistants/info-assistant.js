@@ -40,14 +40,12 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 	if (this.item.start)
 		this.timeMin = Date.parse( this.item.start.replace("T"," ").replace("Z"," "));
 	else
-		this.timeMin = (new Date()).UTC();
+		this.timeMin = (new Date()).getTime();
 		
 	if (this.item.stop)
 		this.timeMax = Date.parse( this.item.stop.replace("T"," ").replace("Z"," "));
 	else
-		this.timeMax = this.timeMin;
-
-    
+		this.timeMax = this.timeMin;    
 
     $('startTime').innerHTML    = this.config.formatDateTime( new Date(this.timeMin));
     $('endTime').innerHTML      = this.config.formatDateTime( new Date(this.timeMax));
@@ -76,7 +74,7 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 InfoAssistant.prototype.trackInfoHandler = function(transaction, results){
     if ((results.rows) && (results.rows.length == 1)){
         this.item = results.rows.item(0);
-        this.item.trackLengthFormated =  Config.getInstance().userDistance( newItem.trackLength , false);
+        this.item.trackLengthFormated =  Config.getInstance().userDistance( this.item.trackLength , false);
 		this.refreshTrackInfo();    
     }else{
 		this.showDialog("Error", 'DB returned bad result ['+results.rows.length+']');
@@ -173,14 +171,6 @@ InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, val
 	// clear canvas
 	canvas.clearRect (0, 0, fullWidth, fullHeight);
 	canvas.strokeRect(startX, startY, startX + width, startY+height);
-	
-	/*
-    canvas.moveTo(startX, startY);
-    canvas.lineTo(startX + width, startY);
-    canvas.lineTo(startX + width, startY+height);
-    canvas.lineTo(startX , startY+height);
-    canvas.lineTo(startX , startY);
-	*/
 
     canvas.stroke();
     canvas.closePath();
@@ -222,10 +212,7 @@ InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, val
                 this.showDialog("Error","draw failed (2) at " +x+"x"+y+" ("+i+")");
                 break;
             }
-            if (i == 0)
-                canvas.moveTo(x, y);
-            else
-                canvas.lineTo(x, y);
+            canvas.lineTo(x, y);
         }
     
         canvas.fill();
