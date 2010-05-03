@@ -162,6 +162,7 @@ InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, val
     if (range == 0)
         range = 1;
     
+	fullWidth = 320;  fullHeight = 200;
     startX = 0; startY= 0; width = 320; height = 200;
 
     // draw graph area
@@ -169,18 +170,24 @@ InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, val
     canvas.lineWidth   = 1;
     canvas.beginPath();
 
+	// clear canvas
+	canvas.clearRect (0, 0, fullWidth, fullHeight);
+	canvas.strokeRect(startX, startY, startX + width, startY+height);
+	
+	/*
     canvas.moveTo(startX, startY);
     canvas.lineTo(startX + width, startY);
     canvas.lineTo(startX + width, startY+height);
     canvas.lineTo(startX , startY+height);
     canvas.lineTo(startX , startY);
+	*/
 
     canvas.stroke();
     canvas.closePath();
     
     if (length == 0)
         return;    
-
+	
     // draw error area    
     if (maxError>0){
         canvas.strokeStyle = "rgb(128,90,90)";
