@@ -4,13 +4,51 @@ function InfoAssistant(params) {
 	this.item = params.item;
 }
 
-InfoAssistant.prototype.setup = function(){
+InfoAssistant.prototype.setup = function(){	
+	this.speedData = new Array();
+	this.speedDataMin = this.item.maxVelocity;
+	this.speedDataMax = this.item.maxVelocity;
 
+	this.altitudeData = new Array();
+	this.altitudeDataMin = this.item.minAltitude;
+	this.altitudeDataMax = this.item.maxAltitude;
+	this.altitudeDataMaxError = 0;
+
+	this.refreshTrackInfo();    
+}
+
+InfoAssistant.prototype.cleanup = function(event){
+    if (this.updateTimeout)
+        clearTimeout( this.updateTimeout );	
+}
+
+InfoAssistant.prototype.refreshTrackInfo = function(){
+	
     this.config = Config.getInstance();
+	mojotracker = Mojotracker.getInstance();
+	
+	// if it is current track, refresh data after 5seconds
+	//this.showDialog('track', this.item.name +"/"+mojotracker.getCurrentTrack());
+	if ( mojotracker.getCurrentTrack() == this.item.name){
+		inst = this;
+		this.updateTimeout = setTimeout( function(){
+				Mojotracker.getInstance().getTrackInfo( inst.item.name,
+										 inst.trackInfoHandler.bind(inst),
+										 inst.tableErrorHandler.bind(inst));
+			}, 5 * 1000);		
+	}	
+	if (this.item.start)
+		this.timeMin = Date.parse( this.item.start.replace("T"," ").replace("Z"," "));
+	else
+		this.timeMin = (new Date()).UTC();
+		
+	if (this.item.stop)
+		this.timeMax = Date.parse( this.item.stop.replace("T"," ").replace("Z"," "));
+	else
+		this.timeMax = this.timeMin;
 
-    this.timeMin = Date.parse( this.item.start.replace("T"," ").replace("Z"," "));
-    this.timeMax = Date.parse( this.item.stop.replace("T"," ").replace("Z"," "));
     
+
     $('startTime').innerHTML    = this.config.formatDateTime( new Date(this.timeMin));
     $('endTime').innerHTML      = this.config.formatDateTime( new Date(this.timeMax));
     
@@ -22,31 +60,34 @@ InfoAssistant.prototype.setup = function(){
     $('tracknum').innerHTML 	= this.item.nodes;
     $('currentTrack').innerHTML = this.item.name;
 
-    this.speedData = new Array();
-    this.speedDataMin = this.item.maxVelocity;
-    this.speedDataMax = this.item.maxVelocity;
-
-    this.altitudeData = new Array();
-    this.altitudeDataMin = this.item.minAltitude;
-    this.altitudeDataMax = this.item.maxAltitude;
-    this.altitudeDataMaxError = 0;
-
     callback = {
         errorHandler : this.drawErrorHandler.bind(this),
         handleResult : this.handleAltitudeResult.bind(this)
     }
-    Mojotracker.getInstance().getAltitudeProfile( this.item , callback );
+    mojotracker.getAltitudeProfile( this.item , callback );
 
     callback = {
         errorHandler : this.drawErrorHandler.bind(this),
         handleResult : this.handleSpeedResult.bind(this)
     }
-    Mojotracker.getInstance().getVelocityProfile( this.item , callback );
-    
+    mojotracker.getVelocityProfile( this.item , callback );
+}
+
+InfoAssistant.prototype.trackInfoHandler = function(transaction, results){
+    if ((results.rows) && (results.rows.length == 1)){
+        this.item = results.rows.item(0);
+        this.item.trackLengthFormated =  Config.getInstance().userDistance( newItem.trackLength , false);
+		this.refreshTrackInfo();    
+    }else{
+		this.showDialog("Error", 'DB returned bad result ['+results.rows.length+']');
+    }	
 }
 
 InfoAssistant.prototype.drawErrorHandler = function(e){
     this.showDialog("Error",e);
+}
+InfoAssistant.prototype.tableErrorHandler = function(e){
+    this.showDialog("SQL Error",e);
 }
 
 InfoAssistant.prototype.handleAltitudeResult = function(result){
@@ -67,8 +108,19 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
             this.altitudeDataMax = data.value + data.error;
         if (this.altitudeDataMaxError < data.error)
             this.altitudeDataMaxError = data.error;
+		if (this.timeMin > data.time)
+			this.timeMin = data.time;
+		if (this.timeMax < data.time)
+			this.timeMax = data.time;
     }
-    this.drawGraph(canvas, this.altitudeData, this.timeMin, this.timeMax, this.altitudeDataMin, this.altitudeDataMax, this.altitudeDataMaxError);
+    this.drawGraph(canvas,
+				   this.altitudeData,
+				   this.timeMin,
+				   this.timeMax,
+				   this.altitudeDataMin,
+				   this.altitudeDataMax,
+				   this.altitudeDataMaxError
+				   );
 }
 
 InfoAssistant.prototype.handleSpeedResult = function(result){
@@ -87,8 +139,19 @@ InfoAssistant.prototype.handleSpeedResult = function(result){
         if (data.value > this.speedDataMax)
             this.speedDataMax = data.value;
         this.speedData[i] = data;
+		if (this.timeMin > data.time)
+			this.timeMin = data.time;
+		if (this.timeMax < data.time)
+			this.timeMax = data.time;		
     }
-    this.drawGraph(canvas, this.speedData, this.timeMin, this.timeMax, this.speedDataMin, this.speedDataMax, 0);
+    this.drawGraph(canvas,
+				   this.speedData,
+				   this.timeMin,
+				   this.timeMax,
+				   this.speedDataMin,
+				   this.speedDataMax,
+				   0
+				   );
 }
 
 InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, valueMin, valueMax, maxError){
@@ -119,7 +182,7 @@ InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, val
         return;    
 
     // draw error area    
-    if (this.altitudeDataMaxError>0){
+    if (maxError>0){
         canvas.strokeStyle = "rgb(128,90,90)";
         canvas.lineWidth   = 1;
         canvas.fillStyle   = "rgb(200,150,150)";
@@ -177,7 +240,7 @@ InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, val
         y = (startY + height) - (height * ((value - valueMin) / range));
         msg = msg+value+" ("+item.error+"), ";
         
-        if (x < startX || y<startY || x > (startX + width) || y > (startY+height)){
+        if (x < (startX-1) || y<(startY-1) || x > (startX + width+1) || y > (startY+height+1)){
             this.showDialog("Error","draw failed (3) at " +x+"x"+y+" ("+value+", "+i+")");
             break;
         }
