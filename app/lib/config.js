@@ -21,6 +21,7 @@ function Config(){
     this.maxVertAccuracy = 50;
     this.updateTimeout = 30; // in second
     this.ignoredCount = 7; // num. of nodes at beginning for skip
+    this.maxGraphSpace = 3*60; // [seconds], maximum space between continuous graph values
 }
 
 Config.instance = null;
@@ -39,6 +40,10 @@ Config.DEGREES_POS_FORMAT = 1;
 
 Config.prototype.splitExportFiles = function(){
     return this.splitExportFile;
+}
+
+Config.prototype.getMaxGraphSpace = function(){
+    return this.maxGraphSpace;
 }
 
 Config.prototype.setSplitExportFiles = function( b ){
