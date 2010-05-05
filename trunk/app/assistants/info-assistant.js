@@ -90,8 +90,12 @@ InfoAssistant.prototype.tableErrorHandler = function(e){
 
 InfoAssistant.prototype.handleAltitudeResult = function(result){
 
+    this.config = Config.getInstance();
     var canvas = document.getElementById('altitudeCanvas').getContext('2d');
     
+	var part = -1;
+	var lastTime = -1;
+	var k = 0;
     for (var i = 0; i < result.rows.length; i++) {
         var item = result.rows.item(i);
         data = {
@@ -99,7 +103,14 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
             value : parseInt( item.altitude ),
             error : parseInt( item.vertAccuracy )
         }
-        this.altitudeData[i] = data;
+		if (lastTime < (data.time - (config.getMaxGraphSpace()*1000) )){
+			part ++;
+			this.altitudeData[part] = new Array();
+			k= 0;
+		}
+		lastTime = data.time;
+		
+        this.altitudeData[part][k++] = data;
         if ((data.value - data.error) < this.altitudeDataMin)
             this.altitudeDataMin = data.value - data.error;
         if (( data.value + data.error) > this.altitudeDataMax)
@@ -123,20 +134,31 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
 
 InfoAssistant.prototype.handleSpeedResult = function(result){
 
+    this.config = Config.getInstance();
     var canvas = document.getElementById('speedCanvas').getContext('2d');
         
-    for (var i = 0; i < result.rows.length; i++) {
+	var part = -1;
+	var lastTime = -1;
+	var k = 0;
+    for (var i = 0; i < result.rows.length; i++) {		
         var item = result.rows.item(i);
         data = {
             time : Date.parse( item.time.replace("T"," ").replace("Z"," ") ),
             value : parseInt( item.velocity ),
             error : 0
         }
+		if (lastTime < (data.time - ( config.getMaxGraphSpace() *1000) )){
+			part ++;
+			this.speedData[part] = new Array();
+			k = 0;
+		}
+		lastTime = data.time;
+
+        this.speedData[part][k++] = data;
         if (data.value < this.speedDataMin)
             this.speedDataMin = data.value;
         if (data.value > this.speedDataMax)
             this.speedDataMax = data.value;
-        this.speedData[i] = data;
 		if (this.timeMin > data.time)
 			this.timeMin = data.time;
 		if (this.timeMax < data.time)
@@ -152,7 +174,7 @@ InfoAssistant.prototype.handleSpeedResult = function(result){
 				   );
 }
 
-InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, valueMin, valueMax, maxError){
+InfoAssistant.prototype.drawGraph = function(canvas, parts, timeMin, timeMax, valueMin, valueMax, maxError){
         
     length = timeMax - timeMin;
     
@@ -184,40 +206,50 @@ InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, val
         canvas.lineWidth   = 1;
         canvas.fillStyle   = "rgb(200,150,150)";
         canvas.beginPath();
+		
     
-    
-        for (var i = 0; i < data.length; i++) {
-            time = data[i].time
-            value = data[i].value + data[i].error;
-            x = (width * ( (time - timeMin) / length)) + startX;
-            y = (startY + height) - (height * ((value - valueMin) / range));            
-            
-            if (x < startX || y<startY || x > (startX + width) || y > (startY+height)){
-                this.showDialog("Error","draw failed (1) at " +x+"x"+y+" ("+i+")");
-                break;
-            }
-            if (i == 0)
-                canvas.moveTo(x, y);
-            else
-                canvas.lineTo(x, y);
-        }
-
-        for (var i = data.length -1; i >= 0; i--) {
-            time = data[i].time
-            value = data[i].value - data[i].error;
-            x = (width * ( (time - timeMin) / length)) + startX;
-            y = (startY + height) - (height * ((value - valueMin) / range));
-            
-            if (x < startX || y<startY || x > (startX + width) || y > (startY+height)){
-                this.showDialog("Error","draw failed (2) at " +x+"x"+y+" ("+i+")");
-                break;
-            }
-            canvas.lineTo(x, y);
-        }
-    
-        canvas.fill();
-        canvas.stroke();
-        canvas.closePath();
+		for (var part = 0; part< parts.length; part++ ){
+			data = parts[part];
+			//this.showDialog("counts", parts.length+", "+part+"/"+data.length);
+			for (var i = 0; i < data.length; i++) {
+				time = data[i].time
+				value = data[i].value + data[i].error;
+				x = (width * ( (time - timeMin) / length)) + startX;
+				y = (startY + height) - (height * ((value - valueMin) / range));            
+				
+				if (x < startX || y<startY || x > (startX + width) || y > (startY+height)){
+					this.showDialog("Error","draw failed (1) at " +x+"x"+y+" ("+i+")");
+					break;
+				}
+				if (i == 0)
+					canvas.moveTo(x, y);
+				else
+					canvas.lineTo(x, y);
+			}
+	
+			for (var i = data.length -1; i >= 0; i--) {
+				time = data[i].time
+				value = data[i].value - data[i].error;
+				x = (width * ( (time - timeMin) / length)) + startX;
+				y = (startY + height) - (height * ((value - valueMin) / range));
+				
+				if (x < startX || y<startY || x > (startX + width) || y > (startY+height)){
+					this.showDialog("Error","draw failed (2) at " +x+"x"+y+" ("+i+")");
+					break;
+				}
+				if (i == 0){
+					canvas.lineTo(x, y);
+					value = data[i].value + data[i].error;
+					y = (startY + height) - (height * ((value - valueMin) / range));					
+					canvas.lineTo(x, y);
+				}else
+					canvas.lineTo(x, y);
+			}
+		
+			canvas.fill();
+			canvas.stroke();
+			canvas.closePath();
+		}
     }
     
     canvas.strokeStyle = "rgb(0,128,0)";
@@ -225,24 +257,27 @@ InfoAssistant.prototype.drawGraph = function(canvas, data, timeMin, timeMax, val
     canvas.beginPath();
     var msg = "";
     // draw main graph
-    for (var i = 0; i < data.length; i++) {
-        var item = data[i];
-        //callback.errorHandler( row.time );
-        time = item.time
-        value = item.value;
-        x = (width * ( (time - timeMin) / length)) + startX;
-        y = (startY + height) - (height * ((value - valueMin) / range));
-        msg = msg+value+" ("+item.error+"), ";
-        
-        if (x < (startX-1) || y<(startY-1) || x > (startX + width+1) || y > (startY+height+1)){
-            this.showDialog("Error","draw failed (3) at " +x+"x"+y+" ("+value+", "+i+")");
-            break;
-        }
-        if (i == 0)
-            canvas.moveTo(x, y);
-        else
-            canvas.lineTo(x, y);
-    }
+	for (var part = 0; part< parts.length; part++ ){
+		data = parts[part];
+		for (var i = 0; i < data.length; i++) {
+			var item = data[i];
+			//callback.errorHandler( row.time );
+			time = item.time
+			value = item.value;
+			x = (width * ( (time - timeMin) / length)) + startX;
+			y = (startY + height) - (height * ((value - valueMin) / range));
+			msg = msg+value+" ("+item.error+"), ";
+			
+			if (x < (startX-1) || y<(startY-1) || x > (startX + width+1) || y > (startY+height+1)){
+				this.showDialog("Error","draw failed (3) at " +x+"x"+y+" ("+value+", "+i+")");
+				break;
+			}
+			if (i == 0)
+				canvas.moveTo(x, y);
+			else
+				canvas.lineTo(x, y);
+		}
+	}
     
     //this.showDialog("data", msg+" ["+valueMin+", "+valueMax+"]");
     
