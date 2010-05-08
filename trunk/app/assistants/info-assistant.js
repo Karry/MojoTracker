@@ -6,10 +6,14 @@ function InfoAssistant(params) {
 
 InfoAssistant.prototype.setup = function(){	
 	this.speedData = new Array();
+	this.speedXAxis = new Array();
+	this.speedYAxis = new Array();
 	this.speedDataMin = this.item.maxVelocity;
 	this.speedDataMax = this.item.maxVelocity;
 
 	this.altitudeData = new Array();
+	this.altXAxis = new Array();
+	this.altYAxis = new Array();
 	this.altitudeDataMin = this.item.minAltitude;
 	this.altitudeDataMax = this.item.maxAltitude;
 	this.altitudeDataMaxError = 0;
@@ -103,7 +107,7 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
             value : parseInt( item.altitude ),
             error : parseInt( item.vertAccuracy )
         }
-		if (lastTime < (data.time - (config.getMaxGraphSpace()*1000) )){
+		if (lastTime < (data.time - (this.config.getMaxGraphSpace()*1000) )){
 			part ++;
 			this.altitudeData[part] = new Array();
 			k= 0;
@@ -122,13 +126,19 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
 		if (this.timeMax < data.time)
 			this.timeMax = data.time;
     }
+	this.altXAxis = this.config.generageXAxis( this.timeMin, this.timeMax );
+	this.altYAxis = this.config.generageAltitudeAxis( this.altitudeDataMin - this.altitudeDataMaxError
+													, this.altitudeDataMax + this.altitudeDataMaxError);
+
     this.drawGraph(canvas,
 				   this.altitudeData,
 				   this.timeMin,
 				   this.timeMax,
 				   this.altitudeDataMin,
 				   this.altitudeDataMax,
-				   this.altitudeDataMaxError
+				   this.altitudeDataMaxError,
+				   this.altXAxis,
+				   this.altYAxis
 				   );
 }
 
@@ -147,7 +157,7 @@ InfoAssistant.prototype.handleSpeedResult = function(result){
             value : parseInt( item.velocity ),
             error : 0
         }
-		if (lastTime < (data.time - ( config.getMaxGraphSpace() *1000) )){
+		if (lastTime < (data.time - ( this.config.getMaxGraphSpace() *1000) )){
 			part ++;
 			this.speedData[part] = new Array();
 			k = 0;
@@ -164,17 +174,33 @@ InfoAssistant.prototype.handleSpeedResult = function(result){
 		if (this.timeMax < data.time)
 			this.timeMax = data.time;		
     }
+
+	this.speedXAxis = this.config.generageXAxis( this.timeMin, this.timeMax );
+	this.speedYAxis = this.config.generageSpeedAxis( this.speedDataMin, this.speedDataMax);
+	
     this.drawGraph(canvas,
 				   this.speedData,
 				   this.timeMin,
 				   this.timeMax,
 				   this.speedDataMin,
 				   this.speedDataMax,
-				   0
+				   0,
+				   this.speedXAxis,
+				   this.speedYAxis 
 				   );
 }
 
-InfoAssistant.prototype.drawGraph = function(canvas, parts, timeMin, timeMax, valueMin, valueMax, maxError){
+InfoAssistant.prototype.drawGraph = function(
+		canvas,
+		parts,
+		timeMin,
+		timeMax,
+		valueMin,
+		valueMax,
+		maxError,
+		xAxis,
+		yAxis
+		){
         
     length = timeMax - timeMin;
     
@@ -183,17 +209,16 @@ InfoAssistant.prototype.drawGraph = function(canvas, parts, timeMin, timeMax, va
         range = 1;
     
 	fullWidth = 320;  fullHeight = 200;
-    startX = 0; startY= 0; width = 320; height = 200;
+    startX = 26; startY= 0; width = 300; height = 185;
+
+	// clear canvas
+	canvas.clearRect (0, 0, fullWidth, fullHeight);
 
     // draw graph area
     canvas.strokeStyle = "rgb(128,128,128)";
     canvas.lineWidth   = 1;
     canvas.beginPath();
-
-	// clear canvas
-	canvas.clearRect (0, 0, fullWidth, fullHeight);
 	canvas.strokeRect(startX, startY, startX + width, startY+height);
-
     canvas.stroke();
     canvas.closePath();
     
@@ -278,11 +303,41 @@ InfoAssistant.prototype.drawGraph = function(canvas, parts, timeMin, timeMax, va
 				canvas.lineTo(x, y);
 		}
 	}
+    canvas.stroke();
+    canvas.closePath();	
+	
+	// draw X axis
+    canvas.strokeStyle  = "rgba(150,150,150, 0.5)";
+	canvas.fillStyle    = "rgb(10,10,10)";
+	canvas.font         = '11px sans-serif';
+	canvas.textBaseline = 'top';
+    canvas.lineWidth    = 1;
+    canvas.beginPath();
+	for (var i=0; i< xAxis.length; i++){
+		item = xAxis[i];
+		time = item.time;
+		x = (width * ( (time - timeMin) / length)) + startX;
+		canvas.moveTo(x,startY);
+		canvas.lineTo(x, startY + height);
+		if (item.label){
+			canvas.fillText( item.label, x - 10, startY + height);			
+		}
+	}
+	// draw Y axis
+	for (var i=0; i< yAxis.length; i++){
+		item = yAxis[i];
+		y = (startY + height) - (height * ((item.value - valueMin) / range));
+		canvas.moveTo(startX , y);
+		canvas.lineTo(startX +width, y);
+		if (item.label){
+			canvas.fillText( item.label , 2, y-7);			
+		}
+	}
+	
+    canvas.stroke();
+    canvas.closePath();	
     
     //this.showDialog("data", msg+" ["+valueMin+", "+valueMax+"]");
-    
-    canvas.stroke();
-    canvas.closePath();
 }
 
 
