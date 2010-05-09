@@ -94,16 +94,30 @@ InfoAssistant.prototype.tableErrorHandler = function(e){
 
 InfoAssistant.prototype.handleAltitudeResult = function(result){
 
+	var startTime = (new Date()).getTime();
+	
     this.config = Config.getInstance();
     var canvas = document.getElementById('altitudeCanvas').getContext('2d');
-    
+	
+	var pixelPerSecond = 293 / (this.timeMax - this.timeMin);
+	var lastPixel = 0;
 	var part = -1;
 	var lastTime = -1;
 	var k = 0;
+	var nodes = 0;
     for (var i = 0; i < result.rows.length; i++) {
         var item = result.rows.item(i);
+		time = Date.parse( item.time.replace("T"," ").replace("Z"," ") );
+		
+		// reduce data count for faster drawing
+		p = (pixelPerSecond * time).toFixed(0);
+		if (lastPixel == p)
+			continue;
+		lastPixel = p;
+		nodes ++;
+		
         data = {
-            time : Date.parse( item.time.replace("T"," ").replace("Z"," ") ),
+            time : time,
             value : parseInt( item.altitude ),
             error : parseInt( item.vertAccuracy )
         }
@@ -126,10 +140,13 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
 		if (this.timeMax < data.time)
 			this.timeMax = data.time;
     }
+	var prepareTime = (new Date()).getTime();
+
 	this.altXAxis = this.config.generageXAxis( this.timeMin, this.timeMax );
 	this.altYAxis = this.config.generageAltitudeAxis( this.altitudeDataMin - this.altitudeDataMaxError
 													, this.altitudeDataMax + this.altitudeDataMaxError);
-
+	var axisTime = (new Date()).getTime();	
+	
     this.drawGraph(canvas,
 				   this.altitudeData,
 				   this.timeMin,
@@ -140,6 +157,10 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
 				   this.altXAxis,
 				   this.altYAxis
 				   );
+
+	var endTime = (new Date()).getTime();
+	// print times for debug
+	//this.showDialog("Debug", "prepare: "+(prepareTime - startTime)+", axis: "+(axisTime - prepareTime)+" draw: "+(endTime - axisTime)+", nodes: "+nodes+"/"+result.rows.length);	
 }
 
 InfoAssistant.prototype.handleSpeedResult = function(result){
@@ -147,13 +168,23 @@ InfoAssistant.prototype.handleSpeedResult = function(result){
     this.config = Config.getInstance();
     var canvas = document.getElementById('speedCanvas').getContext('2d');
         
+	var pixelPerSecond = 293 / (this.timeMax - this.timeMin);
+	var lastPixel = 0;
 	var part = -1;
 	var lastTime = -1;
 	var k = 0;
     for (var i = 0; i < result.rows.length; i++) {		
         var item = result.rows.item(i);
+		time = Date.parse( item.time.replace("T"," ").replace("Z"," ") );
+		
+		// reduce data count for faster drawing
+		p = (pixelPerSecond * time).toFixed(0);
+		if (lastPixel == p)
+			continue;
+		lastPixel = p;
+
         data = {
-            time : Date.parse( item.time.replace("T"," ").replace("Z"," ") ),
+            time : time,
             value : parseInt( item.velocity ),
             error : 0
         }
@@ -208,20 +239,20 @@ InfoAssistant.prototype.drawGraph = function(
     if (range == 0)
         range = 1;
     
-	fullWidth = 320;  fullHeight = 200;
-    startX = 26; startY= 0; width = 300; height = 185;
+	fullWidth = 319;  fullHeight = 200;
+    startX = 26; startY= 0; width = fullWidth - startX; height = fullHeight - 15;
 
 	// clear canvas
 	canvas.clearRect (0, 0, fullWidth, fullHeight);
-
+    
     // draw graph area
-    canvas.strokeStyle = "rgb(128,128,128)";
+    canvas.strokeStyle = "rgb(200,200,200)";
     canvas.lineWidth   = 1;
     canvas.beginPath();
 	canvas.strokeRect(startX, startY, startX + width, startY+height);
     canvas.stroke();
     canvas.closePath();
-    
+	
     if (length == 0)
         return;    
 	
@@ -333,10 +364,10 @@ InfoAssistant.prototype.drawGraph = function(
 			canvas.fillText( item.label , 2, y-7);			
 		}
 	}
-	
+		
     canvas.stroke();
     canvas.closePath();	
-    
+    	
     //this.showDialog("data", msg+" ["+valueMin+", "+valueMax+"]");
 }
 
