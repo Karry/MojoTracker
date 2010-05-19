@@ -39,10 +39,10 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
     // create table
     this.tracename = name;
     var strSQL = 'CREATE TABLE `' + this.tracename + '` ('
-        + 'lat TEXT NOT NULL , '
-        + 'lon TEXT NOT NULL , '
-        + 'altitude INT NULL , '
-        + 'time TEXT NOT NULL , '
+        + 'lat TEXT NOT NULL DEFAULT "nothing", '
+        + 'lon TEXT NOT NULL DEFAULT "nothing", '
+        + 'altitude TEXT NOT NULL DEFAULT "nothing", '
+        + 'time TEXT NOT NULL DEFAULT "nothing", '
         + 'velocity INT NOT NULL DEFAULT -1, '
         + 'horizAccuracy INT NOT NULL DEFAULT -1, '
         + 'vertAccuracy INT NOT NULL DEFAULT -1,'
@@ -68,42 +68,12 @@ Mojotracker.prototype.isActive = function( name){
 }
 
 Mojotracker.prototype.getCurrentTrack = function(){
-    return this.tracename;
+    return tracename;
 }
 
 Mojotracker.prototype.getTrackLength = function(){
     return  this.trackLength;
 }
-
-Mojotracker.prototype.getAltitudeProfile = function(item, callback){
-    var strSQL = "SELECT `time`, `altitude`, `vertAccuracy` FROM `" + item.name + "` WHERE `altitude` != 'nothing' AND `altitude` != 'null'; GO;";
-    
-    this.executeSQL(strSQL,
-            function(tx, result) {
-                //this.drawAltitudeProfile1(canvas, result, item, callback);
-                callback.handleResult(result);
-            }.bind(this),
-            function(tx, error) {
-                callback.errorHandler(error);
-            }.bind(this)                    
-        );    
-}
-
-Mojotracker.prototype.getVelocityProfile = function(item, callback){
-
-    var strSQL = "SELECT `time`, `velocity` FROM `" + item.name + "` WHERE `velocity` >= 0; GO;";
-    
-    this.executeSQL(strSQL,
-            function(tx, result) {
-                //this.drawAltitudeProfile1(canvas, result, item, callback);
-                callback.handleResult(result);
-            }.bind(this),
-            function(tx, error) {
-                callback.errorHandler(error);
-            }.bind(this)                    
-        );    
-}
-
 
 Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy,
                                          vertAccuracy, errorHandler ){
@@ -148,10 +118,9 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
     if ((this.maxVelocity == null) || (velocity > this.maxVelocity))
         this.maxVelocity = velocity;
     
-    var strSQL = "INSERT INTO `" + this.tracename + "` "
-        + "(lat, lon, altitude, time, velocity, horizAccuracy, vertAccuracy, distanceFromPrev)"
-        + "VALUES ('" + lat + "','" + lon + "', " + alt + ", "
-        + "'" + strUTC + "', " + velocity + ", " + horizAccuracy + ", " + vertAccuracy + ", " + distance + "); GO;";
+    var strSQL = 'INSERT INTO `' + this.tracename + '` '
+        + '(lat, lon, altitude, time, velocity, horizAccuracy, vertAccuracy, distanceFromPrev)'
+        + 'VALUES ("' + lat + '","' + lon + '","' + alt + '","' + strUTC + '",  '+velocity+', '+horizAccuracy+', '+vertAccuracy+', '+distance+'); GO;';
     this.executeSQL(strSQL, this.createRecordDataHandler.bind(this), errorHandler); 
     this.total ++;
 }
@@ -197,12 +166,8 @@ Mojotracker.prototype.getTrackInfo = function( name, infoHandler, errorHandler )
         "COUNT(*) AS nodes, " +
         "MIN(`time`) AS start, " +
         "MAX(`time`) AS stop, " +
-        "MIN(`altitude`) AS minAltitude, " +
-        "(SELECT MAX(`altitude`) FROM `"+name+"` WHERE `altitude` != 'nothing' AND `altitude` != 'null') AS maxAltitude, " +
-        "MAX(`velocity`) AS maxVelocity, " +
         "SUM(`distanceFromPrev`) AS trackLength " +
         "FROM `"+name+"` ; GO;";
-
     this.executeSQL(strSQL, infoHandler, errorHandler);
 }
 
@@ -252,14 +217,14 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
 	msg2 += "<trk>\n<name>" + name + "</name>\n<trkseg>\n";
 	for (var i = 0; i < result.rows.length; i++) {
             try {
-                var row = result.rows.item(i);
-                msg2 += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
-                msg2 += "\t<time>" + row.time + "</time>\n";
-                msg2 += (row.altitude)?"\t<ele>" + row.altitude + "</ele>\n"                : "";
-                msg2 += (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n"         : "";
-                msg2 += (row.horizAccuracy>0)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n"  : "";
-                msg2 += (row.vertAccuracy>0)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n"    : "";
-                msg2 += "</trkpt>\n";
+		var row = result.rows.item(i);
+		msg2 += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
+		msg2 += "\t<time>" + row.time + "</time>\n";
+		msg2 += (row.altitude)?"\t<ele>" + row.altitude + "</ele>\n":"";
+                msg2 += (row.velocity) && (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n": "";
+                msg2 += (row.horizAccuracy)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n":"";
+                msg2 += (row.vertAccuracy)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n":"";
+		msg2 += "</trkpt>\n";
                 
                 if (i % 10 == 0){
                     callback.progress(i, result.rows.length, "building xml data ("+i+")...");

@@ -38,7 +38,7 @@ PreferencesAssistant.prototype.setup = function(){
             fieldName: 'checkboxstuff'
     };
     this.splitModel = {
-            value: true,
+            value: false,
             disabled: false
     };
     this.splitModel.value = Config.getInstance().splitExportFiles();
