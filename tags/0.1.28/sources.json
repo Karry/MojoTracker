@@ -1,0 +1,23 @@
+[
+    {"source": "app/assistants/stage-assistant.js"},
+    {"source": "app/assistants/app-assistant.js" },
+    {"source": "app/assistants/progress-dialog-assistant.js" },
+    {"source": "app/lib/mojotracker.js" },
+    {"source": "app/lib/config.js" },
+    {
+        "scenes": "first",
+        "source": "app/assistants/first-assistant.js"
+    },
+    {
+        "scenes": "tracks",
+        "source": "app/assistants/tracks-assistant.js"
+    },
+    {
+        "scenes": "preferences",
+        "source": "app/assistants/preferences-assistant.js"
+    },
+    {
+        "scenes": "about",
+        "source": "app/assistants/about-assistant.js"
+    }
+]
