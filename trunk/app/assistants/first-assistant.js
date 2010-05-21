@@ -232,7 +232,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 			reset = true;
 		}
 	}
-   	//$('statusmsg').innerHTML = "profile "+this.refreshInterval+" interval "+this.computedInterval+" distance "+mojotracker.getDistanceFromPrevious();
+   	$('statusmsg').innerHTML = "profile "+this.refreshInterval+" interval "+this.computedInterval+" distance "+mojotracker.getDistanceFromPrevious();
 	
 	if (reset || this.computedInterval > 5){
 		this.trackingHandle.cancel();
