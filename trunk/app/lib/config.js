@@ -16,6 +16,11 @@ function Config(){
     if (this.posFormat === undefined)
         this.setPosFormat(Config.DEFAULT_POS_FORMAT);
         
+    this.refreshCookie = new Mojo.Model.Cookie( 'refreshInterval' );
+    this.refreshInterval = this.refreshCookie.get();
+    if (this.refreshInterval === undefined)
+        this.setRefreshInterval(Config.DEFAULT_REFRESH_INTERVAL);
+		
     // TODO: make this variable configurable
     this.maxHorizAccuracy = 30;
     this.maxVertAccuracy = 50;
@@ -36,7 +41,19 @@ Config.METRIC_UNITS = 0;
 Config.IMPERIAL_UNITS = 1;
 
 Config.DEFAULT_POS_FORMAT = 0;
-Config.DEGREES_POS_FORMAT = 1;
+Config.GEOCACHING_POS_FORMAT = 1;
+Config.DEGREES_POS_FORMAT = 2;
+
+Config.DEFAULT_REFRESH_INTERVAL = 1;
+
+Config.prototype.getRefreshInterval = function(){
+	return this.refreshInterval;
+}
+
+Config.prototype.setRefreshInterval = function(interval){
+	this.refreshInterval = interval;
+	this.refreshCookie.put( interval );
+}
 
 Config.prototype.splitExportFiles = function(){
     return this.splitExportFile;
@@ -237,9 +254,18 @@ Config.prototype.userDegree = function(degree){
         + (seconds<10?"0":"") + seconds.toFixed(2) + "\"";
 }
 
+Config.prototype.userDegreeLikeGeocaching = function(degree){
+    minutes = (degree - Math.floor(degree)) * 60;
+    return Math.floor(degree) + "°"
+        + (minutes<10?"0":"") + minutes.toFixed(3) + "'"
+}
+
 Config.prototype.userLatitude = function(degree){
     if (this.posFormat == Config.DEGREES_POS_FORMAT)
         return degree;
+
+    if (this.posFormat == Config.GEOCACHING_POS_FORMAT)
+	    return (degree>0? "N":"S") +" "+ this.userDegreeLikeGeocaching( Math.abs(degree) );
 
     return this.userDegree( Math.abs(degree) ) + (degree>0? "N":"S");
 }
@@ -247,6 +273,9 @@ Config.prototype.userLatitude = function(degree){
 Config.prototype.userLongitude = function(degree){
     if (this.posFormat == Config.DEGREES_POS_FORMAT)
         return degree;
+	
+    if (this.posFormat == Config.GEOCACHING_POS_FORMAT)
+	    return (degree>0? "E":"W") +" "+ this.userDegreeLikeGeocaching( Math.abs(degree) );
 
     return this.userDegree( Math.abs(degree) ) + (degree>0? "E":"W");
 }
