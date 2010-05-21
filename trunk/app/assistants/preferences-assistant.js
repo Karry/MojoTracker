@@ -19,7 +19,12 @@ PreferencesAssistant.prototype.setup = function(){
         //	includes the updated model (new value can be accessed from e.model.firstValue in this case)
         modelProperty:'unitsValue'
     };
-    // Define models for each selctor
+    this.unitsModel = {
+        unitsValue: Config.METRIC_UNITS
+    };
+    this.unitsModel.unitsValue = Config.getInstance().getUnits();
+    
+    // --------------------------------------------------------------------------
     this.posFormatAttributes = {
         label: $L('Degrees'),
         choices: [
@@ -29,9 +34,30 @@ PreferencesAssistant.prototype.setup = function(){
         ],
         modelProperty:'posFormat'
     };
-    this.unitsModel.unitsValue = Config.getInstance().getUnits();
+    this.posFormatModel = {
+        posFormat : Config.DEFAULT_POS_FORMAT
+    };        
     this.posFormatModel.posFormat = Config.getInstance().getPosFormat();
+
+    // --------------------------------------------------------------------------
+    this.refreshIntervalAttributes = {
+        label: $L('GPS Refresh'),
+        choices: [
+            {label: $L('Adaptive'), value: -1},
+            {label: $L('1s'), value: 1},
+            {label: $L('5s'), value: 5},
+            {label: $L('10s'), value: 10},
+            {label: $L('20s'), value: 20},
+            {label: $L('30s'), value: 30}
+        ],
+        modelProperty:'refreshInterval'
+    };
+    this.refreshModel = {
+        refreshInterval: -1
+    };
+    this.refreshModel.refreshInterval = Config.getInstance().getRefreshInterval();
     
+    // --------------------------------------------------------------------------
     this.splitAttributes = {
             property: "value",
             trueValue: true,
@@ -43,13 +69,14 @@ PreferencesAssistant.prototype.setup = function(){
             disabled: false
     };
     this.splitModel.value = Config.getInstance().splitExportFiles();
-    
+
+    // --------------------------------------------------------------------------    
     
     //	Instantiate each selector
     this.controller.setupWidget('unitsSelector',  this.unitsAttributes, this.unitsModel);
     this.controller.setupWidget('posFormatSelector',  this.posFormatAttributes, this.posFormatModel);
     this.controller.setupWidget('splitCheckbox', this.splitAttributes, this.splitModel);
-
+    this.controller.setupWidget('refreshIntervalSelector', this.refreshIntervalAttributes, this.refreshModel);
 
     // Events
     //	Use controller.listen() and remember to .stopListening() in .cleanup() until
@@ -57,6 +84,7 @@ PreferencesAssistant.prototype.setup = function(){
     this.controller.listen('unitsSelector', Mojo.Event.propertyChange, this.selectorChanged.bind(this));
     this.controller.listen('posFormatSelector', Mojo.Event.propertyChange, this.posFormatChanged.bind(this));    
     this.controller.listen('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
+    this.controller.listen('refreshIntervalSelector', Mojo.Event.propertyChange, this.refreshIntervalChanged.bind(this));
 }
 
 PreferencesAssistant.prototype.selectorChanged = function(event) {
@@ -71,6 +99,10 @@ PreferencesAssistant.prototype.splitFileChanged = function(event){
     Config.getInstance().setSplitExportFiles( event.value );
 }
 
+PreferencesAssistant.prototype.refreshIntervalChanged = function(event){
+    Config.getInstance().setRefreshInterval( this.refreshModel.refreshInterval );
+}
+
 PreferencesAssistant.prototype.cleanup = function(){
     // We need to manually stop listening to events until the framework is updated to clean these up automatically
     this.controller.stopListening('unitsSelector', Mojo.Event.propertyChange, this.selectorChanged.bind(this));
@@ -78,10 +110,4 @@ PreferencesAssistant.prototype.cleanup = function(){
     this.controller.stopListening('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
 }
 
-PreferencesAssistant.prototype.unitsModel = {
-    unitsValue: Config.METRIC_UNITS
-};
 
-PreferencesAssistant.prototype.posFormatModel = {
-    posFormat : Config.DEFAULT_POS_FORMAT
-};
