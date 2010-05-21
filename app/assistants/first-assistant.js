@@ -51,18 +51,10 @@ FirstAssistant.prototype.setup = function(){
 	
 	this.setScreenTimeout(1);
 	// Start GPS
-	this.trackingHandle = this.controller.serviceRequest('palm://com.palm.location',
-							     {
-							      method : 'startTracking',
-							      parameters: {
-									   accuracy: 1, 
-									   maximumAge: 1,
-									   responseTime: 1,
-									   subscribe: true
-									  },
-							      onSuccess: this.handleGpsResponse.bind(this),
-							      onFailure: this.handleGpsResponseError.bind(this)
-							     } );
+	this.refreshInterval = this.config.getRefreshInterval();
+	this.computedInterval = this.refreshInterval > 0 ?
+			this.refreshInterval : 1;
+	this.startTracking();
     
     this.rot = 0;
     //setTimeout(this.testCompas.bind(this), 100);
@@ -218,8 +210,52 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
         
     // for debug...
     //$('statusmsg').innerHTML = event.heading +", " + event.errorCode;
+	
+	reset = false;
+	if (this.refreshInterval != this.config.getRefreshInterval()){
+		this.refreshInterval = this.config.getRefreshInterval();
+		this.computedInterval = this.refreshInterval > 0 ?
+				this.refreshInterval : 1;
+		reset = true;
+	}
+	if (this.refreshInterval == -1){
+		// compute adaptive refresh interval
+		if (mojotracker.getDistanceFromPrevious() < 5 && this.computedInterval < 30){
+			this.computedInterval += 1;
+			reset = true;
+		}
+		if (mojotracker.getDistanceFromPrevious() > 25 && this.computedInterval > 1){
+			// decrease interval when we are moving
+			this.computedInterval -= ((mojotracker.getDistanceFromPrevious() - 25) / 2);
+			if (this.computedInterval< 0)
+				this.computedInterval = 1;
+			reset = true;
+		}
+	}
+   	//$('statusmsg').innerHTML = "profile "+this.refreshInterval+" interval "+this.computedInterval+" distance "+mojotracker.getDistanceFromPrevious();
+	
+	if (reset || this.computedInterval > 5){
+		this.trackingHandle.cancel();
+		setTimeout(this.startTracking.bind(this), this.computedInterval * 1000);
+	}
 
 	this.nullHandleCount = 0;	
+}
+
+FirstAssistant.prototype.startTracking = function(){
+	this.trackingHandle = this.controller.serviceRequest('palm://com.palm.location',
+					 {
+					  method : 'startTracking',
+					  parameters: {
+						   accuracy: 1, 
+						   maximumAge: 1,
+						   responseTime: 1,
+						   subscribe: true
+						  },
+					  onSuccess: this.handleGpsResponse.bind(this),
+					  onFailure: this.handleGpsResponseError.bind(this)
+					 } );			
+	
 }
 
 FirstAssistant.prototype.showTrackInformations = function(){
@@ -279,8 +315,7 @@ FirstAssistant.prototype.tableErrorHandler = function(transaction, error)
 FirstAssistant.prototype.setScreenTimeout = function(stop)
 {
 	appID = 'com.osm.mojotracker-1';
-	if (stop == 1)
-	{
+	if (stop == 1){
 		this.controller.serviceRequest('palm://com.palm.power/com/palm/power',
 		                               {
 		                                  method: 'activityStart',	
@@ -293,8 +328,7 @@ FirstAssistant.prototype.setScreenTimeout = function(stop)
 		                                  onFailure: this.activityFailed.bind(this)
 	                                   }  );
 	}
-	if (stop == 2)
-	{
+	if (stop == 2){
 		this.controller.serviceRequest('palm://com.palm.power/com/palm/power',
 		                               {
 		                                  method: 'activityEnd',	
@@ -308,29 +342,24 @@ FirstAssistant.prototype.setScreenTimeout = function(stop)
 	}
 }
 
-FirstAssistant.prototype.activitySuccess = function()
-{
+FirstAssistant.prototype.activitySuccess = function(){
 }
 
-FirstAssistant.prototype.activityFailed = function()
-{
+FirstAssistant.prototype.activityFailed = function(){
 	$('statusmsg').update('Screen Power Error'); 
 }
 
-FirstAssistant.prototype.activate = function(event)
-{
+FirstAssistant.prototype.activate = function(event){
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
 }
 
-FirstAssistant.prototype.deactivate = function(event)
-{
+FirstAssistant.prototype.deactivate = function(event){
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
 }
 
-FirstAssistant.prototype.cleanup = function(event)
-{
+FirstAssistant.prototype.cleanup = function(event){
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
 	this.trackingHandle.cancel();

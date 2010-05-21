@@ -8,6 +8,7 @@
 function Mojotracker(){
     Mojo.log("Mojotracker constructor...");
     this.dbConnect();
+	this.distanceFromPrevious = 0;
 }
 
 Mojotracker.instance = null;
@@ -104,6 +105,9 @@ Mojotracker.prototype.getVelocityProfile = function(item, callback){
         );    
 }
 
+Mojotracker.prototype.getDistanceFromPrevious = function(){
+	return this.distanceFromPrevious;	
+}
 
 Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy,
                                          vertAccuracy, errorHandler ){
@@ -113,7 +117,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
         return;
     }
     
-    var distance = 0;
+    this.distanceFromPrevious = 0;
     if (horizAccuracy < Config.getInstance().getMaxHorizAccuracy()){
         if (this.lastPoint != null){
             var lat1Rad = this.lastPoint.lat*( Math.PI / 180);
@@ -128,14 +132,14 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
                     Math.cos(lat1Rad) * Math.cos(lat2Rad) * 
                     Math.sin(dLon/2) * Math.sin(dLon/2); 
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-            distance = R * c;
+            this.distanceFromPrevious = R * c;
         }
         this.lastPoint = {
             lat: lat,
             lon: lon
         }
     }
-    this.trackLength += distance;
+    this.trackLength += this.distanceFromPrevious;
     
     if ((vertAccuracy < Config.getInstance().getMaxVertAccuracy()) && (alt != null) &&
         (this.total > Config.getInstance().getIgnoredCount())) // data at beginning is mostly bad...
@@ -151,7 +155,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
     var strSQL = "INSERT INTO `" + this.tracename + "` "
         + "(lat, lon, altitude, time, velocity, horizAccuracy, vertAccuracy, distanceFromPrev)"
         + "VALUES ('" + lat + "','" + lon + "', " + alt + ", "
-        + "'" + strUTC + "', " + velocity + ", " + horizAccuracy + ", " + vertAccuracy + ", " + distance + "); GO;";
+        + "'" + strUTC + "', " + velocity + ", " + horizAccuracy + ", " + vertAccuracy + ", " + this.distanceFromPrevious + "); GO;";
     this.executeSQL(strSQL, this.createRecordDataHandler.bind(this), errorHandler); 
     this.total ++;
 }
@@ -212,6 +216,7 @@ Mojotracker.prototype.getNodes = function(){
 
 Mojotracker.prototype.closeTrack = function(){
     this.tracename = null;
+	this.distanceFromPrevious = 0;
 }
 
 Mojotracker.prototype.createTableDataHandler = function(transaction, results) {

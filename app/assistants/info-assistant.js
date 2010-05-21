@@ -31,16 +31,6 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
     this.config = Config.getInstance();
 	mojotracker = Mojotracker.getInstance();
 	
-	// if it is current track, refresh data after 5seconds
-	//this.showDialog('track', this.item.name +"/"+mojotracker.getCurrentTrack());
-	if ( mojotracker.getCurrentTrack() == this.item.name){
-		inst = this;
-		this.updateTimeout = setTimeout( function(){
-				Mojotracker.getInstance().getTrackInfo( inst.item.name,
-										 inst.trackInfoHandler.bind(inst),
-										 inst.tableErrorHandler.bind(inst));
-			}, 5 * 1000);		
-	}	
 	if (this.item.start)
 		this.timeMin = Date.parse( this.item.start.replace("T"," ").replace("Z"," "));
 	else
@@ -74,6 +64,29 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
     }
     mojotracker.getVelocityProfile( this.item , callback );
 }
+
+FirstAssistant.prototype.activate = function(event){
+	/* put in event handlers here that should only be in effect when this scene is active. For
+	   example, key handlers that are observing the document */
+	// if it is current track, refresh data after 5seconds
+	//this.showDialog('track', this.item.name +"/"+mojotracker.getCurrentTrack());
+	if ( mojotracker.getCurrentTrack() == this.item.name){
+		inst = this;
+		this.updateTimeout = setTimeout( function(){
+				Mojotracker.getInstance().getTrackInfo( inst.item.name,
+										 inst.trackInfoHandler.bind(inst),
+										 inst.tableErrorHandler.bind(inst));
+			}, 5 * 1000);		
+	}	
+}
+
+FirstAssistant.prototype.deactivate = function(event){
+	/* remove any event handlers you added in activate and do any other cleanup that should happen before
+	   this scene is popped or another scene is pushed on top */
+    if (this.updateTimeout)
+        clearTimeout( this.updateTimeout );		
+}
+
 
 InfoAssistant.prototype.trackInfoHandler = function(transaction, results){
     if ((results.rows) && (results.rows.length == 1)){

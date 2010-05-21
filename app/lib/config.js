@@ -24,7 +24,7 @@ function Config(){
     // TODO: make this variable configurable
     this.maxHorizAccuracy = 30;
     this.maxVertAccuracy = 50;
-    this.updateTimeout = 30; // in second
+    this.updateTimeout = 40; // in second
     this.ignoredCount = 7; // num. of nodes at beginning for skip
     this.maxGraphSpace = 3*60; // [seconds], maximum space between continuous graph values
 }
