@@ -24,6 +24,7 @@ PreferencesAssistant.prototype.setup = function(){
         label: $L('Degrees'),
         choices: [
             {label: $L('49°08\'06.22"'), value: Config.DEFAULT_POS_FORMAT},
+            {label: $L('49°08.104\''), value: Config.GEOCACHING_POS_FORMAT},
             {label: $L('49.135060'), value: Config.DEGREES_POS_FORMAT}
         ],
         modelProperty:'posFormat'
