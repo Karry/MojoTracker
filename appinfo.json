@@ -5,7 +5,7 @@
     "vendorurl": "http://code.google.com/p/mojotracker/",
 	"type": "web",
 	"main": "index.html",
-	"title": "Mojo Tracker",
+	"title": "MojoTracker",
 	"icon": "images/icon.png",
     "splashBackground":"images/screen.png"
 }
