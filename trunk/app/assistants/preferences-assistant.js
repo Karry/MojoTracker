@@ -38,24 +38,6 @@ PreferencesAssistant.prototype.setup = function(){
         posFormat : Config.DEFAULT_POS_FORMAT
     };        
     this.posFormatModel.posFormat = Config.getInstance().getPosFormat();
-
-    // --------------------------------------------------------------------------
-    this.refreshIntervalAttributes = {
-        label: $L('GPS Refresh'),
-        choices: [
-            {label: $L('Adaptive'), value: -1},
-            {label: $L('1s'), value: 1},
-            {label: $L('5s'), value: 5},
-            {label: $L('10s'), value: 10},
-            {label: $L('20s'), value: 20},
-            {label: $L('30s'), value: 30}
-        ],
-        modelProperty:'refreshInterval'
-    };
-    this.refreshModel = {
-        refreshInterval: -1
-    };
-    this.refreshModel.refreshInterval = Config.getInstance().getRefreshInterval();
     
     // --------------------------------------------------------------------------
     this.splitAttributes = {
@@ -76,7 +58,6 @@ PreferencesAssistant.prototype.setup = function(){
     this.controller.setupWidget('unitsSelector',  this.unitsAttributes, this.unitsModel);
     this.controller.setupWidget('posFormatSelector',  this.posFormatAttributes, this.posFormatModel);
     this.controller.setupWidget('splitCheckbox', this.splitAttributes, this.splitModel);
-    this.controller.setupWidget('refreshIntervalSelector', this.refreshIntervalAttributes, this.refreshModel);
 
     // Events
     //	Use controller.listen() and remember to .stopListening() in .cleanup() until
@@ -84,7 +65,6 @@ PreferencesAssistant.prototype.setup = function(){
     this.controller.listen('unitsSelector', Mojo.Event.propertyChange, this.selectorChanged.bind(this));
     this.controller.listen('posFormatSelector', Mojo.Event.propertyChange, this.posFormatChanged.bind(this));    
     this.controller.listen('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
-    this.controller.listen('refreshIntervalSelector', Mojo.Event.propertyChange, this.refreshIntervalChanged.bind(this));
 }
 
 PreferencesAssistant.prototype.selectorChanged = function(event) {
@@ -97,10 +77,6 @@ PreferencesAssistant.prototype.posFormatChanged = function(event) {
 
 PreferencesAssistant.prototype.splitFileChanged = function(event){
     Config.getInstance().setSplitExportFiles( event.value );
-}
-
-PreferencesAssistant.prototype.refreshIntervalChanged = function(event){
-    Config.getInstance().setRefreshInterval( this.refreshModel.refreshInterval );
 }
 
 PreferencesAssistant.prototype.cleanup = function(){

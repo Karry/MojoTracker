@@ -50,10 +50,8 @@ FirstAssistant.prototype.setup = function(){
 	);
 	
 	this.setScreenTimeout(1);
+	
 	// Start GPS
-	this.refreshInterval = this.config.getRefreshInterval();
-	this.computedInterval = this.refreshInterval > 0 ?
-			this.refreshInterval : 1;
 	this.startTracking();
     
     this.rot = 0;
@@ -118,7 +116,6 @@ FirstAssistant.prototype.trackInfoHandler = function(transaction, results){
     if ((results.rows) && (results.rows.length == 1)){
         myItem = results.rows.item(0);
         myItem.trackLengthFormated =  Config.getInstance().userDistance( myItem.trackLength , false);
-		//this.refreshTrackInfo();
         Mojo.Controller.stageController.pushScene("info",{item: myItem});
     }else{
 		this.showDialog("Error", 'DB returned bad result ['+results.rows.length+']');
@@ -210,34 +207,6 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
         
     // for debug...
     //$('statusmsg').innerHTML = event.heading +", " + event.errorCode;
-	
-	reset = false;
-	if (this.refreshInterval != this.config.getRefreshInterval()){
-		this.refreshInterval = this.config.getRefreshInterval();
-		this.computedInterval = this.refreshInterval > 0 ?
-				this.refreshInterval : 1;
-		reset = true;
-	}
-	if (this.refreshInterval == -1){
-		// compute adaptive refresh interval
-		if (mojotracker.getDistanceFromPrevious() < 5 && this.computedInterval < 30){
-			this.computedInterval += 1;
-			reset = true;
-		}
-		if (mojotracker.getDistanceFromPrevious() > 25 && this.computedInterval > 1){
-			// decrease interval when we are moving
-			this.computedInterval -= ((mojotracker.getDistanceFromPrevious() - 25) / 2);
-			if (this.computedInterval< 0)
-				this.computedInterval = 1;
-			reset = true;
-		}
-	}
-   	$('statusmsg').innerHTML = "profile "+this.refreshInterval+" interval "+this.computedInterval+" distance "+mojotracker.getDistanceFromPrevious();
-	
-	if (reset || this.computedInterval > 5){
-		this.trackingHandle.cancel();
-		setTimeout(this.startTracking.bind(this), this.computedInterval * 1000);
-	}
 
 	this.nullHandleCount = 0;	
 }
