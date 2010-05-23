@@ -15,11 +15,6 @@ function Config(){
     this.posFormat = this.posFormatCookie.get();
     if (this.posFormat === undefined)
         this.setPosFormat(Config.DEFAULT_POS_FORMAT);
-        
-    this.refreshCookie = new Mojo.Model.Cookie( 'refreshInterval' );
-    this.refreshInterval = this.refreshCookie.get();
-    if (this.refreshInterval === undefined)
-        this.setRefreshInterval(Config.DEFAULT_REFRESH_INTERVAL);
 		
     // TODO: make this variable configurable
     this.maxHorizAccuracy = 30;
@@ -43,17 +38,6 @@ Config.IMPERIAL_UNITS = 1;
 Config.DEFAULT_POS_FORMAT = 0;
 Config.GEOCACHING_POS_FORMAT = 1;
 Config.DEGREES_POS_FORMAT = 2;
-
-Config.DEFAULT_REFRESH_INTERVAL = 1;
-
-Config.prototype.getRefreshInterval = function(){
-	return this.refreshInterval;
-}
-
-Config.prototype.setRefreshInterval = function(interval){
-	this.refreshInterval = interval;
-	this.refreshCookie.put( interval );
-}
 
 Config.prototype.splitExportFiles = function(){
     return this.splitExportFile;
