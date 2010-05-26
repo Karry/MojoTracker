@@ -1,6 +1,15 @@
-<div class="palm-hasheader">
-
-    <div class="palm-group unlabeled">
+<div >
+	<div class="palm-page-header">
+		<div class="header-icon mojotracker-icon32"></div>	
+		<div class="header-text">
+			<span x-mojo-loc=''>Preferences</span>
+		</div>
+	</div>
+	
+    <div class="palm-group">
+		<div class="palm-group-title">
+			View
+		</div>		
         <div class="palm-list">
 
             <div class="palm-row first" x-mojo-tap-highlight="momentary">
@@ -9,16 +18,6 @@
                 </div>
             </div>
             
-            <div class="palm-row" style="height: 100px" x-mojo-tap-highlight="momentary">
-                <div class="palm-row-wrapper">
-                    
-		    <div x-mojo-element="CheckBox" id="splitCheckbox" style="float:left"></div>
-                    <div class="title" style="text-align:right;">Split exported files </div>
-                    <div class="palm-body-text" style="margin-top:0px">FileMgr service in version 0.5.1 can't write larger file than ~50kB.</div>
-                    
-                </div>
-            </div>
-
             <div class="palm-row last" x-mojo-tap-highlight="momentary">
                 <div class="palm-row-wrapper">
                     <div id="posFormatSelector" x-mojo-element="ListSelector"></div>
@@ -28,4 +27,21 @@
         </div>
     </div>
 
+    <div class="palm-group">
+		<div class="palm-group-title">
+			Export
+		</div>		
+        <div class="palm-list">
+
+            <div class="palm-row last" style="height: 100px" x-mojo-tap-highlight="momentary">
+                <div class="palm-row-wrapper">
+                    
+			    <div x-mojo-element="CheckBox" id="splitCheckbox" style="float:left"></div>
+                    <div class="title" style="text-align:right;">Split exported files </div>
+                    <div class="palm-body-text" style="margin-top:0px">FileMgr service in version 0.5.1 can't write larger file than ~50kB.</div>
+                </div>
+            </div>
+
+		</div>
+	</div>
 </div>
