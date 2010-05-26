@@ -16,6 +16,12 @@ function Config(){
     if (this.posFormat === undefined)
         this.setPosFormat(Config.DEFAULT_POS_FORMAT);
 		
+		
+    this.formatCookie = new Mojo.Model.Cookie( 'exportFormat' );
+    this.exportFormat = this.formatCookie.get();
+    if (this.exportFormat === undefined)
+        this.setExportFormat(Config.DEFAULT_EXPORT_FORMAT);		
+		
     // TODO: make this variable configurable
     this.maxHorizAccuracy = 30;
     this.maxVertAccuracy = 50;
@@ -34,6 +40,8 @@ Config.getInstance = function(){
 
 Config.METRIC_UNITS = 0;
 Config.IMPERIAL_UNITS = 1;
+
+Config.DEFAULT_EXPORT_FORMAT = "gpx"; 
 
 Config.DEFAULT_POS_FORMAT = 0;
 Config.GEOCACHING_POS_FORMAT = 1;
@@ -262,5 +270,14 @@ Config.prototype.userLongitude = function(degree){
 	    return (degree>0? "E":"W") +" "+ this.userDegreeLikeGeocaching( Math.abs(degree) );
 
     return this.userDegree( Math.abs(degree) ) + (degree>0? "E":"W");
+}
+
+Config.prototype.setExportFormat = function(format){
+	this.exportFormat = format;
+	this.formatCookie.put( format );
+}
+
+Config.prototype.getExportFormat = function(){
+	return this.exportFormat;
 }
 

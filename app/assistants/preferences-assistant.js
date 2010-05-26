@@ -40,6 +40,20 @@ PreferencesAssistant.prototype.setup = function(){
     this.posFormatModel.posFormat = Config.getInstance().getPosFormat();
     
     // --------------------------------------------------------------------------
+    this.exportFormatAttributes = {
+        label: $L('Data Format'),
+        choices: [
+            {label: $L('gpx'), value: "gpx"},
+            {label: $L('kml'), value: "kml"}
+        ],
+        modelProperty:'exportFormat'
+    };
+    this.exportFormatModel = {
+        exportFormat : Config.DEFAULT_EXPORT_FORMAT
+    };        
+    this.exportFormatModel.exportFormat = Config.getInstance().getExportFormat();
+
+    // --------------------------------------------------------------------------
     this.splitAttributes = {
             property: "value",
             trueValue: true,
@@ -57,6 +71,7 @@ PreferencesAssistant.prototype.setup = function(){
     //	Instantiate each selector
     this.controller.setupWidget('unitsSelector',  this.unitsAttributes, this.unitsModel);
     this.controller.setupWidget('posFormatSelector',  this.posFormatAttributes, this.posFormatModel);
+    this.controller.setupWidget('exportFormatSelector',  this.exportFormatAttributes, this.exportFormatModel);
     this.controller.setupWidget('splitCheckbox', this.splitAttributes, this.splitModel);
 
     // Events
@@ -64,6 +79,7 @@ PreferencesAssistant.prototype.setup = function(){
     //	the framework is updated to do that for itself. Helps with memory management
     this.controller.listen('unitsSelector', Mojo.Event.propertyChange, this.selectorChanged.bind(this));
     this.controller.listen('posFormatSelector', Mojo.Event.propertyChange, this.posFormatChanged.bind(this));    
+    this.controller.listen('exportFormatSelector', Mojo.Event.propertyChange, this.exportFormatChanged.bind(this));    
     this.controller.listen('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
 }
 
@@ -73,6 +89,10 @@ PreferencesAssistant.prototype.selectorChanged = function(event) {
 
 PreferencesAssistant.prototype.posFormatChanged = function(event) {
     Config.getInstance().setPosFormat( this.posFormatModel.posFormat );
+}
+
+PreferencesAssistant.prototype.exportFormatChanged = function(event) {
+    Config.getInstance().setExportFormat( this.exportFormatModel.exportFormat );
 }
 
 PreferencesAssistant.prototype.splitFileChanged = function(event){
