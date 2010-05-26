@@ -248,39 +248,73 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
     }
 
     try {
-	var msg2 = "<?xml version='1.0' encoding='ISO-8859-1'?>\n";
-	msg2 += "<gpx version='1.1'\n";
-	msg2 += "creator='MojoTracker - http://code.google.com/p/mojotracker/'\n";
-	msg2 += "xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n";
-	msg2 += "xmlns='http://www.topografix.com/GPX/1/1'\n";
-	msg2 += "xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd'>\n";
-	msg2 += "<trk>\n<name>" + name + "</name>\n<trkseg>\n";
-	for (var i = 0; i < result.rows.length; i++) {
-            try {
-                var row = result.rows.item(i);
-                msg2 += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
-                msg2 += "\t<time>" + row.time + "</time>\n";
-                msg2 += (row.altitude)?"\t<ele>" + row.altitude + "</ele>\n"                : "";
-                msg2 += (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n"         : "";
-                msg2 += (row.horizAccuracy>0)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n"  : "";
-                msg2 += (row.vertAccuracy>0)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n"    : "";
-                msg2 += "</trkpt>\n";
-                
-                if (i % 10 == 0){
-                    callback.progress(i, result.rows.length, "building xml data ("+i+")...");
-                }
-            } catch (e) {
-                Mojo.Log.error("Error 1");
-                Mojo.Log.error("Error 1: "+e);
-            }
-        }
-        msg2 += "</trkseg>\n</trk>\n";
-        msg2 += "</gpx>\n";
+		var data = "";
+		if (Config.getInstance().getExportFormat() == "kml"){
+			data += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+			data += "<kml xmlns=\"http://www.opengis.net/kml/2.2\"\n";
+			data += " xmlns:gx=\"http://www.google.com/kml/ext/2.2\"\n";
+			data += " xmlns:kml=\"http://www.opengis.net/kml/2.2\" \n";
+			data += " xmlns:atom=\"http://www.w3.org/2005/Atom\">\n";
+			data += "<Document><name>"+name+"</name><open>1</open><Style id=\"path0Style\"><LineStyle><color>ffff4040</color><width>6</width></LineStyle></Style>\n";
+			data += "<Folder><name>Tracks</name><Placemark><name>"+name+"</name><visibility>1</visibility><styleUrl>#path0Style</styleUrl><MultiGeometry><LineString><coordinates>\n";
+			
+			for (var i = 0; i < result.rows.length; i++) {
+				try {
+					var row = result.rows.item(i);
+					data += "" + row.lon + "," + row.lat + ",";
+					data += (row.altitude)?"" + row.altitude + " ": "0 ";
+					data += "\n";
+					
+					if (i % 10 == 0){
+						callback.progress(i, result.rows.length, "building xml data ("+i+")...");
+					}
+				} catch (e) {
+					Mojo.Log.error("Error 1");
+					Mojo.Log.error("Error 1: "+e);
+				}
+			}
+			
+			data += "</coordinates></LineString></MultiGeometry></Placemark></Folder></Document></kml>\n";
+			
+			name = name+".kml";
+		}else{
+			// gpx
+			data += "<?xml version='1.0' encoding='ISO-8859-1'?>\n";
+			data += "<gpx version='1.1'\n";
+			data += "creator='MojoTracker - http://code.google.com/p/mojotracker/'\n";
+			data += "xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n";
+			data += "xmlns='http://www.topografix.com/GPX/1/1'\n";
+			data += "xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd'>\n";
+			data += "<trk>\n<name>" + name + "</name>\n<trkseg>\n";
+			for (var i = 0; i < result.rows.length; i++) {
+				try {
+					var row = result.rows.item(i);
+					data += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
+					data += "\t<time>" + row.time + "</time>\n";
+					data += (row.altitude)?"\t<ele>" + row.altitude + "</ele>\n"                : "";
+					data += (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n"         : "";
+					data += (row.horizAccuracy>0)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n"  : "";
+					data += (row.vertAccuracy>0)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n"    : "";
+					data += "</trkpt>\n";
+					
+					if (i % 10 == 0){
+						callback.progress(i, result.rows.length, "building xml data ("+i+")...");
+					}
+				} catch (e) {
+					Mojo.Log.error("Error 1");
+					Mojo.Log.error("Error 1: "+e);
+				}
+			}
+			data += "</trkseg>\n</trk>\n";
+			data += "</gpx>\n";
+
+			name = name+".gpx";
+		}
 
         callback.progress(1,1, "xml data built...");
 
         setTimeout(this.writeGPXFile.bind(this), 500,
-                   controller, name, msg2,
+                   controller, name, data,
                    callback, 0);
     } catch (e) {
         Mojo.Log.error(e);
@@ -303,10 +337,10 @@ Mojotracker.prototype.writeGPXFile = function(controller, name, content, callbac
     
     if (largeFile && Config.getInstance().splitExportFiles()){
         from = 0;
-        fileName = name +".gpx."+this.fillZeros(((offset / limit)+1));
+        fileName = name +"."+this.fillZeros(((offset / limit)+1));
     }else{
         from = offset;
-        fileName = name + ".gpx";
+        fileName = name ;
     }
     callback.progress(offset, content.length, "Saving data ("+offset+" / "+content.length+")...");
     
