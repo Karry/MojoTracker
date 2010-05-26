@@ -50,7 +50,7 @@ TracksAssistant.prototype.setup = function(){
 
     // load tracks
     try{
-        $('trackHeadermsg').update('loading...');
+        $('trackHeadermsg').update('Loading...');
         mojotracker = Mojotracker.getInstance();
         mojotracker.getTrackNames( this.createTrackNamesHandler.bind(this), this.tableErrorHandler.bind(this) );
     }catch (e){
@@ -196,7 +196,7 @@ TracksAssistant.prototype.updateHeader = function(){
         if (this.trackCount == 0)
             $('trackHeadermsg').update('base is empty');
         else
-            $('trackHeadermsg').update('loaded '+this.trackCount+' item'+((this.trackCount>1)?'s':''));
+            $('trackHeadermsg').update(''+this.trackCount+' Saved Track'+((this.trackCount>1)?'s':''));
 
 }
 

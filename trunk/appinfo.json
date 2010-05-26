@@ -6,6 +6,6 @@
 	"type": "web",
 	"main": "index.html",
 	"title": "MojoTracker",
-	"icon": "images/icon.png",
+	"icon": "images/icon64.png",
     "splashBackground":"images/screen.png"
 }
