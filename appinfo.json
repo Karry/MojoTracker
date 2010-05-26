@@ -7,5 +7,7 @@
 	"main": "index.html",
 	"title": "MojoTracker",
 	"icon": "images/icon64.png",
+    "miniicon":"images/icon32.png",
+    "smallicon":"images/icon32.png",
     "splashBackground":"images/screen.png"
 }
