@@ -9,7 +9,7 @@ This page contains some tips for applications that you can use with MojoTracker.
 
 Homepage: [http://www.gpsbabel.org/ www.gpsbabel.org]
 
- * convert gpx file from gpx to kml:
+ * convert gps file from gpx to kml:
 {{{
 gpsbabel -rtw -i gpx -f ./input.gpx -o kml -F output.kml
 }}}
