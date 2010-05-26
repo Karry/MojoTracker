@@ -7,7 +7,7 @@ This page contains some tips for applications that you can use with MojoTracker.
 
 = Babel - Universal GPS data format converter =
 
-homepage: [http://www.gpsbabel.org/ www.gpsbabel.org]
+Homepage: [http://www.gpsbabel.org/ www.gpsbabel.org]
 
  * convert gpx file from gpx to kml:
 {{{
@@ -25,3 +25,9 @@ gpsbabel -rtw -i kml -f ./input.kml -o gpx -F output.pgx
 zcat data.kmz > data.kml
 cat data.kml | gzip > data.kmz
 }}}
+
+= Marble - Amazing KDE application for viewing maps and gps data = 
+
+Homepage: [http://edu.kde.org/marble/ edu.kde.org/marble]
+
+<a href="http://mojotracker.googlecode.com/svn/wiki/images/apps/marble.png" ><img src="http://mojotracker.googlecode.com/svn/wiki/images/apps/marble.png"   width="600" alt="Marble with imported gps file"       /></a>
