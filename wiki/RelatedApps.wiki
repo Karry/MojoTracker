@@ -9,19 +9,18 @@ This page contains some tips for applications that you can use with MojoTracker.
 
 homepage: [http://www.gpsbabel.org/ www.gpsbabel.org]
 
-* convert gpx file from gpx to kml:
+ * convert gpx file from gpx to kml:
 {{{
 gpsbabel -rtw -i gpx -f ./input.gpx -o kml -F output.kml
 }}}
 
-* and back from kml to gpx:
+ * and back from kml to gpx:
 {{{
 gpsbabel -rtw -i kml -f ./input.kml -o gpx -F output.pgx
 }}}
 
 
-
-* conversion from and to kml/kmz (kmz is simply gziped kml data)
+ * conversion from and to kml/kmz (kmz is simply gziped kml data)
 {{{
 zcat data.kmz > data.kml
 cat data.kml | gzip > data.kmz
