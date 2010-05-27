@@ -1,11 +1,6 @@
-#summary One-sentence summary of this page.
+#summary This page contains some tips for applications that you can use with MojoTracker.
 
-= Introduction =
-
-This page contains some tips for applications that you can use with MojoTracker.
-
-
-= Babel - Universal GPS data format converter =
+= GPS Babel - Universal GPS data format converter =
 
 Homepage: [http://www.gpsbabel.org/ www.gpsbabel.org]
 
