@@ -14,14 +14,9 @@ We want add some configuration choices:
  * Refresh frequency
  * Start saving track at startup
  * Accuracy value for warning (show this value red)
+ * *Maximum accuracy for export*
  * ...
 
-
-== Show saved track detail ==
-
-Now, we show only track name, length and nodes count. It will be nice add page with track detail. See this outline:
-
-<a href="http://mojotracker.googlecode.com/svn/wiki/images/ideas/trackdetail.jpg"><img src="http://mojotracker.googlecode.com/svn/wiki/images/ideas/trackdetail.jpg" alt="Track detail outline" width="400" /></a>
 
 == Write own file service ==
 
@@ -30,3 +25,9 @@ Mojo applications can't access files on internal storage directly. It must use i
 This service is little bit buggy. Main developer of this service don't want release it as open source, so we can't fix it!
 
 We really need *open source* file service...
+
+== ~~Show saved track detail (done)~~ ==
+
+Now, we show only track name, length and nodes count. It will be nice add page with track detail. See this outline:
+
+<a href="http://mojotracker.googlecode.com/svn/wiki/images/ideas/trackdetail.jpg"><img src="http://mojotracker.googlecode.com/svn/wiki/images/ideas/trackdetail.jpg" alt="Track detail outline" width="200" /></a>
