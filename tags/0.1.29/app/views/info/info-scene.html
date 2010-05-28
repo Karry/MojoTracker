@@ -1,0 +1,89 @@
+<div id="main" >
+	<div class="palm-page-header">
+		<div class="header-icon mojotracker-icon32"></div>	
+		<div class="header-text">
+			<span x-mojo-loc=''>Track <span id="currentTrack" >&nbsp;</span></span>
+		</div>
+	</div>	
+	
+	<div class="palm-group">
+		<div class="palm-group-title">
+			Information
+		</div>
+		
+		<div class="tracker-line " style="">
+			<div class="tracker-line-header">Start</div>
+            <div class="tracker-value">
+                <span id="startTime" >&nbsp;</span>
+            </div>
+		</div>		
+		
+		<div class="tracker-line " style="">
+			<div class="tracker-line-header">End</div>
+            <div class="tracker-value">
+                <span id="endTime" >&nbsp;</span>
+            </div>
+		</div>		
+		
+		<div class="tracker-line indent" >
+            <div style="position:absolute; left:0%; width:40%">
+                <div class="tracker-line-header">Track length</div>
+                <div class="tracker-value">
+                    <div id="trackLength" >&nbsp;</div>
+                </div>
+            </div>
+            <div style="position:absolute; left:40%; width:44%" >
+                <div class="tracker-line-header">Maximum speed</div>
+                <div class="tracker-value">
+                    <div id="maxSpeed" >&nbsp;</div>
+                </div>
+            </div>
+            <div style="position:absolute; left:85%; width:20%">
+                <div class="tracker-line-header">Nodes</div>
+                <div class="tracker-value">
+                    <div id="tracknum" >&nbsp;</div>
+                </div>
+            </div>
+            &nbsp;
+		</div>
+
+		<div class="tracker-line indent" style="">
+			<div class="tracker-line-header">Minimum / maximum altitude</div>
+            <div class="tracker-value">
+                <span id="minAltitude" >&nbsp;</span> /
+                <span id="maxAltitude" >&nbsp;</span>
+            </div>
+		</div>
+		
+    </div>
+
+
+	<div class="palm-list">
+		<div class="palm-row last">
+			<div class="palm-row-wrapper">
+			<div class="title">
+				Altitude
+			</div>
+			</div>
+		</div>
+	</div>
+
+    <canvas id="altitudeCanvas" width="320" height="200" >
+		Your browser does not support HTML5 Canvas.
+    </canvas>
+
+	<div class="palm-list">
+		<div class="palm-row last">
+			<div class="palm-row-wrapper">
+			<div class="title">
+				Speed
+			</div>
+			</div>
+		</div>
+	</div>
+
+    <canvas id="speedCanvas" width="320" height="200" >
+		Your browser does not support HTML5 Canvas.
+    </canvas>
+
+</div>
