@@ -26,6 +26,13 @@ cat data.kml | gzip > data.kmz
 gpsbabel -i gpx -f track1.gpx -f track2.gpx -o gpx -F merged.gpx
 }}}
 
+ * discard points with high horizontal and/or vertical inaccuracy (gpx format only, kml format don't contains hdop/vdop values)
+{{{
+gpsbabel -i gpx -f in.gpx -x discard,hdop=30,vdop=60,hdopandvdop -o gpx -F out.gpx
+gpsbabel -i gpx -f in.gpx -x discard,hdop=30,vdop=60,hdoporvdop  -o gpx -F out.gpx
+}}}
+
+
 = Marble - Amazing KDE application for viewing maps and gps data = 
 
 Homepage: [http://edu.kde.org/marble/ edu.kde.org/marble]
