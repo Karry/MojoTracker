@@ -21,6 +21,11 @@ zcat data.kmz > data.kml
 cat data.kml | gzip > data.kmz
 }}}
 
+ * merge two (or more) tracks into one file
+{{{
+gpsbabel -i gpx -f track1.gpx -f track2.gpx -o gpx -F merged.gpx
+}}}
+
 = Marble - Amazing KDE application for viewing maps and gps data = 
 
 Homepage: [http://edu.kde.org/marble/ edu.kde.org/marble]
