@@ -10,6 +10,6 @@
 
   * Connect your phone to PC and copy exported files from root of internal memory. 
 
-  * If track is splited to more files ( G*.gpx.001, G*.gpx.002...) merge it with your favorite file manager (for example Total Commander for Windows or Krusader for Linux can merge files).
+  * If track is splited to more files ( `G*.gpx.001`, `G*.gpx.002`...) merge it with your favorite file manager (for example Total Commander for Windows or Krusader for Linux can merge files).
 
   
