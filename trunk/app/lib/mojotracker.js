@@ -258,11 +258,18 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
 			data += "<Document><name>"+name+"</name><open>1</open><Style id=\"path0Style\"><LineStyle><color>ffff4040</color><width>6</width></LineStyle></Style>\n";
 			data += "<Folder><name>Tracks</name><Placemark><name>"+name+"</name><visibility>1</visibility><styleUrl>#path0Style</styleUrl><MultiGeometry><LineString><coordinates>\n";
 			
+			var lastAlt = 0;
 			for (var i = 0; i < result.rows.length; i++) {
 				try {
 					var row = result.rows.item(i);
 					data += "" + row.lon + "," + row.lat + ",";
-					data += (row.altitude)?"" + row.altitude + " ": "0 ";
+					if ((!row.altitude) || (row.altitude == "null")){
+						data += ""+lastAlt;
+					}else{
+						data += "" + row.altitude + " ";
+						lastAlt = row.altitude;
+					}
+					
 					data += "\n";
 					
 					if (i % 10 == 0){
@@ -291,7 +298,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
 					var row = result.rows.item(i);
 					data += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
 					data += "\t<time>" + row.time + "</time>\n";
-					data += (row.altitude)?"\t<ele>" + row.altitude + "</ele>\n"                : "";
+					data += ((row.altitude) && (row.altitude != "null"))?"\t<ele>" + row.altitude + "</ele>\n"                : "";
 					data += (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n"         : "";
 					data += (row.horizAccuracy>0)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n"  : "";
 					data += (row.vertAccuracy>0)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n"    : "";
