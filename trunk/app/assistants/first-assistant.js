@@ -12,6 +12,10 @@ FirstAssistant.prototype.setup = function(){
 	/* add event handlers to listen to events from widgets */
 	// set the initial total and display it
 
+    // Translate view
+	//Mojo.Locale.set("cs");
+    $$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });	
+
 	this.config = Config.getInstance();
 		
 	// TODO: add ability start tracking automaticaly
@@ -42,9 +46,9 @@ FirstAssistant.prototype.setup = function(){
 		visible: true,
 		items:
 		[
-		    { label: "Saved tracks", command: "tracks" },
-		    { label: "Preferences", command: Mojo.Menu.prefsCmd },
-		    { label: "About", command: "about" }
+		    { label: $L("Saved tracks"), command: "tracks" },
+		    { label: $L("Preferences"), command: Mojo.Menu.prefsCmd },
+		    { label: $L("About"), command: "about" }
 		]
 	    }
 	);
@@ -59,6 +63,7 @@ FirstAssistant.prototype.setup = function(){
     
     this.rot = 0;
     //setTimeout(this.testCompas.bind(this), 100);
+		
 }
 
 
