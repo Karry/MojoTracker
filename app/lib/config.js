@@ -28,6 +28,9 @@ function Config(){
     this.updateTimeout = 30; // in second
     this.ignoredCount = 7; // num. of nodes at beginning for skip
     this.maxGraphSpace = 3*60; // [seconds], maximum space between continuous graph values
+	
+	// Mojo.Locale.getCurrentLocale();
+	// Mojo.Locale.set("en_us");
 }
 
 Config.instance = null;
