@@ -49,6 +49,9 @@ FirstAssistant.prototype.setup = function(){
 	    }
 	);
 	
+	// listen on location tap
+	this.controller.listen('location', Mojo.Event.tap, this.handleLocTap.bind(this));
+	
 	this.setScreenTimeout(1);
 	
 	// Start GPS
@@ -122,6 +125,25 @@ FirstAssistant.prototype.trackInfoHandler = function(transaction, results){
     }	
 }
 
+FirstAssistant.prototype.handleLocTap = function(event){
+	try{
+		var locPopupModel;
+		locPopupModel = [
+			{label: $L('Copy to clipboard'), command: 'clipboard'},
+			{label: $L('Share via SMS'), command: 'sms'},
+			{label: $L('Share via email'), command: 'email'}
+		];
+		
+		sendPosition = this.sendPosition.bind(this);
+		this.controller.popupSubmenu({
+			onChoose: sendPosition,
+			placeNear: event.target,
+			items: locPopupModel
+		});
+	}catch(e){
+		this.showDialog("Error", Object.toJSON(e));
+	}
+}
 
 FirstAssistant.prototype.closeTrack = function(){
 	mojotracker = Mojotracker.getInstance();
@@ -144,6 +166,10 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
 	horizAccuracy = event.horizAccuracy.toFixed(0);
 	vertAccuracy = event.vertAccuracy.toFixed(0);
 	direction = event.heading.toFixed(0);
+	
+	this.lat = lat;
+	this.lon = lon;
+	this.horizAccuracy = horizAccuracy;
 	
 	// fix bad values from gps
 	if (alt < -200 || (alt == 0 && vertAccuracy == 0))
@@ -336,6 +362,40 @@ FirstAssistant.prototype.cleanup = function(event){
 	this.setScreenTimeout(2);
 }
 
+FirstAssistant.prototype.sendPosition = function(method){
+	
+	msg = this.config.userLatitude( this.lat ) + " "
+		+ this.config.userLongitude( this.lon ) +" (+-"
+		+ this.config.userSmallDistance(this.horizAccuracy, false) +")";
+		
+	if (method == "sms"){
+		this.controller.serviceRequest('palm://com.palm.applicationManager', {
+			method:'open',
+			parameters: {
+				id: 'com.palm.app.messaging',
+				params: {
+					messageText: msg
+				}
+			}
+		});
+	}
+	if (method == "email"){
+		this.controller.serviceRequest('palm://com.palm.applicationManager', {
+                method: 'launch',
+                parameters:  {
+                    id: 'com.palm.app.email',
+                    params: {
+                        summary: 'My current possition',
+                        text: msg
+                    }
+                }
+            });
+	}
+	if (method == "clipboard"){
+		Mojo.Controller.stageController.setClipboard(msg);	
+	}
+}
+
 FirstAssistant.prototype.formatDate = function(dateobj, formattype)
 {
     this.config = Config.getInstance();
@@ -362,4 +422,23 @@ FirstAssistant.prototype.formatDate = function(dateobj, formattype)
         strRes = this.config.formatDateTime(dateobj);
 	}
 	return strRes
+}
+
+FirstAssistant.prototype.showDialog = function(title, message){
+
+    uncancellableAlertAttributes = {
+        //	preventCancel
+        // requires the user to push a button to close the dialog, instead of being about to cancel out
+        preventCancel:false,
+        onChoose: function(value) {
+                    //this.outputDisplay.innerHTML = $L("Alert result = ") + value;
+            },
+        title: title,
+        message: message,
+        choices:[
+            {label: $L('Ok'), value:'dismissed', type:'color'}
+        ]
+    };
+
+    this.controller.showAlertDialog(uncancellableAlertAttributes);
 }
