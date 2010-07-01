@@ -4,7 +4,10 @@ function InfoAssistant(params) {
 	this.item = params.item;
 }
 
-InfoAssistant.prototype.setup = function(){	
+InfoAssistant.prototype.setup = function(){
+    // Translate view
+    $$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });
+	
 	this.speedData = new Array();
 	this.speedXAxis = new Array();
 	this.speedYAxis = new Array();

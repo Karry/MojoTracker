@@ -4,6 +4,8 @@ PreferencesAssistant = function(){
 }
 
 PreferencesAssistant.prototype.setup = function(){
+    // Translate view
+    $$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });
 
     // Define models for each selctor
     this.unitsAttributes = {
@@ -54,6 +56,20 @@ PreferencesAssistant.prototype.setup = function(){
     this.exportFormatModel.exportFormat = Config.getInstance().getExportFormat();
 
     // --------------------------------------------------------------------------
+    this.localeAttributes = {
+        label: $L('Language'),
+        choices: [
+            {label: $L('English'), value: "en"},
+            {label: $L('Czech'), value: "cs"}
+        ],
+        modelProperty:'locale'
+    };
+    this.localeModel = {
+        locale : 'en'
+    };        
+    this.localeModel.locale = Config.getInstance().getLocale();
+
+    // --------------------------------------------------------------------------
     this.splitAttributes = {
             property: "value",
             trueValue: true,
@@ -73,6 +89,7 @@ PreferencesAssistant.prototype.setup = function(){
     this.controller.setupWidget('posFormatSelector',  this.posFormatAttributes, this.posFormatModel);
     this.controller.setupWidget('exportFormatSelector',  this.exportFormatAttributes, this.exportFormatModel);
     this.controller.setupWidget('splitCheckbox', this.splitAttributes, this.splitModel);
+    this.controller.setupWidget('localeSelector',  this.localeAttributes, this.localeModel);
 
     // Events
     //	Use controller.listen() and remember to .stopListening() in .cleanup() until
@@ -81,6 +98,7 @@ PreferencesAssistant.prototype.setup = function(){
     this.controller.listen('posFormatSelector', Mojo.Event.propertyChange, this.posFormatChanged.bind(this));    
     this.controller.listen('exportFormatSelector', Mojo.Event.propertyChange, this.exportFormatChanged.bind(this));    
     this.controller.listen('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
+    this.controller.listen('localeSelector', Mojo.Event.propertyChange, this.localeChanged.bind(this));    
 }
 
 PreferencesAssistant.prototype.selectorChanged = function(event) {
@@ -93,6 +111,10 @@ PreferencesAssistant.prototype.posFormatChanged = function(event) {
 
 PreferencesAssistant.prototype.exportFormatChanged = function(event) {
     Config.getInstance().setExportFormat( this.exportFormatModel.exportFormat );
+}
+
+PreferencesAssistant.prototype.localeChanged = function(event) {
+    Config.getInstance().setLocale( this.localeModel.locale );
 }
 
 PreferencesAssistant.prototype.splitFileChanged = function(event){

@@ -29,8 +29,12 @@ function Config(){
     this.ignoredCount = 7; // num. of nodes at beginning for skip
     this.maxGraphSpace = 3*60; // [seconds], maximum space between continuous graph values
 	
-	// Mojo.Locale.getCurrentLocale();
-	// Mojo.Locale.set("en_us");
+	
+    this.localeCookie = new Mojo.Model.Cookie( 'locale' );
+    this.locale = this.localeCookie.get();
+    if (this.locale === undefined)
+        this.locale = Mojo.Locale.getCurrentLocale() ;
+	this.setLocale( this.locale );
 }
 
 Config.instance = null;
@@ -84,6 +88,21 @@ Config.prototype.setUnits = function( units ){
     this.units = units;
     this.unitsCookie.put( units );
 }
+
+Config.prototype.getLocale = function(){
+	return this.locale;
+}
+
+Config.prototype.setLocale = function( locale ){
+	this.locale = locale;
+	this.localeCookie.put(locale);
+	try{
+		Mojo.Locale.set(this.locale);
+	}catch(e){
+		Mojo.Log.error("Error "+Object.toJSON(e));
+	}
+}
+
 
 Config.prototype.getUnits = function(){
     return this.units;
