@@ -13,10 +13,10 @@ FirstAssistant.prototype.setup = function(){
 	// set the initial total and display it
 
     // Translate view
-	//Mojo.Locale.set("cs");
+	this.config = Config.getInstance();
+	
     $$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });	
 
-	this.config = Config.getInstance();
 		
 	// TODO: add ability start tracking automaticaly
 	this.saveTrack = false;

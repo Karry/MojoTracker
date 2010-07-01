@@ -10,6 +10,8 @@ TracksAssistant.getInstance = function(){
 }
 
 TracksAssistant.prototype.setup = function(){
+    // Translate view
+    $$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });
 
     TracksAssistant.instance = this;
 
