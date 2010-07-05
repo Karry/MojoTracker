@@ -29,5 +29,7 @@
     "wpntDialog.title": "Title",
     'wpntDialogTitleLabel': 'Title',
     'wpntDialogDesctiptionLabel': 'Desctiption',
-    'wpntDialogSave': 'Save'
+    'wpntDialogSave': 'Save',
+    
+    "info.waypoints" : "Waypoints"
 }
