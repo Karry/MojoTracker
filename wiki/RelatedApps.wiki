@@ -11,7 +11,7 @@ gpsbabel -rtw -i gpx -f ./input.gpx -o kml -F output.kml
 
  * and back from kml to gpx:
 {{{
-gpsbabel -rtw -i kml -f ./input.kml -o gpx -F output.pgx
+gpsbabel -rtw -i kml -f ./input.kml -o gpx -F output.gpx
 }}}
 
 
