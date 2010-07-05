@@ -21,7 +21,7 @@ We want add some configuration choices:
 
 Add button for add waypoint to current track. It would be possible specify name and comment (and photo or sound record?).
 
-== Make MojoTracker localizable ==
+== ~~Make MojoTracker localizable~~ ==
 
 Many texts are directly in source code. It would be nice move it to special locale file (json?) and make MojoTracker localizable.
 
