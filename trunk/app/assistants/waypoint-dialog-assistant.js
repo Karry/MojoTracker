@@ -1,12 +1,13 @@
 
 
-function WaypointDialogAssistant(controller, mojotracker, config, lat, lon, strUTC, errorHandler){
+function WaypointDialogAssistant(controller, mojotracker, config, lat, lon, alt, strUTC, errorHandler){
 
     this.config = config;
     this.mojotracker = mojotracker;
     this.controller= controller;
     this.lat = lat;
     this.lon = lon;
+    this.alt = alt;
     this.strUTC = strUTC;
     this.waypoint = {
         title: "",
@@ -65,6 +66,7 @@ WaypointDialogAssistant.prototype.handleSave = function(){
                                         this.waypoint.description,
                                         this.lat,
                                         this.lon,
+                                        this.alt,
                                         this.strUTC,
                                         this.errorHandler);
         

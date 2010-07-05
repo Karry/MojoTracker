@@ -58,6 +58,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
 	var strSQL2 = 'CREATE TABLE `W' + this.tracename + '` ('
         + 'lat TEXT NOT NULL , '
         + 'lon TEXT NOT NULL , '
+        + 'alt INT NULL , '
         + 'time TEXT NOT NULL , '
         + 'title TEXT NOT NULL , '
         + 'description TEXT NOT NULL '
@@ -124,10 +125,10 @@ Mojotracker.prototype.getDistanceFromPrevious = function(){
 	return this.distanceFromPrevious;	
 }
 
-Mojotracker.prototype.addWaypoint = function(title, description, lat, lon, strUTC, errorHandler ){
+Mojotracker.prototype.addWaypoint = function(title, description, lat, lon, alt, strUTC, errorHandler ){
     var strSQL = "INSERT INTO `W" + this.tracename + "` "
-        + "(lat, lon, time, title, description) "
-        + "VALUES ('" + lat + "','" + lon + "', "										
+        + "(lat, lon, alt, time, title, description) "
+        + "VALUES ('" + lat + "','" + lon + "','" + alt + "', "
         + "'" + strUTC + "', ?, ?); GO;";
 		
 	//errorHandler(null, {code: 1, message:strSQL});
@@ -260,17 +261,33 @@ Mojotracker.prototype.createRecordDataHandler = function(transaction, results) {
 }
 
 Mojotracker.prototype.storeGpx = function(controller, name, callback) {
-    var strSQL = "SELECT * FROM `" + name + "` ; GO;";
+    
+    this.getWaypoints(  name,
+						function(transaction, results){
+							this.storeGpx2(controller, name, callback, results.rows);
+						}.bind(this),
+						function(transaction, error){
+							if (error.code != 1){ // no such table
+								callback.errorHandler( error );
+								return;
+							}
+							this.storeGpx2(controller, name, callback, []);
+						}.bind(this) );	
+}
+
+Mojotracker.prototype.storeGpx2 = function(controller, name, callback, waypoints) {
+	var strSQL = "SELECT * FROM `" + name + "` ; GO;";
     
     this.executeSQL(strSQL,[], 
             function(tx, result) {
-                this.createGPXContent(controller, result, name, callback);
+                this.createGPXContent(controller, result, waypoints, name, callback);
             }.bind(this),
             function(tx, error) {
                 callback.errorHandler(error);
             }.bind(this)                    
         );
 }
+
 
 Mojotracker.prototype.timeoutOccured = function(strUTC){
 	var strSQL = "INSERT INTO `timeouts` VALUES ('"+strUTC+"'; GO;";
@@ -281,7 +298,7 @@ Mojotracker.prototype.timeoutOccured = function(strUTC){
         );
 }
 
-Mojotracker.prototype.createGPXContent = function(controller, result, name, callback) {
+Mojotracker.prototype.createGPXContent = function(controller, result, waypoints, name, callback) {
     if (!result.rows){
         callback.errorHandler( $L("BAD base result"));
         Mojo.Log.error("BAD base result");
@@ -297,6 +314,24 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
 			data += " xmlns:kml=\"http://www.opengis.net/kml/2.2\" \n";
 			data += " xmlns:atom=\"http://www.w3.org/2005/Atom\">\n";
 			data += "<Document><name>"+name+"</name><open>1</open><Style id=\"path0Style\"><LineStyle><color>ffff4040</color><width>6</width></LineStyle></Style>\n";
+			data += "  <StyleMap id=\"waypoint\"><IconStyle><scale>1.2</scale><Icon><href>http://maps.google.com/mapfiles/kml/pal4/icon61.png</href></Icon></IconStyle></StyleMap>\n";
+			
+			data += "<Folder><name>Waypoints</name><visibility>1</visibility><open>1</open>\n";
+			for (var i = 0; i < waypoints.length; i++) {
+				try{
+					var row = waypoints.item(i);
+					if ((!row.alt) || (row.alt == "null"))
+						row.alt = 0;
+					data += "<Placemark>\n<name>"+ row.title.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +"</name>\n<visibility>1</visibility>\n"
+					data += "<styleUrl>#waypoint</styleUrl>\n";
+					data += "<description>"+ row.description.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +"</description>\n";
+					data += "<Point><coordinates>"+row.lon+","+row.lat+","+row.alt+"</coordinates></Point>\n</Placemark>\n";
+				}catch(e){
+					Mojo.Log.error("Error 1.2: "+e);
+				}
+			}
+			data += "</Folder>\n";
+			
 			data += "<Folder><name>Tracks</name><Placemark><name>"+name+"</name><visibility>1</visibility><styleUrl>#path0Style</styleUrl><MultiGeometry><LineString><coordinates>\n";
 			
 			var lastAlt = 0;
@@ -318,7 +353,6 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
                             .interpolate({progress: i }));
 					}
 				} catch (e) {
-					Mojo.Log.error("Error 1");
 					Mojo.Log.error("Error 1: "+e);
 				}
 			}
@@ -334,6 +368,27 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
 			data += "xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n";
 			data += "xmlns='http://www.topografix.com/GPX/1/1'\n";
 			data += "xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd'>\n";
+			
+			for (var i = 0; i < waypoints.length; i++) {
+				try{
+					var row = waypoints.item(i);
+						
+					data += "<wpt lat=\""+row.lat+"\" lon=\""+row.lon+"\">\n";
+					if ((row.alt) && (row.alt != "null"))
+						data += "\t<ele>"+row.alt+"</ele>\n";
+					
+					description = row.description.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+					data += "\t<name>"+ row.title.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +"</name>\n";
+					data += "\t<cmt>"+description+"</cmt>\n";
+					data += "\t<desc>"+description+"</desc>\n";
+					data += "\t<time>" + row.time + "</time>\n";
+					data += "</wpt>\n";
+
+				}catch(e){
+					Mojo.Log.error("Error 1.2: "+e);
+				}
+			}
+			
 			data += "<trk>\n<name>" + name + "</name>\n<trkseg>\n";
 			for (var i = 0; i < result.rows.length; i++) {
 				try {

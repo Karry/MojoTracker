@@ -44,6 +44,7 @@ FirstAssistant.prototype.setup = function(){
 																					  Config.getInstance(),
 																					  this.lat,
 																					  this.lon,
+																					  this.alt,
 																					  this.formatDate(new Date(), 2),
 																					  this.tableErrorHandler.bind(this));
 										
@@ -191,6 +192,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event){
 	
 	this.lat = lat;
 	this.lon = lon;
+	this.alt = alt;
 	this.horizAccuracy = horizAccuracy;
 	
 	// fix bad values from gps
