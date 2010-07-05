@@ -1,13 +1,17 @@
 
 
-function WaypointDialogAssistant(controller, mojotracker, lat, lon, strUTC, errorHandler){
+function WaypointDialogAssistant(controller, mojotracker, config, lat, lon, strUTC, errorHandler){
 
+    this.config = config;
     this.mojotracker = mojotracker;
     this.controller= controller;
     this.lat = lat;
     this.lon = lon;
     this.strUTC = strUTC;
-    this.waypoint = {};
+    this.waypoint = {
+        title: "",
+        description: ""
+        };
     this.errorHandler = errorHandler;
 }
 
@@ -15,6 +19,7 @@ WaypointDialogAssistant.prototype.setup = function(widget){
     this.widget = widget;
 
     $('title').innerHTML = $L('wpntDialog.title');
+    $('pos').innerHTML = this.config.userLatitude( this.lat ) +" "+ this.config.userLongitude( this.lon );
     $('wpntDialogTitleLabel').innerHTML = $L('wpntDialogTitleLabel');
     $('wpntDialogDesctiptionLabel').innerHTML = $L('wpntDialogDesctiptionLabel');
     $('wpntDialogSave').innerHTML = $L('wpntDialogSave');
@@ -52,13 +57,19 @@ WaypointDialogAssistant.prototype.close = function(){
 }
 
 WaypointDialogAssistant.prototype.handleSave = function(){
-    // SAVE WAYPOINT TO TRACK...
-    this.mojotracker.addWaypoint(this.waypoint.title,
-                                          this.waypoint.description,
-                                          this.lat,
-                                          this.lon,
-                                          this.strUTC,
-                                          this.errorHandler);
-    
-    this.widget.mojo.close();
+    try{
+        if (this.waypoint.title == "")
+            return;
+        // SAVE WAYPOINT TO TRACK...
+        this.mojotracker.addWaypoint(   this.waypoint.title,
+                                        this.waypoint.description,
+                                        this.lat,
+                                        this.lon,
+                                        this.strUTC,
+                                        this.errorHandler);
+        
+        this.widget.mojo.close();
+    }catch(e){
+        this.errorHandler(null, e);
+    }
 }

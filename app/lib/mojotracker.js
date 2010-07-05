@@ -11,7 +11,7 @@ function Mojotracker(){
 	this.distanceFromPrevious = 0;
 	
 	strSQL = "CREATE TABLE IF NOT EXISTS `timeouts` ( time TEXT NOT NULL )";
-	this.executeSQL(strSQL,
+	this.executeSQL(strSQL,[], 
             function(tx, result) {}.bind(this),
             function(tx, error) {}.bind(this)
         );    
@@ -55,12 +55,20 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
         + 'vertAccuracy INT NOT NULL DEFAULT -1,'
         + 'distanceFromPrev DOUBLE NOT NULL DEFAULT 0'
         +'); GO;';
+	var strSQL2 = 'CREATE TABLE `W' + this.tracename + '` ('
+        + 'lat TEXT NOT NULL , '
+        + 'lon TEXT NOT NULL , '
+        + 'time TEXT NOT NULL , '
+        + 'title TEXT NOT NULL , '
+        + 'description TEXT NOT NULL '
+        +'); GO;';
     this.db.transaction
     ( 
             (function (transaction)
             {
                     transaction.executeSql('DROP TABLE IF EXISTS `' + this.tracename + '`; GO;', []);
                     transaction.executeSql(strSQL, [], this.createTableDataHandler.bind(this), errorHandler);
+                    transaction.executeSql(strSQL2, [], this.createTableDataHandler.bind(this), errorHandler);
             } ).bind(this) 
     );
     this.total = 0;
@@ -86,7 +94,7 @@ Mojotracker.prototype.getTrackLength = function(){
 Mojotracker.prototype.getAltitudeProfile = function(item, callback){
     var strSQL = "SELECT `time`, `altitude`, `vertAccuracy` FROM `" + item.name + "` WHERE `altitude` != 'nothing' AND `altitude` != 'null'; GO;";
     
-    this.executeSQL(strSQL,
+    this.executeSQL(strSQL,[], 
             function(tx, result) {
                 //this.drawAltitudeProfile1(canvas, result, item, callback);
                 callback.handleResult(result);
@@ -101,7 +109,7 @@ Mojotracker.prototype.getVelocityProfile = function(item, callback){
 
     var strSQL = "SELECT `time`, `velocity` FROM `" + item.name + "` WHERE `velocity` >= 0; GO;";
     
-    this.executeSQL(strSQL,
+    this.executeSQL(strSQL,[], 
             function(tx, result) {
                 //this.drawAltitudeProfile1(canvas, result, item, callback);
                 callback.handleResult(result);
@@ -117,6 +125,13 @@ Mojotracker.prototype.getDistanceFromPrevious = function(){
 }
 
 Mojotracker.prototype.addWaypoint = function(title, description, lat, lon, strUTC, errorHandler ){
+    var strSQL = "INSERT INTO `W" + this.tracename + "` "
+        + "(lat, lon, time, title, description) "
+        + "VALUES ('" + lat + "','" + lon + "', "										
+        + "'" + strUTC + "', ?, ?); GO;";
+		
+	//errorHandler(null, {code: 1, message:strSQL});
+    this.executeSQL(strSQL, [title, description], this.createRecordDataHandler.bind(this), errorHandler); 
 	
 }
 
@@ -167,7 +182,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
         + "(lat, lon, altitude, time, velocity, horizAccuracy, vertAccuracy, distanceFromPrev)"
         + "VALUES ('" + lat + "','" + lon + "', " + alt + ", "
         + "'" + strUTC + "', " + velocity + ", " + horizAccuracy + ", " + vertAccuracy + ", " + this.distanceFromPrevious + "); GO;";
-    this.executeSQL(strSQL, this.createRecordDataHandler.bind(this), errorHandler); 
+    this.executeSQL(strSQL, [], this.createRecordDataHandler.bind(this), errorHandler); 
     this.total ++;
 }
 
@@ -185,14 +200,14 @@ Mojotracker.prototype.getMinAltitude = function(){
 
 Mojotracker.prototype.getTrackNames = function(resultHandler, errorHandler){
     var strSQL = "SELECT `name` FROM sqlite_master WHERE type='table' AND `name` LIKE 'G%' ORDER BY `name`; GO;";
-    this.executeSQL(strSQL, resultHandler, errorHandler); 
+    this.executeSQL(strSQL, [], resultHandler, errorHandler); 
 }
 
-Mojotracker.prototype.executeSQL = function(strSQL, resultHandler, errorHandler){
+Mojotracker.prototype.executeSQL = function(strSQL, replacement, resultHandler, errorHandler){
     this.db.transaction(
         (
             function (transaction){
-                transaction.executeSql(strSQL, [], resultHandler, errorHandler);
+                transaction.executeSql(strSQL, replacement, resultHandler, errorHandler);
             }
         ).bind(this) 
     );    
@@ -203,9 +218,15 @@ Mojotracker.prototype.removeTrack = function(name, errorHandler){
         return;
     
     var strSQL = "DROP TABLE `"+name+"`; GO;";
-    this.executeSQL(strSQL, this.createRecordDataHandler.bind(this), errorHandler);
+    var strSQL2 = "DROP TABLE `W"+name+"`; GO;";
+    this.executeSQL(strSQL, [], this.createRecordDataHandler.bind(this), errorHandler);
+    this.executeSQL(strSQL2, [], this.createRecordDataHandler.bind(this), errorHandler);
 }
 
+Mojotracker.prototype.getWaypoints = function( name, infoHandler, errorHandler ){
+    var strSQL = "SELECT * FROM `W"+name+"`; GO; "
+	this.executeSQL(strSQL, [], infoHandler, errorHandler);
+}
 
 Mojotracker.prototype.getTrackInfo = function( name, infoHandler, errorHandler ){
     var strSQL = "SELECT '"+name+"' AS name, " +
@@ -218,7 +239,7 @@ Mojotracker.prototype.getTrackInfo = function( name, infoHandler, errorHandler )
         "SUM(`distanceFromPrev`) AS trackLength " +
         "FROM `"+name+"` ; GO;";
 
-    this.executeSQL(strSQL, infoHandler, errorHandler);
+    this.executeSQL(strSQL, [], infoHandler, errorHandler);
 }
 
 Mojotracker.prototype.getNodes = function(){
@@ -241,7 +262,7 @@ Mojotracker.prototype.createRecordDataHandler = function(transaction, results) {
 Mojotracker.prototype.storeGpx = function(controller, name, callback) {
     var strSQL = "SELECT * FROM `" + name + "` ; GO;";
     
-    this.executeSQL(strSQL,
+    this.executeSQL(strSQL,[], 
             function(tx, result) {
                 this.createGPXContent(controller, result, name, callback);
             }.bind(this),
@@ -254,7 +275,7 @@ Mojotracker.prototype.storeGpx = function(controller, name, callback) {
 Mojotracker.prototype.timeoutOccured = function(strUTC){
 	var strSQL = "INSERT INTO `timeouts` VALUES ('"+strUTC+"'; GO;";
     
-    this.executeSQL(strSQL,
+    this.executeSQL(strSQL,[], 
             function(tx, result) {},
             function(tx, error) {}
         );

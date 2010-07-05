@@ -1,30 +1,30 @@
 <div id="main" >
 	<div class="palm-page-header">
-		<div class="header-icon mojotracker-icon32"></div>	
+		<div class="header-icon mojotracker-icon32"></div>
 		<div class="header-text">
 			<span x-mojo-loc=''><span class="i18n">Track</span> <span id="currentTrack" >&nbsp;</span></span>
 		</div>
-	</div>	
-	
+	</div>
+
 	<div class="palm-group">
 		<div class="palm-group-title">
 			<span class="i18n">Information</span>
 		</div>
-		
+
 		<div class="tracker-line " style="">
 			<div class="tracker-line-header"><span class="i18n">Start</span></div>
             <div class="tracker-value">
                 <span id="startTime" >&nbsp;</span>
             </div>
-		</div>		
-		
+		</div>
+
 		<div class="tracker-line " style="">
 			<div class="tracker-line-header"><span class="i18n">End</span></div>
             <div class="tracker-value">
                 <span id="endTime" >&nbsp;</span>
             </div>
-		</div>		
-		
+		</div>
+
 		<div class="tracker-line indent" >
             <div style="position:absolute; left:0%; width:40%">
                 <div class="tracker-line-header"><span class="i18n">Track length</span></div>
@@ -54,36 +54,39 @@
                 <span id="maxAltitude" >&nbsp;</span>
             </div>
 		</div>
-		
+
     </div>
 
-
 	<div class="palm-list">
-		<div class="palm-row last">
+		<div class="palm-row first">
 			<div class="palm-row-wrapper">
 			<div class="title">
 				<span class="i18n">Altitude</span>
 			</div>
 			</div>
 		</div>
-	</div>
-
-    <canvas id="altitudeCanvas" width="320" height="200" >
-		Your browser does not support HTML5 Canvas.
-    </canvas>
-
-	<div class="palm-list">
-		<div class="palm-row last">
+	
+		<canvas id="altitudeCanvas" width="320" height="200" >
+			Your browser does not support HTML5 Canvas.
+		</canvas>
+	
+		<div class="palm-row ">
 			<div class="palm-row-wrapper">
 			<div class="title">
 				<span class="i18n">Speed</span>
 			</div>
 			</div>
 		</div>
+	
+		<canvas id="speedCanvas" width="320" height="200" >
+			Your browser does not support HTML5 Canvas.
+		</canvas>
+	
+		<div>
+			<div id='editableListContainer'>
+				<div id="waypointList" x-mojo-element="List" >
+				</div>
+			</div>
+		</div>
 	</div>
-
-    <canvas id="speedCanvas" width="320" height="200" >
-		Your browser does not support HTML5 Canvas.
-    </canvas>
-
 </div>

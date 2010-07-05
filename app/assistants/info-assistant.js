@@ -21,8 +21,35 @@ InfoAssistant.prototype.setup = function(){
 	this.altitudeDataMax = this.item.maxAltitude;
 	this.altitudeDataMaxError = 0;
 
-	this.refreshTrackInfo();
 
+    // Set up a few models so we can test setting the widget model:
+    this.currentModel = {listTitle:$L('info.waypoints'), items:[]};
+    // Store references to reduce the use of controller.get()
+    this.waypointList = this.controller.get('waypointList');
+
+    // Set up the attributes for the list widget:
+    this.waypointAtts = {
+            itemTemplate:'info/listitem',
+            listTemplate:'info/listcontainer',
+            showAddItem:false,
+            swipeToDelete:false,
+            reorderable:false,
+            emptyTemplate:'info/emptylist'
+    };
+
+    this.controller.setupWidget('waypointList', this.waypointAtts , this.currentModel);
+	
+    try{
+        Mojotracker.getInstance().getWaypoints(  this.item.name, this.waypointsResultHandler.bind(this),
+												function(transaction, error){
+													if (error.code != 1) // no such table
+														this.showDialog("error","code "+error.code+": "+error.message);
+												}.bind(this) );
+    }catch (e){
+		this.showDialog("Error", 'Exception when getting waypoint list ['+e+']');
+    }
+	
+	this.refreshTrackInfo();
 }
 
 InfoAssistant.prototype.cleanup = function(event){
@@ -86,7 +113,26 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 	}
 }
 
-FirstAssistant.prototype.activate = function(event){
+InfoAssistant.prototype.waypointsResultHandler = function(transaction, results){
+	config = Config.getInstance();
+    if (results.rows){
+		try{
+			for (i = 0; i< results.rows.length; i++){
+				newItem = results.rows.item(i);
+				
+				newItem.posFormated = config.userLatitude( newItem.lat)+" "+config.userLongitude( newItem.lon);
+				this.currentModel.items.push(newItem);
+				this.waypointList.mojo.noticeAddedItems(this.currentModel.items.length, [newItem]);            
+			}
+		}catch(e){
+			this.showDialog('Error', e);
+		}
+    }else{
+		this.showDialog('Error', $L('bad DB result (waypoints handler)...'));
+    }
+}
+
+InfoAssistant.prototype.activate = function(event){
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */	
 	
@@ -94,7 +140,7 @@ FirstAssistant.prototype.activate = function(event){
 
 }
 
-FirstAssistant.prototype.deactivate = function(event){
+InfoAssistant.prototype.deactivate = function(event){
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
 

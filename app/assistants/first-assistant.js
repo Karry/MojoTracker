@@ -41,6 +41,7 @@ FirstAssistant.prototype.setup = function(){
 								if (this.lat && this.lon){
 									this.waypointDialog = new WaypointDialogAssistant(this.controller,
 																					  Mojotracker.getInstance(),
+																					  Config.getInstance(),
 																					  this.lat,
 																					  this.lon,
 																					  this.formatDate(new Date(), 2),
@@ -121,7 +122,7 @@ FirstAssistant.prototype.createNewTrack = function(){
         
         this.showTrackInformations();	
 	}catch (e){
-		$('statusmsg').update("DB Error: " + e);
+		$('errormsg').update("DB Error: " + e);
 	}
 }
 
@@ -329,7 +330,7 @@ FirstAssistant.prototype.handleGpsResponseError = function(event)
 
 FirstAssistant.prototype.tableErrorHandler = function(transaction, error) 
 {
-	$('statusmsg').update('table Error was ' + error.message + ' (Code ' + error.code + ')'); 
+	$('errormsg').update('table Error was ' + error.message + ' (Code ' + error.code + ')'); 
 	return true;
 }
 

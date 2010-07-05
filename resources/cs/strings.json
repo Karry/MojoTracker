@@ -73,5 +73,7 @@
     "wpntDialog.title": "Přidat místo",
     'wpntDialogTitleLabel': 'Název',
     'wpntDialogDesctiptionLabel': 'Popis',
-    'wpntDialogSave': 'Uložit'    
+    'wpntDialogSave': 'Uložit',
+    
+    "info.waypoints" : "Místa"
 }
