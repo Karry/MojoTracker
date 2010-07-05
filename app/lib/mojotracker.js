@@ -9,6 +9,12 @@ function Mojotracker(){
     Mojo.log("Mojotracker constructor...");
     this.dbConnect();
 	this.distanceFromPrevious = 0;
+	
+	strSQL = "CREATE TABLE IF NOT EXISTS `timeouts` ( time TEXT NOT NULL )";
+	this.executeSQL(strSQL,
+            function(tx, result) {}.bind(this),
+            function(tx, error) {}.bind(this)
+        );    
 }
 
 Mojotracker.instance = null;
@@ -62,6 +68,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
     this.trackLength = 0;
     this.minAltitude = null;
     this.maxAltitude = null;
+	this.maxVelocity = null;
 }
 
 Mojotracker.prototype.isActive = function( name){
@@ -107,6 +114,10 @@ Mojotracker.prototype.getVelocityProfile = function(item, callback){
 
 Mojotracker.prototype.getDistanceFromPrevious = function(){
 	return this.distanceFromPrevious;	
+}
+
+Mojotracker.prototype.addWaypoint = function(title, description, lat, lon, strUTC, errorHandler ){
+	
 }
 
 Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy,
@@ -240,9 +251,18 @@ Mojotracker.prototype.storeGpx = function(controller, name, callback) {
         );
 }
 
+Mojotracker.prototype.timeoutOccured = function(strUTC){
+	var strSQL = "INSERT INTO `timeouts` VALUES ('"+strUTC+"'; GO;";
+    
+    this.executeSQL(strSQL,
+            function(tx, result) {},
+            function(tx, error) {}
+        );
+}
+
 Mojotracker.prototype.createGPXContent = function(controller, result, name, callback) {
     if (!result.rows){
-        callback.errorHandler("BAD base result");
+        callback.errorHandler( $L("BAD base result"));
         Mojo.Log.error("BAD base result");
         return;
     }
@@ -273,7 +293,8 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
 					data += "\n";
 					
 					if (i % 10 == 0){
-						callback.progress(i, result.rows.length, "building xml data ("+i+")...");
+						callback.progress(i, result.rows.length, $L("building xml data (#{progress})...")
+                            .interpolate({progress: i }));
 					}
 				} catch (e) {
 					Mojo.Log.error("Error 1");
@@ -305,7 +326,8 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
 					data += "</trkpt>\n";
 					
 					if (i % 10 == 0){
-						callback.progress(i, result.rows.length, "building xml data ("+i+")...");
+						callback.progress(i, result.rows.length, $L("building xml data (#{progress})...")
+                            .interpolate({progress: i }));
 					}
 				} catch (e) {
 					Mojo.Log.error("Error 1");
@@ -318,7 +340,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, name, call
 			name = name+".gpx";
 		}
 
-        callback.progress(1,1, "xml data built...");
+        callback.progress(1,1, $L("xml data built..."));
 
         setTimeout(this.writeGPXFile.bind(this), 500,
                    controller, name, data,
@@ -349,7 +371,8 @@ Mojotracker.prototype.writeGPXFile = function(controller, name, content, callbac
         from = offset;
         fileName = name ;
     }
-    callback.progress(offset, content.length, "Saving data ("+offset+" / "+content.length+")...");
+    callback.progress(offset, content.length, $L("Saving data (#{offst} / #{len})...")
+                            .interpolate({offst: offset , len: content.length }));
     
     try {  
         controller.serviceRequest('palm://ca.canucksoftware.filemgr', {

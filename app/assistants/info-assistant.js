@@ -21,7 +21,8 @@ InfoAssistant.prototype.setup = function(){
 	this.altitudeDataMax = this.item.maxAltitude;
 	this.altitudeDataMaxError = 0;
 
-	this.refreshTrackInfo();    
+	this.refreshTrackInfo();
+
 }
 
 InfoAssistant.prototype.cleanup = function(event){
@@ -30,64 +31,73 @@ InfoAssistant.prototype.cleanup = function(event){
 }
 
 InfoAssistant.prototype.refreshTrackInfo = function(){
-	
-    this.config = Config.getInstance();
-	mojotracker = Mojotracker.getInstance();
-	
-	if (this.item.start)
-		this.timeMin = Date.parse( this.item.start.replace("T"," ").replace("Z"," "));
-	else
-		this.timeMin = (new Date()).getTime();
+	try{
+		this.config = Config.getInstance();
+		mojotracker = Mojotracker.getInstance();
 		
-	if (this.item.stop)
-		this.timeMax = Date.parse( this.item.stop.replace("T"," ").replace("Z"," "));
-	else
-		this.timeMax = this.timeMin;    
-
-    $('startTime').innerHTML    = this.config.formatDateTime( new Date(this.timeMin));
-    $('endTime').innerHTML      = this.config.formatDateTime( new Date(this.timeMax));
-    
-    $('minAltitude').innerHTML 	= this.config.userSmallDistance(this.item.minAltitude, true);
-    $('maxAltitude').innerHTML 	= this.config.userSmallDistance(this.item.maxAltitude, true);
-    
-    $('maxSpeed').innerHTML 	= this.config.userVelocity( this.item.maxVelocity );
-    $('trackLength').innerHTML 	= this.item.trackLengthFormated;
-    $('tracknum').innerHTML 	= this.item.nodes;
-    $('currentTrack').innerHTML = this.item.name;
-
-    callback = {
-        errorHandler : this.drawErrorHandler.bind(this),
-        handleResult : this.handleAltitudeResult.bind(this)
-    }
-    mojotracker.getAltitudeProfile( this.item , callback );
-
-    callback = {
-        errorHandler : this.drawErrorHandler.bind(this),
-        handleResult : this.handleSpeedResult.bind(this)
-    }
-    mojotracker.getVelocityProfile( this.item , callback );
+		if (this.item.start)
+			this.timeMin = Date.parse( this.item.start.replace("T"," ").replace("Z"," "));
+		else
+			this.timeMin = (new Date()).getTime();
+			
+		if (this.item.stop)
+			this.timeMax = Date.parse( this.item.stop.replace("T"," ").replace("Z"," "));
+		else
+			this.timeMax = this.timeMin;
+			
+		// is current track is active, set maxTime to current time
+		if (mojotracker.isActive(this.item.name) && (this.timeMax < (new Date()).getTime()))
+			this.timeMax = (new Date()).getTime();
+	
+		$('startTime').innerHTML    = this.config.formatDateTime( new Date(this.timeMin));
+		$('endTime').innerHTML      = this.config.formatDateTime( new Date(this.timeMax));
+		
+		$('minAltitude').innerHTML 	= this.config.userSmallDistance(this.item.minAltitude, true);
+		$('maxAltitude').innerHTML 	= this.config.userSmallDistance(this.item.maxAltitude, true);
+		
+		$('maxSpeed').innerHTML 	= this.config.userVelocity( this.item.maxVelocity );
+		$('trackLength').innerHTML 	= this.item.trackLengthFormated;
+		$('tracknum').innerHTML 	= this.item.nodes;
+		$('currentTrack').innerHTML = this.item.name;
+	
+		callback = {
+			errorHandler : this.drawErrorHandler.bind(this),
+			handleResult : this.handleAltitudeResult.bind(this)
+		}
+		mojotracker.getAltitudeProfile( this.item , callback );
+	
+		callback = {
+			errorHandler : this.drawErrorHandler.bind(this),
+			handleResult : this.handleSpeedResult.bind(this)
+		}
+		mojotracker.getVelocityProfile( this.item , callback );
+		
+		// if it is current track, refresh data after 5seconds
+		if ( mojotracker.getCurrentTrack() == this.item.name){
+			inst = this;
+			this.updateTimeout = setTimeout( function(){
+					Mojotracker.getInstance().getTrackInfo( inst.item.name,
+											 inst.trackInfoHandler.bind(inst),
+											 inst.tableErrorHandler.bind(inst));
+				}, 5 * 1000);		
+		}			
+	}catch(e){
+		this.showDialog('error', e);
+	}
 }
 
 FirstAssistant.prototype.activate = function(event){
 	/* put in event handlers here that should only be in effect when this scene is active. For
-	   example, key handlers that are observing the document */
-	// if it is current track, refresh data after 5seconds
+	   example, key handlers that are observing the document */	
+	
 	//this.showDialog('track', this.item.name +"/"+mojotracker.getCurrentTrack());
-	if ( mojotracker.getCurrentTrack() == this.item.name){
-		inst = this;
-		this.updateTimeout = setTimeout( function(){
-				Mojotracker.getInstance().getTrackInfo( inst.item.name,
-										 inst.trackInfoHandler.bind(inst),
-										 inst.tableErrorHandler.bind(inst));
-			}, 5 * 1000);		
-	}	
+
 }
 
 FirstAssistant.prototype.deactivate = function(event){
 	/* remove any event handlers you added in activate and do any other cleanup that should happen before
 	   this scene is popped or another scene is pushed on top */
-    if (this.updateTimeout)
-        clearTimeout( this.updateTimeout );		
+
 }
 
 

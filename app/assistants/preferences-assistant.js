@@ -9,10 +9,10 @@ PreferencesAssistant.prototype.setup = function(){
 
     // Define models for each selctor
     this.unitsAttributes = {
-        label: $L('Units'),
+        label: $L('prefer.units'),
         choices: [
-            {label: $L('Metric'), value: Config.METRIC_UNITS},
-            {label: $L('Imperial'), value: Config.IMPERIAL_UNITS}
+            {label: $L('prefer.metric'), value: Config.METRIC_UNITS},
+            {label: $L('prefer.imperial'), value: Config.IMPERIAL_UNITS}
         ],
 
         // Store selected value in 'firstValue' instead of the default of 'value'
@@ -28,7 +28,7 @@ PreferencesAssistant.prototype.setup = function(){
     
     // --------------------------------------------------------------------------
     this.posFormatAttributes = {
-        label: $L('Degrees'),
+        label: $L('prefer.degrees'),
         choices: [
             {label: $L('49°08\'06.22"'), value: Config.DEFAULT_POS_FORMAT},
             {label: $L('49°08.104\''), value: Config.GEOCACHING_POS_FORMAT},
@@ -43,7 +43,7 @@ PreferencesAssistant.prototype.setup = function(){
     
     // --------------------------------------------------------------------------
     this.exportFormatAttributes = {
-        label: $L('Data Format'),
+        label: $L('prefer.format'),
         choices: [
             {label: $L('gpx'), value: "gpx"},
             {label: $L('kml'), value: "kml"}
@@ -57,15 +57,15 @@ PreferencesAssistant.prototype.setup = function(){
 
     // --------------------------------------------------------------------------
     this.localeAttributes = {
-        label: $L('Language'),
+        label: $L('prefer.language'),
         choices: [
-            {label: $L('English'), value: "en"},
-            {label: $L('Czech'), value: "cs"}
+            {label: $L('prefer.english'), value: "en_us"},
+            {label: $L('prefer.czech'), value: "cs"}
         ],
         modelProperty:'locale'
     };
     this.localeModel = {
-        locale : 'en'
+        locale : 'en_us'
     };        
     this.localeModel.locale = Config.getInstance().getLocale();
 

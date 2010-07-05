@@ -1,16 +1,21 @@
 
 
-function ProgressDialogAssistant(controller, value, max, message){
+function ProgressDialogAssistant(controller, value, max, message, title){
+    // Translate view
+    $$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });
+        
     this.max = max;
     this.value = value;
     this.message = message;
     this.controller= controller;
+    this.title = title;
 }
 
 ProgressDialogAssistant.prototype.setup = function(widget){
     this.widget = widget;
     
     $('message').innerHTML = this.message;
+    $('title').innerHTML = this.title;
     
     this.attr = {
             modelProperty: 'progress'
