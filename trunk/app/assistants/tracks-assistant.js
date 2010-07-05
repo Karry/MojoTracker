@@ -52,7 +52,7 @@ TracksAssistant.prototype.setup = function(){
 
     // load tracks
     try{
-        $('trackHeadermsg').update('Loading...');
+        $('trackHeadermsg').update( $L('Loading...'));
         mojotracker = Mojotracker.getInstance();
         mojotracker.getTrackNames( this.createTrackNamesHandler.bind(this), this.tableErrorHandler.bind(this) );
     }catch (e){
@@ -74,6 +74,8 @@ TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results
     if ((results.rows) && (results.rows.length == 1)){
         newItem = results.rows.item(0);
         newItem.trackLengthFormated =  Config.getInstance().userDistance( newItem.trackLength , false);
+		newItem.lengthLabel = $L('length');
+		newItem.nodesLabel = $L('nodes');
         this.currentModel.items.push(newItem);
         this.trackList.mojo.noticeAddedItems(this.currentModel.items.length, [newItem]);
         //$('trackHeadermsg').update('result: ' + results +"["+results.rows.length+"]");
@@ -133,11 +135,11 @@ TracksAssistant.prototype.showInfo = function( myItem ){
 }
 
 TracksAssistant.prototype.createStoreErrorHandler = function(e){
-    this.showDialog("Error",e);
+    this.showDialog($L("Error"),e);
 }
 
 TracksAssistant.prototype.createStoreSuccessHandler = function(name){
-    this.showDialog("Info","Track stored to "+name);
+    this.showDialog($L("dialog.exportInfoTitle"),$L("Track stored to #{trackname}.").interpolate({trackname:"\"" + name +"\""}));
 }
 
 TracksAssistant.prototype.showDialog = function(title, message){    
@@ -169,7 +171,7 @@ TracksAssistant.prototype.showProgress = function(value, max, message){
         return;
     }
     
-    this.progressDialog = new ProgressDialogAssistant(this.controller, value, max, message);
+    this.progressDialog = new ProgressDialogAssistant(this.controller, value, max, message, $L('dialog.exportTitle'));
         
     this.controller.showDialog({
            template: 'dialogs/progress-dialog',
@@ -190,16 +192,15 @@ TracksAssistant.prototype.createTrackNamesHandler = function(transaction, result
         this.trackCount = results.rows.length;
         this.updateHeader()
     }else{
-        $('trackHeadermsg').update('bad DB result...');
+        $('trackHeadermsg').update($L('bad DB result...'));
     }
 }
 
 TracksAssistant.prototype.updateHeader = function(){
-        if (this.trackCount == 0)
-            $('trackHeadermsg').update('base is empty');
-        else
-            $('trackHeadermsg').update(''+this.trackCount+' Saved Track'+((this.trackCount>1)?'s':''));
-
+	if (this.trackCount < 5)
+		$('trackHeadermsg').update( $L('trck.savedTracks_' + this.trackCount) );
+	else
+		$('trackHeadermsg').update(''+this.trackCount+' '+ $L('trck.savedTracks_many') );
 }
 
 // Called for Mojo.Event.listAdd events.
@@ -225,7 +226,7 @@ TracksAssistant.prototype.listAddHandler = function(event ) {
 // The list's DOM elements will be updated automatically, unless event.preventDefault() is called.
 TracksAssistant.prototype.listDeleteHandler = function(event) {
     if (event.item.name == Mojotracker.getInstance().getCurrentTrack()){
-        this.showDialog("Error","It is open track! Nothing will be done.");
+        this.showDialog($L("Error"),$("It is open track! Nothing will be done."));
         return false;
     }
     //this.showDialog("event", event.type+"/"+(typeof event.type));

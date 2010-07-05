@@ -1,0 +1,33 @@
+{
+
+    "app.version": "0.2.0",
+    
+    "trck.savedTracks_0":"Base is empty",
+    "trck.savedTracks_1":"One Saved Track",
+    "trck.savedTracks_2":"Two Saved Tracks",
+    "trck.savedTracks_3":"Three Saved Tracks",
+    "trck.savedTracks_4":"Four Saved Tracks",
+    "trck.savedTracks_many":"Saved Tracks",
+        
+    "prefer.view": "View",
+    "prefer.export": "Export",
+    "prefer.preferences":"Preferences",
+    "prefer.split": "Split exported files",
+    "prefer.fileMgrWarn": "FileMgr service in version 0.5.1 can't write larger file than ~50kB.",
+    "prefer.units": "Units",
+    "prefer.metric": "Metric",
+    "prefer.imperial": "Imperial",
+    "prefer.degrees": "Degrees",
+    "prefer.format": "Data Format",
+    "prefer.language": "Language",
+    "prefer.english": "English",
+    "prefer.czech": "Czech",
+    
+    "dialog.exportInfoTitle": "Info",
+    "dialog.exportTitle": "Export track",
+    
+    "wpntDialog.title": "Title",
+    'wpntDialogTitleLabel': 'Title',
+    'wpntDialogDesctiptionLabel': 'Desctiption',
+    'wpntDialogSave': 'Save'
+}

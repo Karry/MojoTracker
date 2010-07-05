@@ -15,8 +15,7 @@ FirstAssistant.prototype.setup = function(){
     // Translate view
 	this.config = Config.getInstance();
 	
-    $$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });	
-
+	$$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });	
 		
 	// TODO: add ability start tracking automaticaly
 	this.saveTrack = false;
@@ -37,6 +36,24 @@ FirstAssistant.prototype.setup = function(){
     this.controller.listen('showMoreInfoButton', Mojo.Event.tap,
                            this.handleShowMoreButtonTap.bind(this));
 	
+    this.controller.listen('addWaypointButton', Mojo.Event.tap,
+                            function(){
+								if (this.lat && this.lon){
+									this.waypointDialog = new WaypointDialogAssistant(this.controller,
+																					  Mojotracker.getInstance(),
+																					  this.lat,
+																					  this.lon,
+																					  this.formatDate(new Date(), 2),
+																					  this.tableErrorHandler.bind(this));
+										
+									this.controller.showDialog({
+											template: 'dialogs/waypoint-dialog',
+											assistant: this.waypointDialog,
+											preventCancel:false
+									 });
+								}
+							}.bind(this));
+	
 	// Setup application menu
 	this.controller.setupWidget(Mojo.Menu.appMenu,
 	    {
@@ -55,8 +72,6 @@ FirstAssistant.prototype.setup = function(){
 	
 	// listen on location tap
 	this.controller.listen('location', Mojo.Event.tap, this.handleLocTap.bind(this));
-	
-	this.setScreenTimeout(1);
 	
 	// Start GPS
 	this.startTracking();
@@ -95,6 +110,7 @@ FirstAssistant.prototype.handleSaveTrackHandleAction = function(event){
 }
 
 FirstAssistant.prototype.createNewTrack = function(){
+	this.setScreenTimeout(1);
 	now = new Date();
 	tracename = "G" + this.formatDate(now, 1);
 	try{
@@ -106,7 +122,7 @@ FirstAssistant.prototype.createNewTrack = function(){
         this.showTrackInformations();	
 	}catch (e){
 		$('statusmsg').update("DB Error: " + e);
-	}	
+	}
 }
 
 FirstAssistant.prototype.handleShowMoreButtonTap = function(event){
@@ -155,10 +171,10 @@ FirstAssistant.prototype.closeTrack = function(){
 
     this.showTrackInformations();
     mojotracker.closeTrack();
+	this.setScreenTimeout(2);
 }
 
-FirstAssistant.prototype.handleGpsResponse = function(event)
-{
+FirstAssistant.prototype.handleGpsResponse = function(event){
 	mojotracker = Mojotracker.getInstance();
 
 	// Display GPS data, log to Db
@@ -212,7 +228,8 @@ FirstAssistant.prototype.handleGpsResponse = function(event)
     this.updateTimeout = setTimeout( function(){
                 lastUpdateElement = document.getElementById("lastUpdate");
                 lastUpdateElement.style.color = "rgba(200, 0, 0, 0.7)" ;
-            }, this.config.getUpdateTimeout() * 1000);
+				mojotracker.timeoutOccured( strUTC );
+            }.bind(this), this.config.getUpdateTimeout() * 1000);
     
     // display compas
 	compass = document.getElementById("compass");
@@ -258,6 +275,10 @@ FirstAssistant.prototype.startTracking = function(){
 	
 }
 
+FirstAssistant.prototype.stopTracking = function(){
+	this.trackingHandle.cancel();
+}
+
 FirstAssistant.prototype.showTrackInformations = function(){
 	if (this.saveTrack){
         info = document.getElementById("trackInformations");
@@ -280,24 +301,24 @@ FirstAssistant.prototype.showTrackInformations = function(){
 FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){
 	switch(code){
 		case 0:
-			return "Success";
+			return $L("Success");
 		case 1:
-			return "Timeout"; 
+			return $L("Timeout"); 
 		case 2:
-			return "Position unavailable"; 
+			return $L("Position unavailable"); 
 		case 4:
-			return "Only cell and wifi fixes"; // GPS_Permanent_Error (no more GPS fix in this case, but can still get the Cell and wifi fixes)
+			return $L("Only cell and wifi fixes"); // GPS_Permanent_Error (no more GPS fix in this case, but can still get the Cell and wifi fixes)
 		case 5:
-			return "Location service is OFF"; 
+			return $L("Location service is OFF"); 
 		case 6:
-			return "Permission Denied"; //  - The user has not accepted the terms of use for the GPS Services.
+			return $L("Permission Denied"); //  - The user has not accepted the terms of use for the GPS Services.
 		case 7:
-			return "The application already has a pending message"; 
+			return $L("The application already has a pending message"); 
 		case 8:
-			return "The application has been temporarily blacklisted.";		
+			return $L("The application has been temporarily blacklisted.");		
 		case 3: 
 		default:
-			return "Unknown ("+code+")";
+			return $L("Unknown (#{code})").interpolate({code:code});
 	}
 }
 
@@ -312,8 +333,13 @@ FirstAssistant.prototype.tableErrorHandler = function(transaction, error)
 	return true;
 }
 
-FirstAssistant.prototype.setScreenTimeout = function(stop)
-{
+/**
+ * The activity’s expected duration is provided in milliseconds
+ * and cannot exceed 900,000 milliseconds (15 minutes).
+ * The power management service automatically terminates your activity
+ * request at the end of its duration or 15 minutes, whichever is shorter.
+ */
+FirstAssistant.prototype.setScreenTimeout = function(stop){
 	appID = 'com.osm.mojotracker-1';
 	if (stop == 1){
 		this.controller.serviceRequest('palm://com.palm.power/com/palm/power',
@@ -322,11 +348,21 @@ FirstAssistant.prototype.setScreenTimeout = function(stop)
 		                                  parameters:
 									      {
 			                                 id: appID, 
-		                                     duration_ms: '900000' //8 hours
+		                                     duration_ms: '900000' // MAX DURATION IS 15 MINUTES
 		                                  },
 		                                  onSuccess: this.activitySuccess.bind(this),
 		                                  onFailure: this.activityFailed.bind(this)
 	                                   }  );
+		
+		// reset activity each 10 minutes
+		this.activityTimeout = setTimeout( function(){
+				// reset tracking, it sometimes stops work
+				this.stopTracking();
+				this.startTracking();
+                this.setScreenTimeout(2);
+                this.setScreenTimeout(1);
+            }.bind(this), 10 * 60 * 1000);
+		
 	}
 	if (stop == 2){
 		this.controller.serviceRequest('palm://com.palm.power/com/palm/power',
@@ -339,6 +375,9 @@ FirstAssistant.prototype.setScreenTimeout = function(stop)
 		                                  onSuccess: this.activitySuccess.bind(this),
 		                                  onFailure: this.activityFailed.bind(this)
 	                                   }   );
+    if (this.activityTimeout)
+        clearTimeout( this.activityTimeout );
+		
 	}
 }
 
@@ -346,6 +385,7 @@ FirstAssistant.prototype.activitySuccess = function(){
 }
 
 FirstAssistant.prototype.activityFailed = function(){
+	this.showDialog("Error", 'Screen Power Error');
 	$('statusmsg').update('Screen Power Error'); 
 }
 
@@ -362,9 +402,8 @@ FirstAssistant.prototype.deactivate = function(event){
 FirstAssistant.prototype.cleanup = function(event){
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
-	this.trackingHandle.cancel();
+	this.stopTracking();
 	this.closeTrack();
-	this.setScreenTimeout(2);
 }
 
 FirstAssistant.prototype.sendPosition = function(method){
