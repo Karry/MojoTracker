@@ -38,6 +38,7 @@ InfoAssistant.prototype.setup = function(){
     };
 
     this.controller.setupWidget('waypointList', this.waypointAtts , this.currentModel);
+	this.controller.listen(this.waypointList, Mojo.Event.listTap, this.handleWaypointTap.bind(this));	
 	
     try{
         Mojotracker.getInstance().getWaypoints(  this.item.name, this.waypointsResultHandler.bind(this),
@@ -443,6 +444,63 @@ InfoAssistant.prototype.drawGraph = function(
     //this.showDialog("data", msg+" ["+valueMin+", "+valueMax+"]");
 }
 
+InfoAssistant.prototype.handleWaypointTap = function(event){
+	try{
+		item = event.item;
+		elem = event.originalEvent.target;
+		var locPopupModel;
+		locPopupModel = [
+			{label: $L('Copy to clipboard'), command: 'clipboard'},
+			{label: $L('Share via SMS'), command: 'sms'},
+			{label: $L('Share via email'), command: 'email'}
+		];
+		
+		this.controller.popupSubmenu({
+			onChoose: function(method){
+					this.sendPosition(method, item);
+				}.bind(this),
+			placeNear: elem,
+			items: locPopupModel
+		});
+	}catch(e){
+		this.showDialog("Error", Object.toJSON(e));
+	}		
+}
+
+
+InfoAssistant.prototype.sendPosition = function(method, item){
+	
+	msg = item.title + " - " + item.description + ": "
+		+ this.config.userLatitude( item.lat ) + " "
+		+ this.config.userLongitude( item.lon ) +"";
+		
+	if (method == "sms"){
+		this.controller.serviceRequest('palm://com.palm.applicationManager', {
+			method:'open',
+			parameters: {
+				id: 'com.palm.app.messaging',
+				params: {
+					messageText: msg
+				}
+			}
+		});
+	}
+	if (method == "email"){
+		this.controller.serviceRequest('palm://com.palm.applicationManager', {
+                method: 'launch',
+                parameters:  {
+                    id: 'com.palm.app.email',
+                    params: {
+                        summary: 'Interesting place',
+                        text: msg
+                    }
+                }
+            });
+	}
+	if (method == "clipboard"){
+		Mojo.Controller.stageController.setClipboard(msg);	
+	}
+}
 
 InfoAssistant.prototype.showDialog = function(title, message){    
     if (this.progressDialog){
