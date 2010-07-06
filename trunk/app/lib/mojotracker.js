@@ -74,6 +74,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
     );
     this.total = 0;
     this.lastPoint = null;
+	this.lastAcceptedPoint = null;
     this.trackLength = 0;
     this.minAltitude = null;
     this.maxAltitude = null;
@@ -150,7 +151,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
 		&& lat == this.lastAcceptedPoint.lat
 		&& horizAccuracy == this.lastAcceptedPoint.horizAccuracy
 		&& vertAccuracy == this.lastAcceptedPoint.vertAccuracy
-		&& (new Date()).getTime() < (this.lastAcceptedPoint.when + (8*60*1000))
+		&& (new Date()).getTime() < (this.lastAcceptedPoint.when + (8*60*1000)) // don't produce spaces larger than eight minutes (for continuous graphs)
 		){
 		Mojo.log("we ignore this point..."); // we reduce nodes count when device isn't moving
 		return;
