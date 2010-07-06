@@ -143,6 +143,18 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
         Mojo.log("no track is opened");
         return;
     }
+	
+	if (this.lastAcceptedPoint != null
+		&& alt == this.lastAcceptedPoint.alt
+		&& lon == this.lastAcceptedPoint.lon
+		&& lat == this.lastAcceptedPoint.lat
+		&& horizAccuracy == this.lastAcceptedPoint.horizAccuracy
+		&& vertAccuracy == this.lastAcceptedPoint.vertAccuracy
+		&& (new Date()).getTime() < (this.lastAcceptedPoint.when + (8*60*1000))
+		){
+		Mojo.log("we ignore this point..."); // we reduce nodes count when device isn't moving
+		return;
+	}
     
     this.distanceFromPrevious = 0;
     if (horizAccuracy < Config.getInstance().getMaxHorizAccuracy()){
@@ -163,10 +175,22 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
         }
         this.lastPoint = {
             lat: lat,
-            lon: lon
+            lon: lon,
+			alt: alt,
+			horizAccuracy: horizAccuracy,
+			vertAccuracy: vertAccuracy
         }
     }
     this.trackLength += this.distanceFromPrevious;
+
+	this.lastAcceptedPoint = {
+		lat: lat,
+		lon: lon,
+		alt: alt,
+		horizAccuracy: horizAccuracy,
+		vertAccuracy: vertAccuracy,
+		when: (new Date()).getTime()
+	}
     
     if ((vertAccuracy < Config.getInstance().getMaxVertAccuracy()) && (alt != null) &&
         (this.total > Config.getInstance().getIgnoredCount())) // data at beginning is mostly bad...
