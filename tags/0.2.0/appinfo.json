@@ -1,0 +1,13 @@
+{
+	"id": "com.osm.mojotracker",
+	"version": "0.2.0",
+	"vendor": "MojoTracker team",
+    "vendorurl": "http://code.google.com/p/mojotracker/",
+	"type": "web",
+	"main": "index.html",
+	"title": "MojoTracker",
+	"icon": "images/icon64.png",
+    "miniicon":"images/icon32.png",
+    "smallicon":"images/icon32.png",
+    "splashBackground":"images/screen.png"
+}

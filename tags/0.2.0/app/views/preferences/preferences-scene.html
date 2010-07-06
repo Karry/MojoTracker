@@ -1,0 +1,61 @@
+<div >
+	<div class="palm-page-header">
+		<div class="header-icon mojotracker-icon32"></div>	
+		<div class="header-text">
+			<span x-mojo-loc=''><span class="i18n">prefer.preferences</span></span>
+		</div>
+	</div>
+	
+    <div class="palm-group">
+		<div class="palm-group-title">
+			<span class="i18n">prefer.view</span>
+		</div>		
+        <div class="palm-list">
+
+            <div class="palm-row first" x-mojo-tap-highlight="momentary">
+                <div class="palm-row-wrapper">
+                    <div id="unitsSelector" x-mojo-element="ListSelector"></div>
+                </div>
+            </div>
+            
+            <div class="palm-row " x-mojo-tap-highlight="momentary">
+                <div class="palm-row-wrapper">
+                    <div id="posFormatSelector" x-mojo-element="ListSelector"></div>
+                </div>
+            </div>
+
+            <div class="palm-row last" x-mojo-tap-highlight="momentary">
+                <div class="palm-row-wrapper">
+                    <div id="localeSelector" x-mojo-element="ListSelector"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="palm-group">
+		<div class="palm-group-title">
+			<span class="i18n">prefer.export</span>
+		</div>		
+        <div class="palm-list">
+
+            <div class="palm-row" x-mojo-tap-highlight="momentary">
+                <div class="palm-row-wrapper">
+                    <div id="exportFormatSelector" x-mojo-element="ListSelector"></div>
+                </div>
+            </div>
+
+            <div class="palm-row last" style="height: 100px" x-mojo-tap-highlight="momentary">
+                <div class="palm-row-wrapper">
+                    
+			    <div x-mojo-element="CheckBox" id="splitCheckbox" style="float:left"></div>
+                    <div class="title" style="text-align:right;"><span class="i18n">prefer.split</span></div>
+                    <div class="palm-body-text" style="margin-top:0px">
+						<span class="i18n">prefer.fileMgrWarn</span>
+					</div>
+                </div>
+            </div>
+
+		</div>
+	</div>
+</div>

@@ -1,0 +1,79 @@
+{
+
+    "Save track": "Ukládat cestu",
+    "Current information" : "Aktuální informace",
+    "Position": "Pozice",
+    "Horizontal accuracy": "Horizontální chyba",
+    "Altitude": "Nadmořská výška",
+    "Vertical accuracy": "Vertikální chyba",
+    "Speed": "Rychlost",
+    "Last update": "Poslední aktualizace",
+    "Waiting for GPS...": "Čekám na GPS...",
+    "Track information": "Informace o cestě",
+    "Current track": "Současná cesta",
+    "Track length": "Délka cesty",
+    "length": "délka",
+    "Maximum speed": "Max. rychlost",
+    "Nodes": "Bodů",
+    "nodes": "bodů",
+    "Minimum / maximum altitude": "Minimální / Maximální nad. výška",
+    "Add Waypoint": "Přidat místo",
+    "More Info": "Více...",
+
+    "Copy to clipboard": "Kopírovat do schránky",
+    "Share via SMS": "Poslat přes SMS",
+    "Share via email": "Poslat mailem",
+    
+    "End": "Konec",
+    "Track": "Cesta",
+    "Information": "Detaily",
+    
+    "Saved Tracks": "Uložené Cesty",
+    
+    "trck.savedTracks_0":"Databáze je prázdná",
+    "trck.savedTracks_1":"Jedna uložená cesta",
+    "trck.savedTracks_2":"Dvě uložené cesty",
+    "trck.savedTracks_3":"Tři uložené cesty",
+    "trck.savedTracks_4":"Čtyři uložené cesty",
+    "trck.savedTracks_many":"Uložených cest",
+    "Loading...": "Načítám...",
+    "Info": "Detail",
+    "Export": "Exportovat",
+    "Delete": "Smazat",
+    "Track stored to #{trackname}.": "Cesta byla uložena do #{trackname}.",
+    "Are you sure you want to delete the track #{trackname}?": "Jste si jist že chcete smazat cestu #{trackname}?",
+    
+    
+    "prefer.view": "Zobrazení",
+    "prefer.export":"Export",
+    "prefer.preferences":"Nastavenení",
+    "prefer.split": "Rozdělit exporty",
+    "prefer.fileMgrWarn": "Služba <i>FileMgr</i> ve verzi 0.5.1 neumí zapisovat soubory větší než ~50kB.",
+    "prefer.units": "Jednotky",
+    "prefer.metric": "Metrické",
+    "prefer.imperial": "Imperiální",
+    "prefer.degrees": "Stupně",
+    "prefer.format": "Formát Dat",
+    "prefer.language": "Jazyk",
+    "prefer.english": "Anglicky",
+    "prefer.czech": "Česky",
+
+    "Preferences":  "Nastavení",
+    "Saved tracks": "Uložené cesty",
+    "About": "O aplikaci",
+    
+    "Saving data (#{offst} / #{len})...": "Ukládám data (#{offst} / #{len})...",
+    "xml data built...":"XML data vygenerována...",
+    "building xml data (#{progress})...":"Generuji XML data (#{progress})...",
+    "It is open track! Nothing will be done.":"It is open track! Nothing will be done.",
+    
+    "dialog.exportInfoTitle": "Info",
+    "dialog.exportTitle": "Exportuji cestu",
+    
+    "wpntDialog.title": "Přidat místo",
+    'wpntDialogTitleLabel': 'Název',
+    'wpntDialogDesctiptionLabel': 'Popis',
+    'wpntDialogSave': 'Uložit',
+    
+    "info.waypoints" : "Místa"
+}

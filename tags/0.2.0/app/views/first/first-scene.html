@@ -1,0 +1,134 @@
+<div id="main" >
+	
+	<div class="palm-page-header">
+		<div class="header-icon mojotracker-icon32"></div>
+
+		<div class="header-text">
+			<span x-mojo-loc=''>MojoTracker</span>
+		</div>
+	</div>
+	
+	
+	<div class="palm-list">
+		<div class="palm-row last">
+			<div class="palm-row-wrapper">
+			<div x-mojo-element="ToggleButton" id="saveTrackToggle"></div>
+			<div class="title" >
+				<span class="i18n">Save track</span>
+			</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="palm-group">
+		<div class="palm-group-title">
+			<span class="i18n">Current information</span>
+		</div>
+		
+		<div class="tracker-line" id="location">
+			<div class="tracker-line-header"><span class="i18n">Position</span></div>
+            <div class="tracker-value">
+                <span id="latitude" >&nbsp;</span>
+                <span id="longitude" >&nbsp;</span>
+            </div>
+		</div>
+		
+		<div style="position: relative;">
+			<div style="position:absolute; right:0px; top:10px; z-index:100;">
+				<img src="images/compass.png" id="compass" style="opacity:0.2"/>
+			</div>
+		</div>
+
+		<div class="tracker-line">
+			<div class="tracker-line-header"><span class="i18n">Horizontal accuracy</span></div>
+            <div class="tracker-value">
+                <span id="horizAccuracy" >&nbsp;</span>
+            </div>
+		</div>
+
+		<div class="tracker-line indent">
+			<div class="tracker-line-header"><span class="i18n">Altitude</span></div>
+            <div class="tracker-value">
+                <span id="altitude" >&nbsp;</span>
+            </div>
+		</div>
+		
+		<div class="tracker-line">
+			<div class="tracker-line-header"><span class="i18n">Vertical accuracy</span></div>
+            <div class="tracker-value">
+                <span id="vertAccuracy" >&nbsp;</span>
+            </div>
+		</div>
+
+		<div class="tracker-line indent">
+			<div class="tracker-line-header"><span class="i18n">Speed</span></div>
+            <div class="tracker-value">
+                <span id="speed" >&nbsp;</span>
+            </div>
+		</div>
+
+		<div class="tracker-line indent">
+			<div class="tracker-line-header"><span class="i18n">Last update</span></div>
+            <div class="tracker-value">
+                <span id="lastUpdate" >&nbsp;</span>
+            </div>
+		</div>
+
+	</div>
+
+	<div id="statusmsg" class="palm-body-text"><span class="i18n">Waiting for GPS...</span></div>
+	<div id="errormsg" class="palm-body-text"></div>
+	
+	<div class="palm-group" id="trackInformations" style="display:none;">
+		<div class="palm-group-title">
+			<span class="i18n">Track information</span>
+		</div>
+		
+		<div class="tracker-line"  >
+			<div class="tracker-line-header"><span class="i18n">Current track</span></div>
+            <div class="tracker-value">
+                <div id="currentTrack" >&nbsp;</div>
+            </div>
+		</div>
+		
+		<div class="tracker-line indent" >
+            <div style="position:absolute; left:0%; width:40%">
+                <div class="tracker-line-header"><span class="i18n">Track length</span></div>
+                <div class="tracker-value">
+                    <div id="trackLength" >&nbsp;</div>
+                </div>
+            </div>
+            <div style="position:absolute; left:40%; width:44%" >
+                <div class="tracker-line-header"><span class="i18n">Maximum speed</span></div>
+                <div class="tracker-value">
+                    <div id="maxSpeed" >&nbsp;</div>
+                </div>
+            </div>
+            <div style="position:absolute; left:85%; width:20%">
+                <div class="tracker-line-header"><span class="i18n">Nodes</span></div>
+                <div class="tracker-value">
+                    <div id="tracknum" >&nbsp;</div>
+                </div>
+            </div>
+            &nbsp;
+		</div>
+
+		<div class="tracker-line indent " style="">
+
+			<div class="tracker-line-header"><span class="i18n">Minimum / maximum altitude</span></div>
+            <div class="tracker-value">
+                <span id="minAltitude" >&nbsp;</span> /
+                <span id="maxAltitude" >&nbsp;</span>
+            </div>
+
+		</div>
+
+        <div class="indent">
+            <button id="addWaypointButton" x-mojo-loc=""><span class="i18n">Add Waypoint</span></button>
+            <button id="showMoreInfoButton" x-mojo-loc=""><span class="i18n">More Info</span></button>
+		</div>
+		
+    </div>
+
+</div>
