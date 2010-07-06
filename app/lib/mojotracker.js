@@ -73,6 +73,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
             } ).bind(this) 
     );
     this.total = 0;
+	this.saved = 0;
     this.lastPoint = null;
 	this.lastAcceptedPoint = null;
     this.trackLength = 0;
@@ -145,6 +146,8 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
         return;
     }
 	
+	this.total ++;
+	
 	if (this.lastAcceptedPoint != null
 		&& alt == this.lastAcceptedPoint.alt
 		&& lon == this.lastAcceptedPoint.lon
@@ -209,7 +212,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
         + "VALUES ('" + lat + "','" + lon + "', " + alt + ", "
         + "'" + strUTC + "', " + velocity + ", " + horizAccuracy + ", " + vertAccuracy + ", " + this.distanceFromPrevious + "); GO;";
     this.executeSQL(strSQL, [], this.createRecordDataHandler.bind(this), errorHandler); 
-    this.total ++;
+	this.saved ++;
 }
 
 Mojotracker.prototype.getMaxVelocity = function(){
@@ -269,7 +272,7 @@ Mojotracker.prototype.getTrackInfo = function( name, infoHandler, errorHandler )
 }
 
 Mojotracker.prototype.getNodes = function(){
-    return this.total;
+    return this.saved;
 }
 
 Mojotracker.prototype.closeTrack = function(){
