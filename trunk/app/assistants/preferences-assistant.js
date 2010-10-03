@@ -70,6 +70,7 @@ PreferencesAssistant.prototype.setup = function(){
     this.localeModel.locale = Config.getInstance().getLocale();
 
     // --------------------------------------------------------------------------
+    /*
     this.splitAttributes = {
             property: "value",
             trueValue: true,
@@ -81,6 +82,7 @@ PreferencesAssistant.prototype.setup = function(){
             disabled: false
     };
     this.splitModel.value = Config.getInstance().splitExportFiles();
+    */
 
     // --------------------------------------------------------------------------    
     
@@ -88,7 +90,7 @@ PreferencesAssistant.prototype.setup = function(){
     this.controller.setupWidget('unitsSelector',  this.unitsAttributes, this.unitsModel);
     this.controller.setupWidget('posFormatSelector',  this.posFormatAttributes, this.posFormatModel);
     this.controller.setupWidget('exportFormatSelector',  this.exportFormatAttributes, this.exportFormatModel);
-    this.controller.setupWidget('splitCheckbox', this.splitAttributes, this.splitModel);
+    //this.controller.setupWidget('splitCheckbox', this.splitAttributes, this.splitModel);
     this.controller.setupWidget('localeSelector',  this.localeAttributes, this.localeModel);
 
     // Events
@@ -97,7 +99,7 @@ PreferencesAssistant.prototype.setup = function(){
     this.controller.listen('unitsSelector', Mojo.Event.propertyChange, this.selectorChanged.bind(this));
     this.controller.listen('posFormatSelector', Mojo.Event.propertyChange, this.posFormatChanged.bind(this));    
     this.controller.listen('exportFormatSelector', Mojo.Event.propertyChange, this.exportFormatChanged.bind(this));    
-    this.controller.listen('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
+    //this.controller.listen('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
     this.controller.listen('localeSelector', Mojo.Event.propertyChange, this.localeChanged.bind(this));    
 }
 
