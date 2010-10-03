@@ -468,29 +468,39 @@ Mojotracker.prototype.writeGPXFile = function(controller, name, content, callbac
     limit = 50000;
     largeFile = content.length > limit;
     
+	/*
     if (largeFile && Config.getInstance().splitExportFiles()){
         from = 0;
         fileName = name +"."+this.fillZeros(((offset / limit)+1));
     }else{
+	*/
         from = offset;
         fileName = name ;
-    }
+    //}
+	successRecieved = false;
+	Mojo.Log.error("write to "+fileName+" from "+offset);
     callback.progress(offset, content.length, $L("Saving data (#{offst} / #{len})...")
-                            .interpolate({offst: offset , len: content.length }));
+                            .interpolate({offst: offset , len: content.length, i:((offset / limit)+1), count: (content.length/limit)}));
     
-    try {  
+    try {
+		// filemgr service behaves weird.. why we get two onSuccess callback?
+		// uaaaa... I want opensource file service!
         controller.serviceRequest('palm://ca.canucksoftware.filemgr', {
             method: 'write',
             parameters: {
                     file: "/media/internal/" + fileName,
                     str: content.substr(offset, limit),
-                    offset: from
+                    append: (offset > 0)
             },
             onSuccess: function(){
                 //offset += limit;
+				Mojo.Log.error("onSuccess "+offset+" "+successRecieved);
+				if (successRecieved)
+					return;
+				successRecieved = true;
                 if ((content.length - offset)> limit) {
                     //this.writeGPXFile(controller, name,  content.substr(limit), errorHandler, successHandler, offset+limit);
-                    setTimeout(this.writeGPXFile.bind(this), 500,
+                    setTimeout(this.writeGPXFile.bind(this), 100,
                                    controller, name, content,
                                    callback, offset + limit);                    
                 } else {
