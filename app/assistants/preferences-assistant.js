@@ -42,6 +42,7 @@ PreferencesAssistant.prototype.setup = function(){
     this.posFormatModel.posFormat = Config.getInstance().getPosFormat();
     
     // --------------------------------------------------------------------------
+    /*
     this.exportFormatAttributes = {
         label: $L('prefer.format'),
         choices: [
@@ -54,6 +55,7 @@ PreferencesAssistant.prototype.setup = function(){
         exportFormat : Config.DEFAULT_EXPORT_FORMAT
     };        
     this.exportFormatModel.exportFormat = Config.getInstance().getExportFormat();
+    */
 
     // --------------------------------------------------------------------------
     this.localeAttributes = {
@@ -89,7 +91,7 @@ PreferencesAssistant.prototype.setup = function(){
     //	Instantiate each selector
     this.controller.setupWidget('unitsSelector',  this.unitsAttributes, this.unitsModel);
     this.controller.setupWidget('posFormatSelector',  this.posFormatAttributes, this.posFormatModel);
-    this.controller.setupWidget('exportFormatSelector',  this.exportFormatAttributes, this.exportFormatModel);
+    //this.controller.setupWidget('exportFormatSelector',  this.exportFormatAttributes, this.exportFormatModel);
     //this.controller.setupWidget('splitCheckbox', this.splitAttributes, this.splitModel);
     this.controller.setupWidget('localeSelector',  this.localeAttributes, this.localeModel);
 
@@ -98,7 +100,7 @@ PreferencesAssistant.prototype.setup = function(){
     //	the framework is updated to do that for itself. Helps with memory management
     this.controller.listen('unitsSelector', Mojo.Event.propertyChange, this.selectorChanged.bind(this));
     this.controller.listen('posFormatSelector', Mojo.Event.propertyChange, this.posFormatChanged.bind(this));    
-    this.controller.listen('exportFormatSelector', Mojo.Event.propertyChange, this.exportFormatChanged.bind(this));    
+    //this.controller.listen('exportFormatSelector', Mojo.Event.propertyChange, this.exportFormatChanged.bind(this));    
     //this.controller.listen('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
     this.controller.listen('localeSelector', Mojo.Event.propertyChange, this.localeChanged.bind(this));    
 }

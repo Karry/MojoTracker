@@ -84,14 +84,14 @@ TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results
     }
 }
 
-TracksAssistant.prototype.storeGpx = function(name){
+TracksAssistant.prototype.exportData = function(name, type){
     callback = {
         errorHandler : this.createStoreErrorHandler.bind(this),
         successHandler : this.createStoreSuccessHandler.bind(this),
         progress : this.showProgress.bind(this)
     }
     
-    Mojotracker.getInstance().storeGpx(this.controller, name, callback);
+    Mojotracker.getInstance().exportData(this.controller, name, callback, type);
 }
 
 TracksAssistant.prototype.handleTrackTap = function(event){
@@ -99,15 +99,21 @@ TracksAssistant.prototype.handleTrackTap = function(event){
 	var trackPopupModel;
     trackPopupModel = [
         {label: $L('Info'), command: 'info'},
-        {label: $L('Export'), command: 'export'},
+        {label: $L('Export as GPX'), command: 'gpx-export'},
+        {label: $L('Export as KML'), command: 'kml-export'},
+        {label: $L('Export Waypoints'), command: 'loc-export'},
         {label: $L('Delete'), command: 'delete'}
     ];
     this.controller.popupSubmenu({
         onChoose: function(response){
             if (response == 'info') {
                 this.showInfo( event.item );
-            } else if (response == 'export') {
-                this.storeGpx( event.item.name );
+            } else if (response == 'gpx-export') {
+                this.exportData( event.item.name, 'gpx' );
+            } else if (response == 'kml-export') {
+                this.exportData( event.item.name, 'kml' );
+            } else if (response == 'loc-export') {
+                this.exportData( event.item.name, 'loc' );
             } else if (response == 'delete') {
                 this.controller.showAlertDialog({
                     onChoose: function(value) {
@@ -123,7 +129,9 @@ TracksAssistant.prototype.handleTrackTap = function(event){
                         {label:$L('No'), value:"no", type:'negative'}
                     ]
                 });
-            }
+            }else{
+				Mojo.Log.error("undefined command ("+response+")");
+			}
         },
         placeNear: event.originalEvent.target,
         items: trackPopupModel
