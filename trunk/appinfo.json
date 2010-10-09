@@ -1,6 +1,6 @@
 {
 	"id": "com.osm.mojotracker",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"vendor": "MojoTracker team",
     "vendorurl": "http://code.google.com/p/mojotracker/",
 	"type": "web",

@@ -288,27 +288,31 @@ Mojotracker.prototype.createRecordDataHandler = function(transaction, results) {
     // nothing to do 
 }
 
-Mojotracker.prototype.storeGpx = function(controller, name, callback) {
+Mojotracker.prototype.exportData = function(controller, name, callback, type) {
     
     this.getWaypoints(  name,
 						function(transaction, results){
-							this.storeGpx2(controller, name, callback, results.rows);
+							if (type == 'loc'){
+								this.createLocXmlContent(controller, name, callback, results.rows);
+							}else{
+								this.storeGpx2(controller, name, callback, results.rows, type);
+							}
 						}.bind(this),
 						function(transaction, error){
 							if (error.code != 1){ // no such table
 								callback.errorHandler( error );
 								return;
 							}
-							this.storeGpx2(controller, name, callback, []);
+							this.storeGpx2(controller, name, callback, [], type);
 						}.bind(this) );	
 }
 
-Mojotracker.prototype.storeGpx2 = function(controller, name, callback, waypoints) {
+Mojotracker.prototype.storeGpx2 = function(controller, name, callback, waypoints, type) {
 	var strSQL = "SELECT * FROM `" + name + "` ; GO;";
     
     this.executeSQL(strSQL,[], 
             function(tx, result) {
-                this.createGPXContent(controller, result, waypoints, name, callback);
+				this.createGPXContent(controller, result, waypoints, name, callback, type);
             }.bind(this),
             function(tx, error) {
                 callback.errorHandler(error);
@@ -316,6 +320,51 @@ Mojotracker.prototype.storeGpx2 = function(controller, name, callback, waypoints
         );
 }
 
+Mojotracker.prototype.createLocXmlContent = function(controller, name, callback, waypoints){
+    if (!waypoints){
+        callback.errorHandler( $L("BAD base result"));
+        Mojo.Log.error("BAD base result");
+        return;
+    }
+    if (waypoints.length == 0){
+        callback.errorHandler( $L("This track has no waypoints"));
+        Mojo.Log.error("This track has no waypoints");
+        return;
+    }
+	
+	try{
+		name = name+".loc";
+		
+		var data = "";
+		data += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<loc version=\"1.0\" src=\"MojoTracker\">\n";
+		for (var i = 0; i < waypoints.length; i++) {
+			try{
+				data += "<waypoint>\n";
+				var row = waypoints.item(i);
+				if ((!row.alt) || (row.alt == "null"))
+					row.alt = 0;
+				data += "<name>"+ row.title.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +""
+				if (row.description != "")
+					data += "\n - "+ row.description.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+				data += "</name>\n";
+				data += "<coord lon=\""+row.lon+"\" lat=\""+row.lat+"\" ele=\""+row.alt+"\"/>\n";
+				data += "</waypoint>\n";
+			}catch(e){
+				Mojo.Log.error("Error 1.2: "+e);
+			}
+		}
+		data += "</loc>\n";
+		
+        callback.progress(1,1, $L("xml data built..."));
+
+        setTimeout(this.writeGPXFile.bind(this), 500,
+                   controller, name, data,
+                   callback, 0);
+    } catch (e) {
+        Mojo.Log.error(e);
+        callback.errorHandler("Error 2: "+e);
+    }
+}
 
 Mojotracker.prototype.timeoutOccured = function(strUTC){
 	var strSQL = "INSERT INTO `timeouts` VALUES ('"+strUTC+"'; GO;";
@@ -326,7 +375,7 @@ Mojotracker.prototype.timeoutOccured = function(strUTC){
         );
 }
 
-Mojotracker.prototype.createGPXContent = function(controller, result, waypoints, name, callback) {
+Mojotracker.prototype.createGPXContent = function(controller, result, waypoints, name, callback, type) {
     if (!result.rows){
         callback.errorHandler( $L("BAD base result"));
         Mojo.Log.error("BAD base result");
@@ -335,7 +384,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, waypoints,
 
     try {
 		var data = "";
-		if (Config.getInstance().getExportFormat() == "kml"){
+		if (type == "kml"){
 			data += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 			data += "<kml xmlns=\"http://www.opengis.net/kml/2.2\"\n";
 			data += " xmlns:gx=\"http://www.google.com/kml/ext/2.2\"\n";
@@ -390,7 +439,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, waypoints,
 			name = name+".kml";
 		}else{
 			// gpx
-			data += "<?xml version='1.0' encoding='ISO-8859-1'?>\n";
+			data += "<?xml version='1.0' encoding='UTF-8'?>\n";
 			data += "<gpx version='1.1'\n";
 			data += "creator='MojoTracker - http://code.google.com/p/mojotracker/'\n";
 			data += "xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'\n";
