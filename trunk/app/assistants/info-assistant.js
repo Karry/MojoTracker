@@ -133,7 +133,6 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 		call = 1;
         
 		strokeFcn = function () {
-            // Original resolution: x, y.
 			call ++;
 			myCall = call;
 			config = Config.getInstance();
@@ -161,6 +160,12 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 					continue;
 				lastX = x; lastY = y;
 				
+				/*
+				alpha = 1 - (horizAccuracy *0.005);
+				alpha = alpha < 0.5? 0.5: alpha;
+				*/
+				alpha = 1;
+				context.strokeStyle = "rgba(255,0,0,"+alpha+")";
 				if (i == 0){
 					context.moveTo(x, y);
 					//inst.showDialog("Error", point.lat+" x "+point.lat+ " >>> "+x+"x"+y+" "+leftPos+"x"+topPos +", "+scale);
@@ -174,19 +179,9 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 						context.lineTo(x, y);
 					}
 				}
-				//Mojo.log("track "+x+"x"+y+"");
-			
-				
 			}
             context.stroke();
             context.closePath();
-			/*
-			context.strokeStyle = "rgba(0,0,255,1)";
-			context.beginPath();
-			context.strokeRect(10, 10, 110, 110);
-			context.stroke();
-			context.closePath();
-			*/
         }
 		
         img.src = loc;
