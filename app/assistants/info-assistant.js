@@ -51,6 +51,127 @@ InfoAssistant.prototype.setup = function(){
     }
 	
 	this.refreshTrackInfo();
+	this.refreshMap();
+}
+
+InfoAssistant.prototype.refreshMap = function(){
+	try{
+		callback = {
+			errorHandler : this.drawErrorHandler.bind(this),
+			handleResult : this.handleAllPointsResult.bind(this)
+		}
+		mojotracker.getAllPoints( this.item , callback );		
+	}catch(e){
+		this.showDialog('error', e);
+	}
+}
+
+InfoAssistant.prototype.handleAllPointsResult = function(results){
+	 if (results.rows){
+		minLat = minLon = maxLat = maxLon = undefined;
+		for (i = 0; i< results.rows.length; i++){
+			point = results.rows.item(i);
+			if (minLat == undefined || minLat > point.lat)
+				minLat = point.lat;
+			if (maxLat == undefined || maxLat < point.lat)
+				maxLat = point.lat;
+			if (minLon == undefined || minLon > point.lon)
+				minLon = point.lon;
+			if (maxLon == undefined || maxLon < point.lon)
+				maxLon = point.lon;
+		}
+		
+		tracker = Mojotracker.getInstance();
+        //        X            Y       :)
+        p1 = { lon: minLon, lat: minLat };
+        p2 = { lon: maxLon, lat: maxLat }
+        realHeight = tracker.approximateDistance( p1.lat, p1.lon, p2.lat, p1.lon );
+        realWidth = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, p2.lon );
+		
+        larger = realWidth > realHeight? realWidth : realHeight;
+        if (larger == 0) 
+            return;
+        maxImageDim = 320;
+        //magic = 0.00028;
+        magic = 0.00017820;
+        scale = Math.round( larger / (magic * maxImageDim) );
+        
+        //417 x -503
+        premissWidth = Math.round((realWidth / scale) / magic);
+        premissHeight = Math.round((realHeight / scale) / magic);
+        
+        loc = "http://tile.openstreetmap.org/cgi-bin/export?bbox="+p1.lon+","+p1.lat+","+p2.lon+","+p2.lat+"&scale="+scale+"&format=jpeg"
+        //window.location = loc;
+        
+        // Get the canvas element.
+        var elem = document.getElementById('mapCanvas');
+        if (!elem || !elem.getContext) {
+            return;
+        }
+        
+        // Get the canvas 2d context.
+        var context = elem.getContext('2d');
+        if (!context || !context.drawImage) {
+            return;
+        }
+        elem.width = premissWidth;
+        elem.height = premissHeight;
+				
+		var img = new Image();
+		inst = this;
+		call = 1;
+        
+		strokeFcn = function () {
+            // Original resolution: x, y.
+			call ++;
+			myCall = call;
+			//inst.showDialog("Error", Math.abs(premissWidth) +" x "+ Math.abs(premissHeight)+" "+img.width+" "+img.height);
+			if (img.complete && img.width != 0 && img.height != 0)
+				context.drawImage(img, 0, 0, Math.abs(premissWidth), Math.abs(premissHeight));
+        
+            context.strokeStyle = "rgba(255,0,0,1)";
+            context.lineWidth   = 2;
+    
+            context.beginPath();
+			lastX = lastY = 0;
+            for (i = 0; i< results.rows.length; i++){
+				if (myCall != call )
+					return;
+				point = results.rows.item(i);
+				leftPos = tracker.approximateDistance( maxLat, minLon, maxLat, point.lon );
+				topPos = tracker.approximateDistance( maxLat, minLon, point.lat, minLon );			
+				
+				x = Math.round((leftPos / scale) / magic);
+				y = Math.round((topPos / scale) / magic);
+				if (lastX == x && lastY == y)
+					continue;
+				lastX = x; lastY = y;
+				
+				if (i == 0){
+					context.moveTo(x, y);
+					//inst.showDialog("Error", point.lat+" x "+point.lat+ " >>> "+x+"x"+y+" "+leftPos+"x"+topPos +", "+scale);
+				}else{
+					context.lineTo(x, y);
+				}
+				//Mojo.log("track "+x+"x"+y+"");
+			
+				
+			}
+            context.stroke();
+            context.closePath();
+			/*
+			context.strokeStyle = "rgba(0,0,255,1)";
+			context.beginPath();
+			context.strokeRect(10, 10, 110, 110);
+			context.stroke();
+			context.closePath();
+			*/
+        }
+		
+        img.src = loc;
+        img.addEventListener('load', strokeFcn, false);
+		strokeFcn();
+	 }
 }
 
 InfoAssistant.prototype.cleanup = function(event){

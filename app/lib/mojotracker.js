@@ -108,6 +108,20 @@ Mojotracker.prototype.getAltitudeProfile = function(item, callback){
         );    
 }
 
+Mojotracker.prototype.getAllPoints = function(item, callback){
+    var strSQL = "SELECT `time`, `lat`, `lon`, `horizAccuracy`  FROM `" + item.name + "` WHERE `lat` != 'nothing' AND `lat` != 'null'; GO;";
+    
+    this.executeSQL(strSQL,[], 
+            function(tx, result) {
+                //this.drawAltitudeProfile1(canvas, result, item, callback);
+                callback.handleResult(result);
+            }.bind(this),
+            function(tx, error) {
+                callback.errorHandler(error);
+            }.bind(this)                    
+        );	
+}
+
 Mojotracker.prototype.getVelocityProfile = function(item, callback){
 
     var strSQL = "SELECT `time`, `velocity` FROM `" + item.name + "` WHERE `velocity` >= 0; GO;";
@@ -138,6 +152,22 @@ Mojotracker.prototype.addWaypoint = function(title, description, lat, lon, alt, 
 	
 }
 
+Mojotracker.prototype.approximateDistance = function(lat1, lon1, lat2, lon2){
+	var lat1Rad = lat1*( Math.PI / 180);
+	var lon1Rad = lon1*( Math.PI / 180);
+	var lat2Rad = lat2*( Math.PI / 180);
+	var lon2Rad = lon2*( Math.PI / 180);
+	
+	var R = 6371000; // Earth radius (mean) in metres
+	var dLat = lat2Rad - lat1Rad;
+	var dLon = lon2Rad - lon1Rad; 
+	var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+			Math.cos(lat1Rad) * Math.cos(lat2Rad) * 
+			Math.sin(dLon/2) * Math.sin(dLon/2); 
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+	return R * c;
+}
+
 Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy,
                                          vertAccuracy, errorHandler ){
 
@@ -163,19 +193,7 @@ Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horiz
     this.distanceFromPrevious = 0;
     if (horizAccuracy < Config.getInstance().getMaxHorizAccuracy()){
         if (this.lastPoint != null){
-            var lat1Rad = this.lastPoint.lat*( Math.PI / 180);
-            var lon1Rad = this.lastPoint.lon*( Math.PI / 180);
-            var lat2Rad = lat*( Math.PI / 180);
-            var lon2Rad = lon*( Math.PI / 180);
-            
-            var R = 6371000; // Earth radius (mean) in metres
-            var dLat = lat2Rad - lat1Rad;
-            var dLon = lon2Rad - lon1Rad; 
-            var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(lat1Rad) * Math.cos(lat2Rad) * 
-                    Math.sin(dLon/2) * Math.sin(dLon/2); 
-            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-            this.distanceFromPrevious = R * c;
+			this.distanceFromPrevious = this.approximateDistance(this.lastPoint.lat, this.lastPoint.lon, lat, lon);
         }
         this.lastPoint = {
             lat: lat,
