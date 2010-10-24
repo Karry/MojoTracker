@@ -17,7 +17,7 @@ We want add some configuration choices:
  * *Maximum accuracy for export*
  * ...
 
-== Add waypoints ==
+== ~~Add waypoints~~ ==
 
 Add button for add waypoint to current track. It would be possible specify name and comment (and photo or sound record?).
 
