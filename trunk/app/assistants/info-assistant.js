@@ -60,7 +60,7 @@ InfoAssistant.prototype.refreshMap = function(){
 			errorHandler : this.drawErrorHandler.bind(this),
 			handleResult : this.handleAllPointsResult.bind(this)
 		}
-		mojotracker.getAllPoints( this.item , callback );		
+		mojotracker.getAllPoints( this.item , callback, 150);		
 	}catch(e){
 		this.showDialog('error', e);
 	}
@@ -83,12 +83,22 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 		
 		tracker = Mojotracker.getInstance();
         //        X            Y       :)
-        p1 = { lon: minLon, lat: minLat };
-        p2 = { lon: maxLon, lat: maxLat }
+        p1 = { lon: minLon, lat: maxLat };
+        p2 = { lon: maxLon, lat: minLat }
         realHeight = tracker.approximateDistance( p1.lat, p1.lon, p2.lat, p1.lon );
-        realWidth = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, p2.lon );
-		
+        realWidth = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, p2.lon );		
         larger = realWidth > realHeight? realWidth : realHeight;
+		
+		// add some borders
+		p1 = tracker.movePoint(p1, larger * -0.1, larger * -0.1);
+		p2 = tracker.movePoint(p2, larger * +0.1, larger * +0.1);
+		
+		//this.showDialog("test", "dist "+p2.lon+" "+p2.lat+" / "+pm2.lon+" "+pm2.lat+" ");
+		
+        realHeight = tracker.approximateDistance( p1.lat, p1.lon, p2.lat, p1.lon );
+        realWidth = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, p2.lon );		
+        larger = realWidth > realHeight? realWidth : realHeight;
+		
         if (larger == 0) 
             return;
         maxImageDim = 320;
@@ -125,6 +135,7 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
             // Original resolution: x, y.
 			call ++;
 			myCall = call;
+			config = Config.getInstance();
 			//inst.showDialog("Error", Math.abs(premissWidth) +" x "+ Math.abs(premissHeight)+" "+img.width+" "+img.height);
 			if (img.complete && img.width != 0 && img.height != 0)
 				context.drawImage(img, 0, 0, Math.abs(premissWidth), Math.abs(premissHeight));
@@ -138,8 +149,10 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 				if (myCall != call )
 					return;
 				point = results.rows.item(i);
-				leftPos = tracker.approximateDistance( maxLat, minLon, maxLat, point.lon );
-				topPos = tracker.approximateDistance( maxLat, minLon, point.lat, minLon );			
+				lastTime = time;
+				time = Date.parse( point.time.replace("T"," ").replace("Z"," ") );
+				leftPos = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, point.lon );
+				topPos  = tracker.approximateDistance( p1.lat, p1.lon, point.lat, p1.lon );			
 				
 				x = Math.round((leftPos / scale) / magic);
 				y = Math.round((topPos / scale) / magic);
@@ -151,7 +164,14 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 					context.moveTo(x, y);
 					//inst.showDialog("Error", point.lat+" x "+point.lat+ " >>> "+x+"x"+y+" "+leftPos+"x"+topPos +", "+scale);
 				}else{
-					context.lineTo(x, y);
+					if (lastTime < (time - ( config.getMaxGraphSpace() *1000) )){
+						context.stroke();
+						context.closePath();
+						context.beginPath();
+						context.moveTo(x, y);
+					}else{
+						context.lineTo(x, y);
+					}
 				}
 				//Mojo.log("track "+x+"x"+y+"");
 			
