@@ -89,12 +89,12 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
         realWidth = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, p2.lon );		
         larger = realWidth > realHeight? realWidth : realHeight;
 		
+		if (larger < 200)
+			larger = 200;
+		
 		// add some borders
 		p1 = tracker.movePoint(p1, larger * -0.1, larger * -0.1);
 		p2 = tracker.movePoint(p2, larger * +0.1, larger * +0.1);
-		
-		//this.showDialog("test", "dist "+p2.lon+" "+p2.lat+" / "+pm2.lon+" "+pm2.lat+" ");
-		
         realHeight = tracker.approximateDistance( p1.lat, p1.lon, p2.lat, p1.lon );
         realWidth = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, p2.lon );		
         larger = realWidth > realHeight? realWidth : realHeight;
@@ -110,8 +110,9 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
         premissWidth = Math.round((realWidth / scale) / magic);
         premissHeight = Math.round((realHeight / scale) / magic);
         
-        loc = "http://tile.openstreetmap.org/cgi-bin/export?bbox="+p1.lon+","+p1.lat+","+p2.lon+","+p2.lat+"&scale="+scale+"&format=jpeg"
-        //window.location = loc;
+        loc = "http://tile.openstreetmap.org/cgi-bin/export?bbox="+p1.lon+","+p2.lat+","+p2.lon+","+p1.lat+"&scale="+scale+"&format=jpeg"
+		// for debug...
+		//Mojo.Controller.stageController.setClipboard(loc);	
         
         // Get the canvas element.
         var elem = document.getElementById('mapCanvas');
