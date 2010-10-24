@@ -108,8 +108,8 @@ Mojotracker.prototype.getAltitudeProfile = function(item, callback){
         );    
 }
 
-Mojotracker.prototype.getAllPoints = function(item, callback){
-    var strSQL = "SELECT `time`, `lat`, `lon`, `horizAccuracy`  FROM `" + item.name + "` WHERE `lat` != 'nothing' AND `lat` != 'null'; GO;";
+Mojotracker.prototype.getAllPoints = function(item, callback, maxAccuracy){
+    var strSQL = "SELECT `time`, `lat`, `lon`, `horizAccuracy`, `distanceFromPrev`, `time`  FROM `" + item.name + "` WHERE `lat` != 'nothing' AND `lat` != 'null' AND `horizAccuracy` <= "+maxAccuracy+"; GO;";
     
     this.executeSQL(strSQL,[], 
             function(tx, result) {
@@ -166,6 +166,21 @@ Mojotracker.prototype.approximateDistance = function(lat1, lon1, lat2, lon2){
 			Math.sin(dLon/2) * Math.sin(dLon/2); 
 	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
 	return R * c;
+}
+
+Mojotracker.prototype.movePoint = function(p, horizontal, vertical){
+	var latRad = p.lat*( Math.PI / 180);
+	var lonRad = p.lon*( Math.PI / 180);
+
+	var R = 6371000; // Earth radius (mean) in metres
+	horizRad = horizontal / R;
+	vertRad = vertical / R;
+	
+	latRad -= vertRad;
+	lonRad += horizRad;
+	
+	return {lat : (latRad / (Math.PI / 180)),
+			lon : (lonRad / (Math.PI / 180))};
 }
 
 Mojotracker.prototype.addNode = function( lat, lon, alt, strUTC, velocity, horizAccuracy,
