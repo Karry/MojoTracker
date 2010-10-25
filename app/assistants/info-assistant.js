@@ -137,8 +137,10 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 			myCall = call;
 			config = Config.getInstance();
 			//inst.showDialog("Error", Math.abs(premissWidth) +" x "+ Math.abs(premissHeight)+" "+img.width+" "+img.height);
-			if (img.complete && img.width != 0 && img.height != 0)
+			if (img.complete && img.width != 0 && img.height != 0){
 				context.drawImage(img, 0, 0, Math.abs(premissWidth), Math.abs(premissHeight));
+				$('mapStatus').innerHTML = "";
+			}
         
             context.strokeStyle = "rgba(255,0,0,1)";
             context.lineWidth   = 2;
@@ -182,10 +184,22 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 			}
             context.stroke();
             context.closePath();
-        }
+        }.bind(this);
 		
+		$('mapStatus').innerHTML = $L("loading map from OpenStreetMap.org...");
         img.src = loc;
+		this.mapUrl = loc;
+		this.controller.listen('mapCanvas', Mojo.Event.tap,
+                           this.handleMapTap.bind(this));
+		
+
         img.addEventListener('load', strokeFcn, false);
+		img.addEventListener("error", function(e){
+				$('mapStatus').innerHTML = $L("loading map from OpenStreetMap.org failed (server is probably busy)");
+			}, false); 
+		img.addEventListener("abort", function(e){
+				$('mapStatus').innerHTML = $L("loading map from OpenStreetMap.org aborted");
+			}, false); 
 		strokeFcn();
 	 }
 }
@@ -595,6 +609,27 @@ InfoAssistant.prototype.handleWaypointTap = function(event){
 		this.controller.popupSubmenu({
 			onChoose: function(method){
 					this.sendPosition(method, item);
+				}.bind(this),
+			placeNear: elem,
+			items: locPopupModel
+		});
+	}catch(e){
+		this.showDialog("Error", Object.toJSON(e));
+	}		
+}
+
+InfoAssistant.prototype.handleMapTap = function(event){
+	try{
+		//item = event.item;
+		elem = event.target;
+		var locPopupModel;
+		locPopupModel = [
+			{label: $L('Copy url to clipboard'), command: 'clipboard'},
+		];
+		
+		this.controller.popupSubmenu({
+			onChoose: function(method){
+					Mojo.Controller.stageController.setClipboard(this.mapUrl);	
 				}.bind(this),
 			placeNear: elem,
 			items: locPopupModel
