@@ -19,19 +19,63 @@ FirstAssistant.prototype.setup = function(){
 		
 	// TODO: add ability start tracking automaticaly
 	this.saveTrack = false;
+	
+	// append track if it is not closed
+	this.openTrackCookie = new Mojo.Model.Cookie( 'openTrack' );
+    openTrack = this.openTrackCookie.get();
+    if (openTrack != undefined && openTrack != null && openTrack != "null"){
+		alertAttributes = {
+			//	onChoose
+			// Accepts the value of the selection made in the diologue
+			onChoose: function(value) {
+				if (value =="yes"){
+					try{
+						mojotracker = Mojotracker.getInstance();
+						mojotracker.appendTrack( openTrack, function(){
+								$('statusmsg').update("Append track " + openTrack);
+								this.nullHandleCount = 0;				
+								this.saveTrack = true;
+								this.saveTrackToggleModel.value = this.saveTrack;
+								this.controller.modelChanged(this.saveTrackToggleModel, this);
+								
+								this.showTrackInformations();								
+							}.bind(this), this.tableErrorHandler.bind(this));
+					}catch (e){
+						$('errormsg').update("DB Error: " + e);
+					}					
+				}
+			}.bind(this),
+	
+			title: $L("Continue with tracking?"),
+			message: $L("Track #{trackname} is still open, continue with it?")
+                            .interpolate({trackname:"\"" + openTrack +"\""}),
+	
+			//	Choices
+			// sets of labels, associated values and button types (Green, Gray, Red, Light Gray respectively)
+			choices:[
+				{label:$L('Yes'), value:"yes", type:'affirmative'},
+				{label:$L("No"), value:"no", type:'negative'},
+			]
+		},
+		this.controller.showAlertDialog(alertAttributes);
+		
+    }else{
+		if (this.saveTrack)
+			this.createNewTrack();		
+	}
+	
 			    
 	//	Setup Toggles
+	this.saveTrackToggleModel = {
+			value: this.saveTrack,
+			disabled: false 
+		};
 	this.controller.setupWidget('saveTrackToggle', {
 			modelProperty: "value"
 		},
-		{
-			value: this.saveTrack,
-			disabled: false 
-		});
+		this.saveTrackToggleModel);
 	this.controller.listen('saveTrackToggle', Mojo.Event.propertyChanged,
                            this.handleSaveTrackHandleAction.bind(this));
-	if (this.saveTrack)
-		this.createNewTrack();
 			    
     this.controller.listen('showMoreInfoButton', Mojo.Event.tap,
                            this.handleShowMoreButtonTap.bind(this));
@@ -406,6 +450,11 @@ FirstAssistant.prototype.cleanup = function(event){
 	/* this function should do any cleanup needed before the scene is destroyed as 
 	   a result of being popped off the scene stack */
 	this.stopTracking();
+	
+	tracker = Mojotracker.getInstance();
+	openTrack = tracker.getCurrentTrack();
+	this.openTrackCookie.put(openTrack);
+	
 	this.closeTrack();
 }
 
