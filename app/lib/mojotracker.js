@@ -34,6 +34,46 @@ Mojotracker.prototype.dbConnect = function(){
     this.db = openDatabase('ext:OsmDb', '', 'Sample Data Store', 65536);
 }
 
+Mojotracker.prototype.appendTrack = function(trackName, successHandler, errorHandler){
+    if (!this.db){
+        Mojo.log("no db!");
+        return;
+    }
+
+    if (this.tracename)
+        closeTrack();
+
+	strSQL = "SELECT * FROM `"+trackName+"`;";
+    this.executeSQL(strSQL,[], 
+            function(tx, result) {
+				this.tracename = trackName;
+				
+				this.total = this.saved = result.rows.length;
+				this.lastAcceptedPoint = this.lastPoint = result.rows.item( result.rows.length -1 );
+
+				this.trackLength = 0;
+				this.minAltitude = null;
+				this.maxAltitude = null;
+				this.maxVelocity = null;
+				for (var i = 0; i < result.rows.length; i++) {
+					var row = result.rows.item(i);
+					this.trackLength += row.distanceFromPrev;
+					if (this.minAltitude == null || row.altitude < this.minAltitude)
+						this.minAltitude = row.altitude;
+					if (this.maxAltitude == null || row.altitude > this.maxAltitude)
+						this.maxAltitude = row.altitude;
+					if (this.maxVelocity == null || row.velocity > this.maxVelocity)
+						this.maxVelocity = row.velocity;
+				}
+				
+                successHandler(result);
+            }.bind(this),
+            function(tx, error) {
+                errorHandler(error);
+            }.bind(this)                    
+        );	
+}
+
 Mojotracker.prototype.createTrack = function(name, errorHandler){
     if (!this.db){
         Mojo.log("no db!");
