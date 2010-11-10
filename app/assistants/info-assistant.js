@@ -214,10 +214,12 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 		this.config = Config.getInstance();
 		mojotracker = Mojotracker.getInstance();
 		
+		now = new Date();
+		nowUTC = new Date(now.getTime() + (now.getTimezoneOffset()*60*1000));
 		if (this.item.start)
 			this.timeMin = Date.parse( this.item.start.replace("T"," ").replace("Z"," "));
 		else
-			this.timeMin = (new Date()).getTime();
+			this.timeMin = nowUTC;
 			
 		if (this.item.stop)
 			this.timeMax = Date.parse( this.item.stop.replace("T"," ").replace("Z"," "));
@@ -225,8 +227,8 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 			this.timeMax = this.timeMin;
 			
 		// is current track is active, set maxTime to current time
-		if (mojotracker.isActive(this.item.name) && (this.timeMax < (new Date()).getTime()))
-			this.timeMax = (new Date()).getTime();
+		if (mojotracker.isActive(this.item.name) && (this.timeMax < nowUTC))
+			this.timeMax = nowUTC;
 	
 		$('startTime').innerHTML    = this.config.formatUTCDateTime( new Date(this.timeMin));
 		$('endTime').innerHTML      = this.config.formatUTCDateTime( new Date(this.timeMax));
