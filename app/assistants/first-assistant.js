@@ -89,7 +89,7 @@ FirstAssistant.prototype.setup = function(){
 																					  this.lat,
 																					  this.lon,
 																					  this.alt,
-																					  this.formatDate(new Date(), 2),
+																					  this.strUTC,
 																					  this.tableErrorHandler.bind(this));
 										
 									this.controller.showDialog({
@@ -229,7 +229,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event){
 	lat = event.latitude.toFixed(6);
 	lon = event.longitude.toFixed(6);
 	alt = event.altitude;
-	strUTC = this.formatDate(now, 2);
+	this.strUTC = this.formatDate( new Date(now.getTime() + (now.getTimezoneOffset()*60*1000)), 2);
 	horizAccuracy = event.horizAccuracy.toFixed(0);
 	vertAccuracy = event.vertAccuracy.toFixed(0);
 	direction = event.heading.toFixed(0);
@@ -245,7 +245,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event){
 
     // save values to DB	
 	if (this.saveTrack)
-		mojotracker.addNode( lat, lon, alt, strUTC, velocity, horizAccuracy, vertAccuracy, this.tableErrorHandler.bind(this) );
+		mojotracker.addNode( lat, lon, alt, this.strUTC, velocity, horizAccuracy, vertAccuracy, this.tableErrorHandler.bind(this) );
 
     // display values
 	$('latitude').innerHTML 	= this.config.userLatitude( lat );
@@ -275,7 +275,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event){
     this.updateTimeout = setTimeout( function(){
                 lastUpdateElement = document.getElementById("lastUpdate");
                 lastUpdateElement.style.color = "rgba(200, 0, 0, 0.7)" ;
-				mojotracker.timeoutOccured( strUTC );
+				mojotracker.timeoutOccured( this.strUTC );
             }.bind(this), this.config.getUpdateTimeout() * 1000);
     
     // display compas
@@ -302,6 +302,9 @@ FirstAssistant.prototype.handleGpsResponse = function(event){
         
     // for debug...
     //$('statusmsg').innerHTML = event.heading +", " + event.errorCode;
+	//$('statusmsg').innerHTML =  now.getTime()+" / "+event.timestamp+" \n "+now.toUTCString()+" ("+now.getTimezoneOffset()+") "+this.strUTC;
+	//$('statusmsg').innerHTML = Object.toJSON(event);
+
 
 	this.nullHandleCount = 0;	
 }

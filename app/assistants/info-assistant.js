@@ -228,8 +228,8 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 		if (mojotracker.isActive(this.item.name) && (this.timeMax < (new Date()).getTime()))
 			this.timeMax = (new Date()).getTime();
 	
-		$('startTime').innerHTML    = this.config.formatDateTime( new Date(this.timeMin));
-		$('endTime').innerHTML      = this.config.formatDateTime( new Date(this.timeMax));
+		$('startTime').innerHTML    = this.config.formatUTCDateTime( new Date(this.timeMin));
+		$('endTime').innerHTML      = this.config.formatUTCDateTime( new Date(this.timeMax));
 		
 		$('minAltitude').innerHTML 	= this.config.userSmallDistance(this.item.minAltitude, true);
 		$('maxAltitude').innerHTML 	= this.config.userSmallDistance(this.item.maxAltitude, true);
