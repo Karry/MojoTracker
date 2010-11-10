@@ -172,7 +172,12 @@ Config.prototype.formatDateTime = function(dateobj){
 	mnth = dateobj.getMonth() + 1; if (mnth > 9) strMnth = String(mnth); else strMnth = "0" + String(mnth);
 	yr   = dateobj.getFullYear(); strYr = String(yr);
     
-    return strDays + "/" + strMnth + "/" + strYr + " " + strHrs + ":" + strMins + ":" + strSecs;    
+    return strDays + "." + strMnth + "." + strYr + " " + strHrs + ":" + strMins + ":" + strSecs;    
+}
+
+Config.prototype.formatUTCDateTime = function(dateobj){
+	now = new Date();
+	return this.formatDateTime( new Date( dateobj.getTime() + ( now.getTimezoneOffset()*-60*1000 ) ))+" (GTM+"+(now.getTimezoneOffset()/-60)+")";
 }
 
 Config.prototype.formatTime = function(dateobj, shortFormat){
