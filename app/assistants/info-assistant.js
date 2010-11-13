@@ -39,17 +39,7 @@ InfoAssistant.prototype.setup = function(){
 
     this.controller.setupWidget('waypointList', this.waypointAtts , this.currentModel);
 	this.controller.listen(this.waypointList, Mojo.Event.listTap, this.handleWaypointTap.bind(this));	
-	
-    try{
-        Mojotracker.getInstance().getWaypoints(  this.item.name, this.waypointsResultHandler.bind(this),
-												function(transaction, error){
-													if (error.code != 1) // no such table
-														this.showDialog("error","code "+error.code+": "+error.message);
-												}.bind(this) );
-    }catch (e){
-		this.showDialog("Error", 'Exception when getting waypoint list ['+e+']');
-    }
-	
+		
 	this.refreshTrackInfo();
 	this.refreshMap();
 }
@@ -66,11 +56,11 @@ InfoAssistant.prototype.refreshMap = function(){
 	}
 }
 
-InfoAssistant.prototype.handleAllPointsResult = function(results){
-	 if (results.rows){
+InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
+	 if (result.rows){
 		minLat = minLon = maxLat = maxLon = undefined;
-		for (i = 0; i< results.rows.length; i++){
-			point = results.rows.item(i);
+		for (i = 0; i< result.rows.length; i++){
+			point = result.rows.item(i);
 			if (minLat == undefined || minLat > point.lat)
 				minLat = point.lat;
 			if (maxLat == undefined || maxLat < point.lat)
@@ -147,10 +137,10 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
     
             context.beginPath();
 			lastX = lastY = 0;
-            for (i = 0; i< results.rows.length; i++){
+            for (i = 0; i< result.rows.length; i++){
 				if (myCall != call )
 					return;
-				point = results.rows.item(i);
+				point = result.rows.item(i);
 				lastTime = time;
 				time = Date.parse( point.time.replace("T"," ").replace("Z"," ") );
 				leftPos = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, point.lon );
@@ -163,6 +153,7 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 				lastX = x; lastY = y;
 				
 				/*
+				 // stroke path with more error more transparency
 				alpha = 1 - (horizAccuracy *0.005);
 				alpha = alpha < 0.5? 0.5: alpha;
 				*/
@@ -184,6 +175,27 @@ InfoAssistant.prototype.handleAllPointsResult = function(results){
 			}
             context.stroke();
             context.closePath();
+			
+			if (waypoints && waypoints.rows && waypoints.rows.length > 0){
+				context.strokeStyle = "rgba(0,0,255,1)";
+				context.fillStyle = "rgba(0,0,255,1)";
+				context.lineWidth   = 1;
+				for ( i=0; i < waypoints.rows.length; i++){
+					point = waypoints.rows.item(i);
+					leftPos = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, point.lon );
+					topPos  = tracker.approximateDistance( p1.lat, p1.lon, point.lat, p1.lon );			
+					
+					x = Math.round((leftPos / scale) / magic);
+					y = Math.round((topPos / scale) / magic);
+					context.strokeText(point.title, x+5, y+3);
+							   
+					context.beginPath();
+					context.arc(x,y,4,0,Math.PI*2,true);
+					context.closePath();
+					context.stroke();
+					context.fill();
+				}
+			}
         }.bind(this);
 		
 		$('mapStatus').innerHTML = $L("loading map from OpenStreetMap.org...");
@@ -241,17 +253,26 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 		$('tracknum').innerHTML 	= this.item.nodes;
 		$('currentTrack').innerHTML = this.item.name;
 	
+		// ALTITUDE GRAPH
 		callback = {
 			errorHandler : this.drawErrorHandler.bind(this),
 			handleResult : this.handleAltitudeResult.bind(this)
 		}
 		mojotracker.getAltitudeProfile( this.item , callback );
 	
+		// VELOCITY PROFILE
 		callback = {
 			errorHandler : this.drawErrorHandler.bind(this),
 			handleResult : this.handleSpeedResult.bind(this)
 		}
 		mojotracker.getVelocityProfile( this.item , callback );
+		
+		// WAYPOINTS LIST
+		mojotracker.getWaypoints(  this.item.name, this.waypointsResultHandler.bind(this),
+													function(transaction, error){
+														if (error.code != 1) // no such table
+															this.showDialog("error","code "+error.code+": "+error.message);
+													}.bind(this) );		
 		
 		// if it is current track, refresh data after 5seconds
 		if ( mojotracker.getCurrentTrack() == this.item.name){
@@ -267,12 +288,12 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 	}
 }
 
-InfoAssistant.prototype.waypointsResultHandler = function(transaction, results){
+InfoAssistant.prototype.waypointsResultHandler = function(transaction, result){
 	config = Config.getInstance();
-    if (results.rows){
+    if (result.rows){
 		try{
-			for (i = 0; i< results.rows.length; i++){
-				newItem = results.rows.item(i);
+			for (i = 0; i< result.rows.length; i++){
+				newItem = result.rows.item(i);
 				
 				newItem.posFormated = config.userLatitude( newItem.lat)+" "+config.userLongitude( newItem.lon);
 				this.currentModel.items.push(newItem);
@@ -301,13 +322,13 @@ InfoAssistant.prototype.deactivate = function(event){
 }
 
 
-InfoAssistant.prototype.trackInfoHandler = function(transaction, results){
-    if ((results.rows) && (results.rows.length == 1)){
-        this.item = results.rows.item(0);
+InfoAssistant.prototype.trackInfoHandler = function(transaction, result){
+    if ((result.rows) && (result.rows.length == 1)){
+        this.item = result.rows.item(0);
         this.item.trackLengthFormated =  Config.getInstance().userDistance( this.item.trackLength , false);
 		this.refreshTrackInfo();    
     }else{
-		this.showDialog("Error", 'DB returned bad result ['+results.rows.length+']');
+		this.showDialog("Error", 'DB returned bad result ['+result.rows.length+']');
     }	
 }
 

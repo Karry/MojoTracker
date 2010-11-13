@@ -153,8 +153,14 @@ Mojotracker.prototype.getAllPoints = function(item, callback, maxAccuracy){
     
     this.executeSQL(strSQL,[], 
             function(tx, result) {
-                //this.drawAltitudeProfile1(canvas, result, item, callback);
-                callback.handleResult(result);
+				this.getWaypoints(  item.name,
+						function(tx, waypointsResult){
+							callback.handleResult(result, waypointsResult);
+						}.bind(this),
+						function(tx, error) {
+							callback.errorHandler(error);
+						}.bind(this)
+				);
             }.bind(this),
             function(tx, error) {
                 callback.errorHandler(error);
