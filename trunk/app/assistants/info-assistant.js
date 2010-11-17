@@ -23,7 +23,7 @@ InfoAssistant.prototype.setup = function(){
 
 
     // Set up a few models so we can test setting the widget model:
-    this.currentModel = {listTitle:$L('info.waypoints'), items:[]};
+    this.waypointsModel = {listTitle:$L('info.waypoints'), items:[]};
     // Store references to reduce the use of controller.get()
     this.waypointList = this.controller.get('waypointList');
 
@@ -37,11 +37,23 @@ InfoAssistant.prototype.setup = function(){
             emptyTemplate:'info/emptylist'
     };
 
-    this.controller.setupWidget('waypointList', this.waypointAtts , this.currentModel);
+    this.controller.setupWidget('waypointList', this.waypointAtts , this.waypointsModel);
 	this.controller.listen(this.waypointList, Mojo.Event.listTap, this.handleWaypointTap.bind(this));	
 		
 	this.refreshTrackInfo();
 	this.refreshMap();
+	this.refreshWaypointsList();
+}
+
+InfoAssistant.prototype.refreshWaypointsList = function(){
+		// WAYPOINTS LIST
+		mojotracker = Mojotracker.getInstance();
+		mojotracker.getWaypoints(  this.item.name, this.waypointsResultHandler.bind(this),
+													function(transaction, error){
+														if (error.code != 1) // no such table
+															this.showDialog("error","code "+error.code+": "+error.message);
+													}.bind(this) );		
+
 }
 
 InfoAssistant.prototype.refreshMap = function(){
@@ -266,14 +278,7 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 			handleResult : this.handleSpeedResult.bind(this)
 		}
 		mojotracker.getVelocityProfile( this.item , callback );
-		
-		// WAYPOINTS LIST
-		mojotracker.getWaypoints(  this.item.name, this.waypointsResultHandler.bind(this),
-													function(transaction, error){
-														if (error.code != 1) // no such table
-															this.showDialog("error","code "+error.code+": "+error.message);
-													}.bind(this) );		
-		
+				
 		// if it is current track, refresh data after 5seconds
 		if ( mojotracker.getCurrentTrack() == this.item.name){
 			inst = this;
@@ -296,8 +301,8 @@ InfoAssistant.prototype.waypointsResultHandler = function(transaction, result){
 				newItem = result.rows.item(i);
 				
 				newItem.posFormated = config.userLatitude( newItem.lat)+" "+config.userLongitude( newItem.lon);
-				this.currentModel.items.push(newItem);
-				this.waypointList.mojo.noticeAddedItems(this.currentModel.items.length, [newItem]);            
+				this.waypointsModel.items.push(newItem);
+				this.waypointList.mojo.noticeAddedItems(this.waypointsModel.items.length, [newItem]);            
 			}
 		}catch(e){
 			this.showDialog('Error', e);
