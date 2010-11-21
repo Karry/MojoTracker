@@ -3,6 +3,7 @@
     {"source": "app/assistants/app-assistant.js" },
     {"source": "app/assistants/progress-dialog-assistant.js" },
     {"source": "app/assistants/waypoint-dialog-assistant.js" },
+    {"source": "app/assistants/input-dialog-assistant.js" },
     {"source": "app/lib/mojotracker.js" },
     {"source": "app/lib/config.js" },
     {

@@ -72,7 +72,7 @@ TracksAssistant.prototype.tableErrorHandler = function(transaction, error){
 
 TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results){
     if ((results.rows) && (results.rows.length == 1)){
-        newItem = results.rows.item(0);
+        newItem = Object.clone( results.rows.item(0) );
         newItem.trackLengthFormated =  Config.getInstance().userDistance( newItem.trackLength , false);
 		newItem.lengthLabel = $L('length');
 		newItem.nodesLabel = $L('nodes');
@@ -99,6 +99,7 @@ TracksAssistant.prototype.handleTrackTap = function(event){
 	var trackPopupModel;
     trackPopupModel = [
         {label: $L('Info'), command: 'info'},
+        {label: $L('Rename'), command: 'rename'},
         {label: $L('Export as GPX'), command: 'gpx-export'},
         {label: $L('Export as KML'), command: 'kml-export'},
         {label: $L('Export Waypoints'), command: 'loc-export'},
@@ -108,6 +109,24 @@ TracksAssistant.prototype.handleTrackTap = function(event){
         onChoose: function(response){
             if (response == 'info') {
                 this.showInfo( event.item );
+            } else if (response == 'rename') {
+					this.dialog = new InputDialogAssistant(this.controller,
+								"Enter new name",
+								event.item.display_name,
+								function(value){
+									Mojotracker.getInstance().rename(event.item, value,
+												this.itemModified.bind(this),
+												function(tx, e){this.showDialog($L("Error"),e+" "+JSON.stringify(e));}.bind(this));
+								}.bind(this),
+								function(e){
+									this.showDialog($L("Error"),e);
+								}.bind(this));
+						
+					this.controller.showDialog({
+							template: 'dialogs/simple-input-dialog',
+							assistant: this.dialog,
+							preventCancel:false
+					 });
             } else if (response == 'gpx-export') {
                 this.exportData( event.item.name, 'gpx' );
             } else if (response == 'kml-export') {
@@ -123,7 +142,7 @@ TracksAssistant.prototype.handleTrackTap = function(event){
                     }.bind(this),
                     title: $L("Delete?"),
                     message: $L("Are you sure you want to delete the track #{trackname}?")
-                            .interpolate({trackname:"\"" + event.item.name +"\""}),
+                            .interpolate({trackname:"\"" + event.item.display_name +"\""}),
                     choices:[
                         {label:$L('Yes'), value:"yes", type:'affirmative'},
                         {label:$L('No'), value:"no", type:'negative'}
@@ -137,6 +156,17 @@ TracksAssistant.prototype.handleTrackTap = function(event){
         items: trackPopupModel
     });
 };
+
+TracksAssistant.prototype.itemModified = function(item){
+	//Mojo.Log.error("item modified "+item.name+" > "+item.display_name);
+	for (i = 0; i< this.currentModel.items.length; i++){
+		if (this.currentModel.items[i].name == item.name){
+			this.currentModel.items[i] = item;
+			break;
+		}
+	}
+	this.controller.modelChanged(this.currentModel, this);
+}
 
 TracksAssistant.prototype.showInfo = function( myItem ){
     Mojo.Controller.stageController.pushScene("info",{item: myItem});
@@ -194,8 +224,8 @@ TracksAssistant.prototype.createTrackNamesHandler = function(transaction, result
 
     if (results.rows){
         for (i = 0; i< results.rows.length; i++){
-            item = results.rows.item(i);
-            mojotracker.getTrackInfo( item.name, this.createTrackInfoHandler.bind(this), this.tableErrorHandler.bind(this) );
+            item = Object.clone( results.rows.item(i) );
+            mojotracker.getTrackInfo( item, this.createTrackInfoHandler.bind(this), this.tableErrorHandler.bind(this) );
         }
         this.trackCount = results.rows.length;
         this.updateHeader()

@@ -263,7 +263,7 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 		$('maxSpeed').innerHTML 	= this.config.userVelocity( this.item.maxVelocity );
 		$('trackLength').innerHTML 	= this.item.trackLengthFormated;
 		$('tracknum').innerHTML 	= this.item.nodes;
-		$('currentTrack').innerHTML = this.item.name;
+		$('currentTrack').innerHTML = "\""+this.item.display_name+"\"";
 	
 		// ALTITUDE GRAPH
 		callback = {
@@ -283,7 +283,7 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 		if ( mojotracker.getCurrentTrack() == this.item.name){
 			inst = this;
 			this.updateTimeout = setTimeout( function(){
-					Mojotracker.getInstance().getTrackInfo( inst.item.name,
+					Mojotracker.getInstance().getTrackInfo( inst.item,
 											 inst.trackInfoHandler.bind(inst),
 											 inst.tableErrorHandler.bind(inst));
 				}, 5 * 1000);		
@@ -298,7 +298,7 @@ InfoAssistant.prototype.waypointsResultHandler = function(transaction, result){
     if (result.rows){
 		try{
 			for (i = 0; i< result.rows.length; i++){
-				newItem = result.rows.item(i);
+				newItem = Object.clone( result.rows.item(i) );
 				
 				newItem.posFormated = config.userLatitude( newItem.lat)+" "+config.userLongitude( newItem.lon);
 				this.waypointsModel.items.push(newItem);
@@ -329,7 +329,7 @@ InfoAssistant.prototype.deactivate = function(event){
 
 InfoAssistant.prototype.trackInfoHandler = function(transaction, result){
     if ((result.rows) && (result.rows.length == 1)){
-        this.item = result.rows.item(0);
+        this.item = Object.clone( result.rows.item(0) );
         this.item.trackLengthFormated =  Config.getInstance().userDistance( this.item.trackLength , false);
 		this.refreshTrackInfo();    
     }else{
