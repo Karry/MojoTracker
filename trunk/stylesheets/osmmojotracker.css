@@ -75,3 +75,9 @@ p{
 	background: url(../images/icon32.png) no-repeat;
 }
 
+.unwrapped{
+	white-space: nowrap;
+	overflow: hidden;
+	pading-right:10px;
+	text-overflow: ellipsis;
+}

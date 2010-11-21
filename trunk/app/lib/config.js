@@ -162,6 +162,16 @@ Config.prototype.userDistance = function(distanceM, canNegative){
     return distanceM+" m";    
 }
 
+Config.prototype.formatShortDateTime = function(dateobj){
+    // FIXME: add support for locale, or configurable format
+	day  = dateobj.getDate(); //if (day > 9) strDays = String(day); else strDays = "0" + String(day);
+	mnth = dateobj.getMonth() + 1; //if (mnth > 9) strMnth = String(mnth); else strMnth = "0" + String(mnth);
+	mins = dateobj.getMinutes(); if (mins > 9) strMins = String(mins); else strMins = "0" + String(mins);
+	hrs  = dateobj.getHours(); if (hrs > 9) strHrs = String(hrs); else strHrs = "0" + String(hrs);
+    
+    return day + "." + mnth + ". " + strHrs + ":" + strMins ;
+}
+
 Config.prototype.formatDateTime = function(dateobj){
     // FIXME: add support for locale, or configurable format
 	strRes = "NA";
@@ -178,6 +188,11 @@ Config.prototype.formatDateTime = function(dateobj){
 Config.prototype.formatUTCDateTime = function(dateobj){
 	now = new Date();
 	return this.formatDateTime( new Date( dateobj.getTime() + ( now.getTimezoneOffset()*-60*1000 ) ))+" (GTM+"+(now.getTimezoneOffset()/-60)+")";
+}
+
+Config.prototype.formatUTCShortDateAndTime = function(dateobj){
+	now = new Date();
+	return this.formatShortDateTime( new Date( dateobj.getTime() + ( now.getTimezoneOffset()*-60*1000 ) )); //+" (GTM+"+(now.getTimezoneOffset()/-60)+")";
 }
 
 Config.prototype.formatTime = function(dateobj, shortFormat){
