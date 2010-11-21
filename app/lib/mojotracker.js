@@ -15,6 +15,12 @@ function Mojotracker(){
             function(tx, result) {}.bind(this),
             function(tx, error) {}.bind(this)
         );    
+	strSQL = "CREATE TABLE IF NOT EXISTS `track_list` ( `name` TEXT NOT NULL, `display_name` TEXT NOT NULL )";
+	this.executeSQL(strSQL,[], 
+            function(tx, result) {}.bind(this),
+            function(tx, error) {}.bind(this)
+        );
+	this.updateDBSchema();
 }
 
 Mojotracker.instance = null;
@@ -103,6 +109,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
         + 'title TEXT NOT NULL , '
         + 'description TEXT NOT NULL '
         +'); GO;';
+	var strSQL3 = "INSERT INTO `track_list` (`name`, `display_name`) VALUES (?, ?); GO;";
     this.db.transaction
     ( 
             (function (transaction)
@@ -110,6 +117,7 @@ Mojotracker.prototype.createTrack = function(name, errorHandler){
                     transaction.executeSql('DROP TABLE IF EXISTS `' + this.tracename + '`; GO;', []);
                     transaction.executeSql(strSQL, [], this.createTableDataHandler.bind(this), errorHandler);
                     transaction.executeSql(strSQL2, [], this.createTableDataHandler.bind(this), errorHandler);
+                    transaction.executeSql(strSQL3, [this.tracename, this.tracename], this.createTableDataHandler.bind(this), errorHandler);
             } ).bind(this) 
     );
     this.total = 0;
@@ -307,8 +315,32 @@ Mojotracker.prototype.getMinAltitude = function(){
 }
 
 Mojotracker.prototype.getTrackNames = function(resultHandler, errorHandler){
-    var strSQL = "SELECT `name` FROM sqlite_master WHERE type='table' AND `name` LIKE 'G%' ORDER BY `name`; GO;";
-    this.executeSQL(strSQL, [], resultHandler, errorHandler); 
+	var strSQL = "SELECT `name`, `display_name` FROM `track_list` ORDER BY `name`; GO; " ;
+	this.executeSQL(strSQL, [],  resultHandler, errorHandler);
+}
+
+/**
+ * this method fill table track_list that was added in version 0.2.4
+ */
+Mojotracker.prototype.updateDBSchema = function(){
+	var strSQL = "SELECT m.`name` FROM sqlite_master AS m  "
+		+"LEFT JOIN `track_list` AS t ON t.`name` = m.`name` "
+		+"WHERE t.`name` IS NULL AND m.type='table' AND m.`name` LIKE 'G%'; GO;";
+    this.executeSQL(strSQL, [], function(tx,result){
+			if (result.rows.length > 0){				
+				for (i=0; i< result.rows.length; i++){
+					item = result.rows.item(i);
+					strSQL = "INSERT INTO `track_list` (`name`, `display_name`) VALUES "
+						+"('"+item.name+"', '"+item.name+"'); GO;";
+					this.executeSQL(strSQL, [],  function(){}, function(){});
+					Mojo.Log.error("error "+strSQL);
+				}
+			}
+		}.bind(this),
+		function(tx, error){
+			Mojo.Log.error("error "+JSON.stringify(error));
+		}.bind(this)); 
+
 }
 
 Mojotracker.prototype.executeSQL = function(strSQL, replacement, resultHandler, errorHandler){
@@ -336,18 +368,30 @@ Mojotracker.prototype.getWaypoints = function( name, infoHandler, errorHandler )
 	this.executeSQL(strSQL, [], infoHandler, errorHandler);
 }
 
-Mojotracker.prototype.getTrackInfo = function( name, infoHandler, errorHandler ){
-    var strSQL = "SELECT '"+name+"' AS name, " +
+Mojotracker.prototype.getTrackInfo = function( track, infoHandler, errorHandler ){
+    var strSQL = "SELECT " +
+		"'"+track.name+"' AS name, " +
+		"? AS display_name, " +
         "COUNT(*) AS nodes, " +
         "MIN(`time`) AS start, " +
         "MAX(`time`) AS stop, " +
         "MIN(`altitude`) AS minAltitude, " +
-        "(SELECT MAX(`altitude`) FROM `"+name+"` WHERE `altitude` != 'nothing' AND `altitude` != 'null') AS maxAltitude, " +
+        "(SELECT MAX(`altitude`) FROM `"+track.name+"` WHERE `altitude` != 'nothing' AND `altitude` != 'null') AS maxAltitude, " +
         "MAX(`velocity`) AS maxVelocity, " +
         "SUM(`distanceFromPrev`) AS trackLength " +
-        "FROM `"+name+"` ; GO;";
+        "FROM `"+track.name+"` ; GO;";
 
-    this.executeSQL(strSQL, [], infoHandler, errorHandler);
+    this.executeSQL(strSQL, [track.display_name], infoHandler, errorHandler);
+}
+
+Mojotracker.prototype.rename = function(track, newDisplayName, infoHandler, errorHandler){
+	strSQL = "UPDATE `track_list` SET `display_name` = ? WHERE `name` = ?; GO; ";
+	this.executeSQL(strSQL, [newDisplayName, track.name],
+					function(tx, result){
+						track.display_name = newDisplayName;
+						//Mojo.Log.error("notify "+track.name+" > "+track.display_name);
+						infoHandler(track);
+					}, errorHandler);
 }
 
 Mojotracker.prototype.getNodes = function(){

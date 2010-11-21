@@ -15,6 +15,9 @@ FirstAssistant.prototype.setup = function(){
     // Translate view
 	this.config = Config.getInstance();
 	
+	// connect to base, update tables and others...
+	Mojotracker.getInstance();
+	
 	$$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });	
 		
 	// TODO: add ability start tracking automaticaly
