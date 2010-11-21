@@ -315,7 +315,8 @@ Mojotracker.prototype.getMinAltitude = function(){
 }
 
 Mojotracker.prototype.getTrackNames = function(resultHandler, errorHandler){
-	var strSQL = "SELECT `name`, `display_name` FROM `track_list` ORDER BY `name`; GO; " ;
+	var strSQL = "SELECT t.`name`, t.`display_name` FROM `track_list` AS t "
+		+ "JOIN sqlite_master AS m ON m.name = t.name ORDER BY t.`name`; GO; " ;
 	this.executeSQL(strSQL, [],  resultHandler, errorHandler);
 }
 
@@ -359,6 +360,7 @@ Mojotracker.prototype.removeTrack = function(name, errorHandler){
     
     var strSQL = "DROP TABLE `"+name+"`; GO;";
     var strSQL2 = "DROP TABLE `W"+name+"`; GO;";
+	var strSQL3 = "DELETE FROM `track_list` WHERE `name` = '"+name+"' LIMIT 1; GO;";
     this.executeSQL(strSQL, [], this.createRecordDataHandler.bind(this), errorHandler);
     this.executeSQL(strSQL2, [], this.createRecordDataHandler.bind(this), errorHandler);
 }

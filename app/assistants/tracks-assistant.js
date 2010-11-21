@@ -73,6 +73,7 @@ TracksAssistant.prototype.tableErrorHandler = function(transaction, error){
 TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results){
     if ((results.rows) && (results.rows.length == 1)){
         newItem = Object.clone( results.rows.item(0) );
+		newItem.startDateShort = Config.getInstance().formatUTCShortDateAndTime( new Date( Date.parse( newItem.start.replace("T"," ").replace("Z"," ")) ) );
         newItem.trackLengthFormated =  Config.getInstance().userDistance( newItem.trackLength , false);
 		newItem.lengthLabel = $L('length');
 		newItem.nodesLabel = $L('nodes');
