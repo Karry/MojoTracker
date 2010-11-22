@@ -55,7 +55,8 @@ Mojotracker.prototype.appendTrack = function(trackName, successHandler, errorHan
 				this.tracename = trackName;
 				
 				this.total = this.saved = result.rows.length;
-				this.lastAcceptedPoint = this.lastPoint = result.rows.item( result.rows.length -1 );
+				this.lastAcceptedPoint = this.lastPoint = (result.rows.length > 0) ?
+												result.rows.item( result.rows.length -1 ) : null;
 
 				this.trackLength = 0;
 				this.minAltitude = null;
@@ -413,31 +414,31 @@ Mojotracker.prototype.createRecordDataHandler = function(transaction, results) {
     // nothing to do 
 }
 
-Mojotracker.prototype.exportData = function(controller, name, callback, type) {
+Mojotracker.prototype.exportData = function(controller, track, callback, type) {
     
-    this.getWaypoints(  name,
+    this.getWaypoints(  track.name,
 						function(transaction, results){
 							if (type == 'loc'){
-								this.createLocXmlContent(controller, name, callback, results.rows);
+								this.createLocXmlContent(controller, track.name, callback, results.rows);
 							}else{
-								this.storeGpx2(controller, name, callback, results.rows, type);
+								this.storeGpx2(controller, track, callback, results.rows, type);
 							}
 						}.bind(this),
 						function(transaction, error){
-							if (error.code != 1){ // no such table
+							if (error.code != 1){ // no such table... we continue without waypoints
 								callback.errorHandler( error );
 								return;
 							}
-							this.storeGpx2(controller, name, callback, [], type);
+							this.storeGpx2(controller, track, callback, [], type);
 						}.bind(this) );	
 }
 
-Mojotracker.prototype.storeGpx2 = function(controller, name, callback, waypoints, type) {
-	var strSQL = "SELECT * FROM `" + name + "` ; GO;";
+Mojotracker.prototype.storeGpx2 = function(controller, track, callback, waypoints, type) {
+	var strSQL = "SELECT * FROM `" + track.name + "` ; GO;";
     
     this.executeSQL(strSQL,[], 
             function(tx, result) {
-				this.createGPXContent(controller, result, waypoints, name, callback, type);
+				this.createGPXContent(controller, result, waypoints, track, callback, type);
             }.bind(this),
             function(tx, error) {
                 callback.errorHandler(error);
@@ -500,13 +501,15 @@ Mojotracker.prototype.timeoutOccured = function(strUTC){
         );
 }
 
-Mojotracker.prototype.createGPXContent = function(controller, result, waypoints, name, callback, type) {
+Mojotracker.prototype.createGPXContent = function(controller, result, waypoints, track, callback, type) {
     if (!result.rows){
         callback.errorHandler( $L("BAD base result"));
         Mojo.Log.error("BAD base result");
         return;
     }
 
+	name = track.name;
+	safeDisplayName = track.display_name.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     try {
 		var data = "";
 		if (type == "kml"){
@@ -515,7 +518,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, waypoints,
 			data += " xmlns:gx=\"http://www.google.com/kml/ext/2.2\"\n";
 			data += " xmlns:kml=\"http://www.opengis.net/kml/2.2\" \n";
 			data += " xmlns:atom=\"http://www.w3.org/2005/Atom\">\n";
-			data += "<Document><name>"+name+"</name><open>1</open><Style id=\"path0Style\"><LineStyle><color>ffff4040</color><width>6</width></LineStyle></Style>\n";
+			data += "<Document><name>"+safeDisplayName+"</name><open>1</open><Style id=\"path0Style\"><LineStyle><color>ffff4040</color><width>6</width></LineStyle></Style>\n";
 			data += "  <StyleMap id=\"waypoint\"><IconStyle><scale>1.2</scale><Icon><href>http://maps.google.com/mapfiles/kml/pal4/icon61.png</href></Icon></IconStyle></StyleMap>\n";
 			
 			data += "<Folder><name>Waypoints</name><visibility>1</visibility><open>1</open>\n";
@@ -591,7 +594,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, waypoints,
 				}
 			}
 			
-			data += "<trk>\n<name>" + name + "</name>\n<trkseg>\n";
+			data += "<trk>\n<name>" + safeDisplayName + "</name>\n<trkseg>\n";
 			for (var i = 0; i < result.rows.length; i++) {
 				try {
 					var row = result.rows.item(i);

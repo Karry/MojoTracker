@@ -73,7 +73,8 @@ TracksAssistant.prototype.tableErrorHandler = function(transaction, error){
 TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results){
     if ((results.rows) && (results.rows.length == 1)){
         newItem = Object.clone( results.rows.item(0) );
-		newItem.startDateShort = Config.getInstance().formatUTCShortDateAndTime( new Date( Date.parse( newItem.start.replace("T"," ").replace("Z"," ")) ) );
+		if (newItem.start)
+			newItem.startDateShort = Config.getInstance().formatUTCShortDateAndTime( new Date( Date.parse( newItem.start.replace("T"," ").replace("Z"," ")) ) );
         newItem.trackLengthFormated =  Config.getInstance().userDistance( newItem.trackLength , false);
 		newItem.lengthLabel = $L('length');
 		newItem.nodesLabel = $L('nodes');
@@ -85,14 +86,14 @@ TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results
     }
 }
 
-TracksAssistant.prototype.exportData = function(name, type){
+TracksAssistant.prototype.exportData = function(track, type){
     callback = {
         errorHandler : this.createStoreErrorHandler.bind(this),
         successHandler : this.createStoreSuccessHandler.bind(this),
         progress : this.showProgress.bind(this)
     }
     
-    Mojotracker.getInstance().exportData(this.controller, name, callback, type);
+    Mojotracker.getInstance().exportData(this.controller, track, callback, type);
 }
 
 TracksAssistant.prototype.handleTrackTap = function(event){
@@ -129,11 +130,11 @@ TracksAssistant.prototype.handleTrackTap = function(event){
 							preventCancel:false
 					 });
             } else if (response == 'gpx-export') {
-                this.exportData( event.item.name, 'gpx' );
+                this.exportData( event.item, 'gpx' );
             } else if (response == 'kml-export') {
-                this.exportData( event.item.name, 'kml' );
+                this.exportData( event.item, 'kml' );
             } else if (response == 'loc-export') {
-                this.exportData( event.item.name, 'loc' );
+                this.exportData( event.item, 'loc' );
             } else if (response == 'delete') {
                 this.controller.showAlertDialog({
                     onChoose: function(value) {

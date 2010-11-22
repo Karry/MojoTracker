@@ -178,7 +178,7 @@ FirstAssistant.prototype.handleShowMoreButtonTap = function(event){
 	mojotracker = Mojotracker.getInstance();
     trackName = mojotracker.getCurrentTrack();
     if (trackName){
-        mojotracker.getTrackInfo( trackName,
+        mojotracker.getTrackInfo( {name: trackName, display_name: trackName}, // FIXME: respect correct display_name
                                 this.trackInfoHandler.bind(this),
                                 this.tableErrorHandler.bind(this)
                                 );
