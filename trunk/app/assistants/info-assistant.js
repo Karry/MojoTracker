@@ -72,7 +72,8 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
 	 if (result.rows){
 		minLat = minLon = maxLat = maxLon = undefined;
 		for (i = 0; i< result.rows.length; i++){
-			point = result.rows.item(i);
+			// fu***q JavaScript and its string > number conversions...
+			point = {lat: result.rows.item(i).lat / 1, lon: result.rows.item(i).lon / 1 };
 			if (minLat == undefined || minLat > point.lat)
 				minLat = point.lat;
 			if (maxLat == undefined || maxLat < point.lat)
@@ -338,10 +339,10 @@ InfoAssistant.prototype.trackInfoHandler = function(transaction, result){
 }
 
 InfoAssistant.prototype.drawErrorHandler = function(e){
-    this.showDialog("Error",e);
+    this.showDialog("Error",JSON.stringify(e));
 }
 InfoAssistant.prototype.tableErrorHandler = function(e){
-    this.showDialog("SQL Error",e);
+    this.showDialog("SQL Error",JSON.stringify(e));
 }
 
 InfoAssistant.prototype.handleAltitudeResult = function(result){
