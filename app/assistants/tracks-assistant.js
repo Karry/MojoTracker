@@ -187,6 +187,8 @@ TracksAssistant.prototype.showDialog = function(title, message){
         this.progressDialog.close();
         this.progressDialog = null;
     }
+	if (message==null)
+		Mojo.Log.error("message for dialog is null "+message);
 
     uncancellableAlertAttributes = {
         //	preventCancel
@@ -266,7 +268,7 @@ TracksAssistant.prototype.listAddHandler = function(event ) {
 // The list's DOM elements will be updated automatically, unless event.preventDefault() is called.
 TracksAssistant.prototype.listDeleteHandler = function(event) {
     if (event.item.name == Mojotracker.getInstance().getCurrentTrack()){
-        this.showDialog($L("Error"),$("It is open track! Nothing will be done."));
+        this.showDialog($L("Error"),$L("It is open track! Nothing will be done."));
         return false;
     }
     //this.showDialog("event", event.type+"/"+(typeof event.type));
