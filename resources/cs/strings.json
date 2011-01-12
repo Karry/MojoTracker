@@ -71,9 +71,9 @@
     "dialog.exportTitle": "Exportuji cestu",
     
     "wpntDialog.title": "Přidat místo",
-    'wpntDialogTitleLabel': 'Název',
-    'wpntDialogDesctiptionLabel': 'Popis',
-    'wpntDialogSave': 'Uložit',
+    "wpntDialogTitleLabel": "Název",
+    "wpntDialogDesctiptionLabel": "Popis",
+    "wpntDialogSave": "Uložit",
     
     "info.waypoints" : "Místa"
 }

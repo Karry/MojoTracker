@@ -27,9 +27,9 @@
     "dialog.exportTitle": "Export track",
     
     "wpntDialog.title": "Title",
-    'wpntDialogTitleLabel': 'Title',
-    'wpntDialogDesctiptionLabel': 'Desctiption',
-    'wpntDialogSave': 'Save',
+    "wpntDialogTitleLabel": "Title",
+    "wpntDialogDesctiptionLabel": "Desctiption",
+    "wpntDialogSave": "Save",
     
     "info.waypoints" : "Waypoints"
 }
