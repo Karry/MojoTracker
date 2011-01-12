@@ -317,7 +317,7 @@ Mojotracker.prototype.getMinAltitude = function(){
 
 Mojotracker.prototype.getTrackNames = function(resultHandler, errorHandler){
 	var strSQL = "SELECT t.`name`, t.`display_name` FROM `track_list` AS t "
-		+ "JOIN sqlite_master AS m ON m.name = t.name ORDER BY t.`name`; GO; " ;
+		+ "JOIN sqlite_master AS m ON m.name = t.name ORDER BY t.`name` DESC; GO; " ;
 	this.executeSQL(strSQL, [],  resultHandler, errorHandler);
 }
 
