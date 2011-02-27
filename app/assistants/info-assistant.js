@@ -373,9 +373,12 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
 	var startTime = (new Date()).getTime();
 	
     this.config = Config.getInstance();
+	var canvasElem = document.getElementById('altitudeCanvas');
+	canvasElem.width =  Mojo.Environment.DeviceInfo.screenWidth;
+	canvasElem.height =  Mojo.Environment.DeviceInfo.screenWidth * 0.62500;
     var canvas = document.getElementById('altitudeCanvas').getContext('2d');
 	
-	var pixelPerSecond = 293 / (this.timeMax - this.timeMin);
+	var pixelPerSecond = (Mojo.Environment.DeviceInfo.screenWidth-27) / (this.timeMax - this.timeMin);
 	var lastPixel = 0;
 	var part = -1;
 	var lastTime = -1;
@@ -424,6 +427,8 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
 	var axisTime = (new Date()).getTime();	
 	
     this.drawGraph(canvas,
+				   canvasElem.width,
+				   canvasElem.height,
 				   this.altitudeData,
 				   this.timeMin,
 				   this.timeMax,
@@ -442,9 +447,12 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
 InfoAssistant.prototype.handleSpeedResult = function(result){
 
     this.config = Config.getInstance();
+	var canvasElem = document.getElementById('speedCanvas');
+	canvasElem.width =  Mojo.Environment.DeviceInfo.screenWidth;
+	canvasElem.height =  Mojo.Environment.DeviceInfo.screenWidth * 0.62500;	
     var canvas = document.getElementById('speedCanvas').getContext('2d');
         
-	var pixelPerSecond = 293 / (this.timeMax - this.timeMin);
+	var pixelPerSecond = (Mojo.Environment.DeviceInfo.screenWidth-27) / (this.timeMax - this.timeMin);
 	var lastPixel = 0;
 	var part = -1;
 	var lastTime = -1;
@@ -486,6 +494,8 @@ InfoAssistant.prototype.handleSpeedResult = function(result){
 	this.speedYAxis = this.config.generageSpeedAxis( this.speedDataMin, this.speedDataMax);
 	
     this.drawGraph(canvas,
+				   canvasElem.width,
+				   canvasElem.height,
 				   this.speedData,
 				   this.timeMin,
 				   this.timeMax,
@@ -499,6 +509,8 @@ InfoAssistant.prototype.handleSpeedResult = function(result){
 
 InfoAssistant.prototype.drawGraph = function(
 		canvas,
+		fullWidth,
+		fullHeight,
 		parts,
 		timeMin,
 		timeMax,
@@ -515,7 +527,8 @@ InfoAssistant.prototype.drawGraph = function(
     if (range == 0)
         range = 1;
     
-	fullWidth = 319;  fullHeight = 200;
+	fullWidth -= 1;
+	//fullHeight = 200;
     startX = 26; startY= 0; width = fullWidth - startX; height = fullHeight - 15;
 
 	// clear canvas
