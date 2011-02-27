@@ -130,7 +130,7 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
 
 		Mojo.Log.error("final "+premissWidth+"x"+premissHeight);
         
-		/* Osmareader needs diferent parameters for export... Long and lat is center of viewed area and we have to specify
+		/* Osmarender needs diferent parameters for export... Long and lat is center of viewed area and we have to specify
 		  Z, image width and height directly
 		  "http://tah.openstreetmap.org/MapOf/index.php?long=14.4357&lat=50.0448&z=12&w=948&h=719&format=jpeg"
 		  
