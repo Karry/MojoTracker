@@ -9,6 +9,8 @@ function Mojotracker(){
     Mojo.log("Mojotracker constructor...");
     this.dbConnect();
 	this.distanceFromPrevious = 0;
+
+	this.R = 6371 * 1000; // Earth radius (mean) in metres {6371, 6367}
 	
 	strSQL = "CREATE TABLE IF NOT EXISTS `timeouts` ( time TEXT NOT NULL )";
 	this.executeSQL(strSQL,[], 
@@ -213,23 +215,23 @@ Mojotracker.prototype.approximateDistance = function(lat1, lon1, lat2, lon2){
 	var lat2Rad = lat2*( Math.PI / 180);
 	var lon2Rad = lon2*( Math.PI / 180);
 	
-	var R = 6371000; // Earth radius (mean) in metres
 	var dLat = lat2Rad - lat1Rad;
-	var dLon = lon2Rad - lon1Rad; 
+	var dLon = lon2Rad - lon1Rad;
+
 	var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
 			Math.cos(lat1Rad) * Math.cos(lat2Rad) * 
 			Math.sin(dLon/2) * Math.sin(dLon/2); 
 	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-	return R * c;
+	return this.R * c;
 }
 
 Mojotracker.prototype.movePoint = function(p, horizontal, vertical){
 	var latRad = p.lat*( Math.PI / 180);
 	var lonRad = p.lon*( Math.PI / 180);
 
-	var R = 6371000; // Earth radius (mean) in metres
-	horizRad = horizontal / R;
-	vertRad = vertical / R;
+	var latCircleR = Math.sin( Math.PI/2 - latRad) * this.R;
+	var horizRad = latCircleR == 0? 0: horizontal / latCircleR;
+	var vertRad = vertical / this.R;
 	
 	latRad -= vertRad;
 	lonRad += horizRad;
