@@ -102,9 +102,24 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
         realWidth = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, p2.lon );		
         larger = realWidth > realHeight? realWidth : realHeight;
 		
+		//Mojo.Log.error("before "+Math.round(realWidth)+"x"+Math.round(realHeight)+"   {"+p1.lat+", "+p1.lon+"}, {"+p2.lat+", "+p2.lon+"}");
+		
+		// make map width always larger
+		if (realWidth < realHeight){
+			//Mojo.Log.error("add 2x "+Math.round((realHeight - realWidth) / -2));
+			
+			p1 = tracker.movePoint(p1, (realHeight - realWidth) / -2, 0);
+			p2 = tracker.movePoint(p2, (realHeight - realWidth) / +2, 0);
+			realHeight = tracker.approximateDistance( p1.lat, p1.lon, p2.lat, p1.lon );
+			realWidth = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, p2.lon );		
+			larger = realWidth > realHeight? realWidth : realHeight;			
+		}
+		//Mojo.Log.error("after  "+Math.round(realWidth)+"x"+Math.round(realHeight)+"   {"+p1.lat+", "+p1.lon+"}, {"+p2.lat+", "+p2.lon+"}");
+		
         if (larger == 0) 
             return;
-        maxImageDim = 320;
+
+        maxImageDim = Mojo.Environment.DeviceInfo.screenWidth;
         //magic = 0.00028;
         magic = 0.00017820;
         scale = Math.round( larger / (magic * maxImageDim) );
@@ -112,7 +127,15 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
         //417 x -503
         premissWidth = Math.round((realWidth / scale) / magic);
         premissHeight = Math.round((realHeight / scale) / magic);
+
+		Mojo.Log.error("final "+premissWidth+"x"+premissHeight);
         
+		/* Osmareader needs diferent parameters for export... Long and lat is center of viewed area and we have to specify
+		  Z, image width and height directly
+		  "http://tah.openstreetmap.org/MapOf/index.php?long=14.4357&lat=50.0448&z=12&w=948&h=719&format=jpeg"
+		  
+		*/
+		
         loc = "http://tile.openstreetmap.org/cgi-bin/export?bbox="+p1.lon+","+p2.lat+","+p2.lon+","+p1.lat+"&scale="+scale+"&format=jpeg"
 		// for debug...
 		//Mojo.Controller.stageController.setClipboard(loc);	
@@ -654,11 +677,15 @@ InfoAssistant.prototype.handleMapTap = function(event){
 		var locPopupModel;
 		locPopupModel = [
 			{label: $L('Copy url to clipboard'), command: 'clipboard'},
+			{label: $L('Reload'), command: 'reload'}
 		];
 		
 		this.controller.popupSubmenu({
 			onChoose: function(method){
-					Mojo.Controller.stageController.setClipboard(this.mapUrl);	
+					if (method == "clipboard")
+						Mojo.Controller.stageController.setClipboard(this.mapUrl);
+					else if (method == "reload")
+						this.refreshMap();
 				}.bind(this),
 			placeNear: elem,
 			items: locPopupModel
