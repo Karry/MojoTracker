@@ -509,6 +509,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, waypoints,
         Mojo.Log.error("BAD base result");
         return;
     }
+	Mojo.Log.error("create export content...");
 
 	name = track.name;
 	safeDisplayName = track.display_name.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -523,6 +524,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, waypoints,
 			data += "<Document><name>"+safeDisplayName+"</name><open>1</open><Style id=\"path0Style\"><LineStyle><color>ffff4040</color><width>6</width></LineStyle></Style>\n";
 			data += "  <StyleMap id=\"waypoint\"><IconStyle><scale>1.2</scale><Icon><href>http://maps.google.com/mapfiles/kml/pal4/icon61.png</href></Icon></IconStyle></StyleMap>\n";
 			
+			Mojo.Log.error("waypoints...");
 			data += "<Folder><name>Waypoints</name><visibility>1</visibility><open>1</open>\n";
 			for (var i = 0; i < waypoints.length; i++) {
 				try{
@@ -541,32 +543,11 @@ Mojotracker.prototype.createGPXContent = function(controller, result, waypoints,
 			
 			data += "<Folder><name>Tracks</name><Placemark><name>"+name+"</name><visibility>1</visibility><styleUrl>#path0Style</styleUrl><MultiGeometry><LineString><coordinates>\n";
 			
-			var lastAlt = 0;
-			for (var i = 0; i < result.rows.length; i++) {
-				try {
-					var row = result.rows.item(i);
-					data += "" + row.lon + "," + row.lat + ",";
-					if ((!row.altitude) || (row.altitude == "null")){
-						data += ""+lastAlt;
-					}else{
-						data += "" + row.altitude + " ";
-						lastAlt = row.altitude;
-					}
-					
-					data += "\n";
-					
-					if (i % 10 == 0){
-						callback.progress(i, result.rows.length, $L("building xml data (#{progress})...")
-                            .interpolate({progress: i }));
-					}
-				} catch (e) {
-					Mojo.Log.error("Error 1: "+e);
-				}
-			}
-			
-			data += "</coordinates></LineString></MultiGeometry></Placemark></Folder></Document></kml>\n";
-			
-			name = name+".kml";
+			Mojo.Log.error("track...");			
+			setTimeout(this.appendContent.bind(this), 10,
+					   type,controller, name, data, result, 0,
+					   callback, 0);			
+
 		}else{
 			// gpx
 			data += "<?xml version='1.0' encoding='UTF-8'?>\n";
@@ -576,6 +557,7 @@ Mojotracker.prototype.createGPXContent = function(controller, result, waypoints,
 			data += "xmlns='http://www.topografix.com/GPX/1/1'\n";
 			data += "xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd'>\n";
 			
+			Mojo.Log.error("waypoints...");
 			for (var i = 0; i < waypoints.length; i++) {
 				try{
 					var row = waypoints.item(i);
@@ -596,42 +578,74 @@ Mojotracker.prototype.createGPXContent = function(controller, result, waypoints,
 				}
 			}
 			
+			Mojo.Log.error("track...");
 			data += "<trk>\n<name>" + safeDisplayName + "</name>\n<trkseg>\n";
-			for (var i = 0; i < result.rows.length; i++) {
-				try {
-					var row = result.rows.item(i);
-					data += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
-					data += "\t<time>" + row.time + "</time>\n";
-					data += ((row.altitude) && (row.altitude != "null"))?"\t<ele>" + row.altitude + "</ele>\n"                : "";
-					data += (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n"         : "";
-					data += (row.horizAccuracy>0)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n"  : "";
-					data += (row.vertAccuracy>0)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n"    : "";
-					data += "</trkpt>\n";
-					
-					if (i % 10 == 0){
-						callback.progress(i, result.rows.length, $L("building xml data (#{progress})...")
-                            .interpolate({progress: i }));
-					}
-				} catch (e) {
-					Mojo.Log.error("Error 1");
-					Mojo.Log.error("Error 1: "+e);
-				}
-			}
-			data += "</trkseg>\n</trk>\n";
-			data += "</gpx>\n";
-
-			name = name+".gpx";
+			
+			setTimeout(this.appendContent.bind(this), 10,
+					   type, controller, name, data, result, 0,
+					   callback, 0);
 		}
-
-        callback.progress(1,1, $L("xml data built..."));
-
-        setTimeout(this.writeGPXFile.bind(this), 500,
-                   controller, name, data,
-                   callback, 0);
     } catch (e) {
-        Mojo.Log.error(e);
+        Mojo.Log.error("error while build content "+e);
         callback.errorHandler("Error 2: "+e);
     }
+}
+Mojotracker.prototype.appendContent = function(type, controller, name, data, result, i, callback){
+	var counter = 0;
+	for (; i < result.rows.length && counter < 500; i++) {
+		try {
+			var row = result.rows.item(i);
+			if (type == "kml"){
+				data += "" + row.lon + "," + row.lat + ",";
+				if ((!row.altitude) || (row.altitude == "null")){
+					data += ""+lastAlt;
+				}else{
+					data += "" + row.altitude + " ";
+					lastAlt = row.altitude;
+				}
+				data += "\n";
+			}else{ // gpx
+				data += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
+				data += "\t<time>" + row.time + "</time>\n";
+				data += ((row.altitude) && (row.altitude != "null"))?"\t<ele>" + row.altitude + "</ele>\n"                : "";
+				data += (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n"         : "";
+				data += (row.horizAccuracy>0)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n"  : "";
+				data += (row.vertAccuracy>0)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n"    : "";
+				data += "</trkpt>\n";				
+			}
+			
+			if (i % 10 == 0){
+				callback.progress(i, result.rows.length, $L("building xml data (#{progress}/#{sum})...")
+					.interpolate({progress: i, sum: result.rows.length }));
+			}
+		} catch (e) {
+			Mojo.Log.error("Error 1: "+e);
+		}
+		counter ++;
+	}
+	
+	Mojo.Log.error(type+" points... ("+i+"/"+result.rows.length+")");
+	if (i == result.rows.length){
+		if (type == "kml"){
+			data += "</coordinates></LineString></MultiGeometry></Placemark></Folder></Document></kml>\n";
+			name = name+".kml";
+		}else{// gpx
+			data += "</trkseg>\n</trk>\n";
+			data += "</gpx>\n";
+			
+			name = name+".gpx";			
+		}
+		callback.progress(1,1, $L("xml data built..."));
+		
+		Mojo.Log.error("content is done... ("+data.length+")");
+		setTimeout(this.writeGPXFile.bind(this), 100,
+				   controller, name, data,
+				   callback, 0);
+	}else{
+		setTimeout(this.appendContent.bind(this), 10,
+				   type, controller, name, data, result, i,
+				   callback, 0);
+	}
 }
 
 Mojotracker.prototype.fillZeros = function(num){
