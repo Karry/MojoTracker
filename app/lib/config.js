@@ -221,10 +221,11 @@ Config.prototype.generageXAxis = function( minTime, maxTime ){
     alignedStart = minTime + ( align - ((minTime - startOfDay) % align));
     
     var i = 0;
+	var now = new Date();
     for (time = alignedStart; time < maxTime ; time += align){
         result[ i++ ] = {
             time : time,
-            label : this.formatTime( new Date(time), true)
+            label : this.formatTime(  new Date( time + ( now.getTimezoneOffset()*-60*1000 ) ), true)
         };  
     }
 
