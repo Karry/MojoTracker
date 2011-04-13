@@ -8,6 +8,8 @@ InfoAssistant.prototype.setup = function(){
     // Translate view
     $$(".i18n").each(function(e) { e.update($L(e.innerHTML)); });
 	
+	this.live = true;
+	
 	this.speedData = new Array();
 	this.speedXAxis = new Array();
 	this.speedYAxis = new Array();
@@ -43,6 +45,12 @@ InfoAssistant.prototype.setup = function(){
 	this.refreshTrackInfo();
 	this.refreshMap();
 	this.refreshWaypointsList();
+}
+
+InfoAssistant.prototype.cleanup = function(event){
+	/* this function should do any cleanup needed before the scene is destroyed as 
+	   a result of being popped off the scene stack */
+	this.live = false;
 }
 
 InfoAssistant.prototype.refreshWaypointsList = function(){
@@ -173,7 +181,7 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
     
             context.beginPath();
 			lastX = lastY = 0;
-            for (i = 0; i< result.rows.length; i++){
+            for (i = 0; i< result.rows.length && this.live; i++){
 				if (myCall != call )
 					return;
 				point = result.rows.item(i);
@@ -216,7 +224,7 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
 				context.strokeStyle = "rgba(0,0,255,1)";
 				context.fillStyle = "rgba(0,0,255,1)";
 				context.lineWidth   = 1;
-				for ( i=0; i < waypoints.rows.length; i++){
+				for ( i=0; i < waypoints.rows.length && this.live; i++){
 					point = waypoints.rows.item(i);
 					leftPos = tracker.approximateDistance( p1.lat, p1.lon, p1.lat, point.lon );
 					topPos  = tracker.approximateDistance( p1.lat, p1.lon, point.lat, p1.lon );			
@@ -278,16 +286,16 @@ InfoAssistant.prototype.refreshTrackInfo = function(){
 		if (mojotracker.isActive(this.item.name) && (this.timeMax < nowUTC))
 			this.timeMax = nowUTC;
 	
-		$('startTime').innerHTML    = this.config.formatUTCDateTime( new Date(this.timeMin));
-		$('endTime').innerHTML      = this.config.formatUTCDateTime( new Date(this.timeMax));
+		$('info_startTime').innerHTML    = this.config.formatUTCDateTime( new Date(this.timeMin));
+		$('info_endTime').innerHTML      = this.config.formatUTCDateTime( new Date(this.timeMax));
 		
-		$('minAltitude').innerHTML 	= this.config.userSmallDistance(this.item.minAltitude, true);
-		$('maxAltitude').innerHTML 	= this.config.userSmallDistance(this.item.maxAltitude, true);
+		$('info_minAltitude').innerHTML 	= this.config.userSmallDistance(this.item.minAltitude, true);
+		$('info_maxAltitude').innerHTML 	= this.config.userSmallDistance(this.item.maxAltitude, true);
 		
-		$('maxSpeed').innerHTML 	= this.config.userVelocity( this.item.maxVelocity );
-		$('trackLength').innerHTML 	= this.item.trackLengthFormated;
-		$('tracknum').innerHTML 	= this.item.nodes;
-		$('currentTrack').innerHTML = "\""+this.item.display_name+"\"";
+		$('info_maxSpeed').innerHTML 	= this.config.userVelocity( this.item.maxVelocity );
+		$('info_trackLength').innerHTML 	= this.item.trackLengthFormated;
+		$('info_tracknum').innerHTML 	= this.item.nodes;
+		$('info_currentTrack').innerHTML = "\""+this.item.display_name+"\"";
 	
 		// ALTITUDE GRAPH
 		callback = {
@@ -572,7 +580,7 @@ InfoAssistant.prototype.drawGraph = function(
 					canvas.lineTo(x, y);
 			}
 	
-			for (var i = data.length -1; i >= 0; i--) {
+			for (var i = data.length -1 ; i >= 0 && this.live; i--) {
 				time = data[i].time
 				value = data[i].value - data[i].error;
 				x = (width * ( (time - timeMin) / length)) + startX;
@@ -602,7 +610,7 @@ InfoAssistant.prototype.drawGraph = function(
     canvas.beginPath();
     var msg = "";
     // draw main graph
-	for (var part = 0; part< parts.length; part++ ){
+	for (var part = 0; part< parts.length && this.live; part++ ){
 		data = parts[part];
 		for (var i = 0; i < data.length; i++) {
 			var item = data[i];
