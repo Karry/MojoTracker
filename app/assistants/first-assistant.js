@@ -226,6 +226,9 @@ FirstAssistant.prototype.closeTrack = function(){
 FirstAssistant.prototype.handleGpsResponse = function(event){
 	mojotracker = Mojotracker.getInstance();
 
+	if (!event || !event.latitude || !event.longitude)
+		return;
+
 	// Display GPS data, log to Db
 	now = new Date();
 	velocity = event.velocity;
