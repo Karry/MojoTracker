@@ -20,7 +20,12 @@ function Config(){
     this.formatCookie = new Mojo.Model.Cookie( 'exportFormat' );
     this.exportFormat = this.formatCookie.get();
     if (this.exportFormat === undefined)
-        this.setExportFormat(Config.DEFAULT_EXPORT_FORMAT);		
+        this.setExportFormat(Config.DEFAULT_EXPORT_FORMAT);
+		
+    this.discardCookie = new Mojo.Model.Cookie( 'discardValue' );
+    this.discardValue = this.discardCookie.get();
+    if (this.discardValue === undefined)
+        this.setDiscardValue(Config.DEFAULT_DISCARD_VALUE);	
 		
     // TODO: make this variable configurable
     this.maxHorizAccuracy = 30;
@@ -53,6 +58,8 @@ Config.DEFAULT_EXPORT_FORMAT = "gpx";
 Config.DEFAULT_POS_FORMAT = 0;
 Config.GEOCACHING_POS_FORMAT = 1;
 Config.DEGREES_POS_FORMAT = 2;
+
+Config.DEFAULT_DISCARD_VALUE = 500 * 1000;
 
 Config.prototype.splitExportFiles = function(){
     return this.splitExportFile;
@@ -91,6 +98,10 @@ Config.prototype.setUnits = function( units ){
 
 Config.prototype.getLocale = function(){
 	return this.locale;
+}
+
+Config.prototype.getDiscardValue = function(){
+	return this.discardValue;
 }
 
 Config.prototype.setLocale = function( locale ){
@@ -318,6 +329,11 @@ Config.prototype.userLongitude = function(degree){
 Config.prototype.setExportFormat = function(format){
 	this.exportFormat = format;
 	this.formatCookie.put( format );
+}
+
+Config.prototype.setDiscardValue = function(value){
+	this.discardValue = value;
+	this.discardCookie.put( value );
 }
 
 Config.prototype.getExportFormat = function(){

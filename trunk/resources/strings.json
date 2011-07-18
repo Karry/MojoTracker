@@ -1,6 +1,6 @@
 {
 
-    "app.version": "0.2.9",
+    "app.version": "0.3.0",
     
     "trck.savedTracks_0":"Base is empty",
     "trck.savedTracks_1":"One Saved Track",
@@ -22,6 +22,7 @@
     "prefer.language": "Language",
     "prefer.english": "English",
     "prefer.czech": "Czech",
+    "prefer.discardPoints": "Max. error",
     
     "dialog.exportInfoTitle": "Info",
     "dialog.exportTitle": "Export track",

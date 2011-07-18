@@ -72,6 +72,23 @@ PreferencesAssistant.prototype.setup = function(){
     this.localeModel.locale = Config.getInstance().getLocale();
 
     // --------------------------------------------------------------------------
+    this.discardAttributes = {
+        label: $L('prefer.discardPoints'),
+        choices: [
+            {label: $L('Export all'),                              value: Config.DEFAULT_DISCARD_VALUE},
+            {label: Config.getInstance().userSmallDistance( 30  ), value: 30},
+            {label: Config.getInstance().userSmallDistance( 60  ), value: 60},
+            {label: Config.getInstance().userSmallDistance( 90  ), value: 90},
+            {label: Config.getInstance().userSmallDistance( 120 ), value: 120}
+        ],
+        modelProperty:'discardValue'
+    };
+    this.discardModel = {
+        discardValue : Config.DEFAULT_DISCARD_VALUE
+    };        
+    this.discardModel.discardValue = Config.getInstance().getDiscardValue();
+
+    // --------------------------------------------------------------------------
     /*
     this.splitAttributes = {
             property: "value",
@@ -94,6 +111,7 @@ PreferencesAssistant.prototype.setup = function(){
     //this.controller.setupWidget('exportFormatSelector',  this.exportFormatAttributes, this.exportFormatModel);
     //this.controller.setupWidget('splitCheckbox', this.splitAttributes, this.splitModel);
     this.controller.setupWidget('localeSelector',  this.localeAttributes, this.localeModel);
+    this.controller.setupWidget('discardSelector',  this.discardAttributes, this.discardModel);
 
     // Events
     //	Use controller.listen() and remember to .stopListening() in .cleanup() until
@@ -103,6 +121,7 @@ PreferencesAssistant.prototype.setup = function(){
     //this.controller.listen('exportFormatSelector', Mojo.Event.propertyChange, this.exportFormatChanged.bind(this));    
     //this.controller.listen('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
     this.controller.listen('localeSelector', Mojo.Event.propertyChange, this.localeChanged.bind(this));    
+    this.controller.listen('discardSelector', Mojo.Event.propertyChange, this.discardChanged.bind(this));    
 }
 
 PreferencesAssistant.prototype.selectorChanged = function(event) {
@@ -121,6 +140,10 @@ PreferencesAssistant.prototype.localeChanged = function(event) {
     Config.getInstance().setLocale( this.localeModel.locale );
 }
 
+PreferencesAssistant.prototype.discardChanged = function(event) {
+    Config.getInstance().setDiscardValue( this.discardModel.discardValue );
+}
+
 PreferencesAssistant.prototype.splitFileChanged = function(event){
     Config.getInstance().setSplitExportFiles( event.value );
 }
@@ -130,6 +153,7 @@ PreferencesAssistant.prototype.cleanup = function(){
     this.controller.stopListening('unitsSelector', Mojo.Event.propertyChange, this.selectorChanged.bind(this));
     this.controller.stopListening('posFormatSelector', Mojo.Event.propertyChange, this.posFormatChanged.bind(this));    
     this.controller.stopListening('splitCheckbox', Mojo.Event.propertyChange, this.splitFileChanged.bind(this));
+    this.controller.stopListening('discardSelector', Mojo.Event.propertyChange, this.discardChanged.bind(this));
 }
 
 

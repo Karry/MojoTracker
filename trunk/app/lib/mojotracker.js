@@ -595,23 +595,25 @@ Mojotracker.prototype.appendContent = function(type, controller, name, data, res
 	for (; i < result.rows.length && counter < 500; i++) {
 		try {
 			var row = result.rows.item(i);
-			if (type == "kml"){
-				data += "" + row.lon + "," + row.lat + ",";
-				if ((!row.altitude) || (row.altitude == "null")){
-					data += ""+lastAlt;
-				}else{
-					data += "" + row.altitude + " ";
-					lastAlt = row.altitude;
+			if (row.horizAccuracy <= Config.getInstance().getDiscardValue()){
+				if (type == "kml"){
+					data += "" + row.lon + "," + row.lat + ",";
+					if ((!row.altitude) || (row.altitude == "null")){
+						data += ""+lastAlt;
+					}else{
+						data += "" + row.altitude + " ";
+						lastAlt = row.altitude;
+					}
+					data += "\n";
+				}else{ // gpx
+					data += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
+					data += "\t<time>" + row.time + "</time>\n";
+					data += ((row.altitude) && (row.altitude != "null"))?"\t<ele>" + row.altitude + "</ele>\n"                : "";
+					data += (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n"         : "";
+					data += (row.horizAccuracy>0)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n"  : "";
+					data += (row.vertAccuracy>0)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n"    : "";
+					data += "</trkpt>\n";				
 				}
-				data += "\n";
-			}else{ // gpx
-				data += "<trkpt lat='" + row.lat + "' lon='" + row.lon + "'>\n";
-				data += "\t<time>" + row.time + "</time>\n";
-				data += ((row.altitude) && (row.altitude != "null"))?"\t<ele>" + row.altitude + "</ele>\n"                : "";
-				data += (row.velocity>=0) ? "\t<speed>" +row.velocity+ "</speed>\n"         : "";
-				data += (row.horizAccuracy>0)?"\t<hdop>" + row.horizAccuracy + "</hdop>\n"  : "";
-				data += (row.vertAccuracy>0)?"\t<vdop>" + row.vertAccuracy + "</vdop>\n"    : "";
-				data += "</trkpt>\n";				
 			}
 			
 			if (i % 10 == 0){
