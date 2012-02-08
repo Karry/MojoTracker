@@ -1,5 +1,5 @@
 {
-    "app.version": "0.2.9",
+    "app.version": "0.3.1",
     
     "Save track": "Ukládat cestu",
     "Current information" : "Aktuální informace",
@@ -39,11 +39,20 @@
     "trck.savedTracks_many":"Uložených cest",
     "Loading...": "Načítám...",
     "Info": "Detail",
-    "Export": "Exportovat",
+    "Rename": "Přejmenovat",
+    "Export": "Exportovat",    
+    "Export as GPX": "Exportovat jako GPX",
+    "Export as KML": "Exportovat jako KML",
+    "Export Waypoints": "Exportovat Místa",
     "Delete": "Smazat",
     "Track stored to #{trackname}.": "Cesta byla uložena do #{trackname}.",
     "Are you sure you want to delete the track #{trackname}?": "Jste si jist že chcete smazat cestu #{trackname}?",
     
+    "Map Preview": "Náhled mapy",
+    "Map is drawing...": "Mapa se vykresluje...",
+    "Loading map from OpenStreetMap.org...": "Nahrávám mapu z OpenStreetMap.org...",
+    "Loading map from OpenStreetMap.org aborted":"Nahrávání mapy z OpenStreetMap.org přerušeno",
+    "Loading map from OpenStreetMap.org failed (server is probably busy)":"Nahrávání mapy z OpenStreetMap.org selhalo (server je pravděpodobně zaneprázděn)",
     
     "prefer.view": "Zobrazení",
     "prefer.export":"Export",
@@ -58,6 +67,7 @@
     "prefer.language": "Jazyk",
     "prefer.english": "Anglicky",
     "prefer.czech": "Česky",
+    "prefer.french": "Francouzsky",
 
     "Preferences":  "Nastavení",
     "Saved tracks": "Uložené cesty",
