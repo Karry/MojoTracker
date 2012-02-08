@@ -242,7 +242,7 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
 			}
         }.bind(this);
 		
-		$('mapStatus').innerHTML = $L("loading map from OpenStreetMap.org...");
+		$('mapStatus').innerHTML = $L("Loading map from OpenStreetMap.org...");
         img.src = loc;
 		this.mapUrl = loc;
 		this.controller.listen('mapCanvas', Mojo.Event.tap,
@@ -251,10 +251,10 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
 
         img.addEventListener('load', strokeFcn, false);
 		img.addEventListener("error", function(e){
-				$('mapStatus').innerHTML = $L("loading map from OpenStreetMap.org failed (server is probably busy)");
+				$('mapStatus').innerHTML = $L("Loading map from OpenStreetMap.org failed (server is probably busy)");
 			}, false); 
 		img.addEventListener("abort", function(e){
-				$('mapStatus').innerHTML = $L("loading map from OpenStreetMap.org aborted");
+				$('mapStatus').innerHTML = $L("Loading map from OpenStreetMap.org aborted");
 			}, false); 
 		strokeFcn();
 	 }
