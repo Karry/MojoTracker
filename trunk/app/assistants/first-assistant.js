@@ -199,9 +199,9 @@ FirstAssistant.prototype.handleLocTap = function(event){
 	try{
 		var locPopupModel;
 		locPopupModel = [
-			{label: $L('Copy to clipboard'), command: 'clipboard'},
-			{label: $L('Share via SMS'), command: 'sms'},
-			{label: $L('Share via email'), command: 'email'}
+			{label: $L("Copy to clipboard"), command: 'clipboard'},
+			{label: $L("Share via SMS"), command: 'sms'},
+			{label: $L("Share via email"), command: 'email'}
 		];
 		
 		sendPosition = this.sendPosition.bind(this);
@@ -380,7 +380,7 @@ FirstAssistant.prototype.getMessageForGpsErrorCode = function(code){
 
 FirstAssistant.prototype.handleGpsResponseError = function(event)
 {
-	$('statusmsg').innerHTML = "A GPS Error occurred: " + this.getMessageForGpsErrorCode(event.errorCode);
+	$('statusmsg').innerHTML = $L("A GPS Error occurred: ") + this.getMessageForGpsErrorCode(event.errorCode);
 }
 
 FirstAssistant.prototype.tableErrorHandler = function(transaction, error) 

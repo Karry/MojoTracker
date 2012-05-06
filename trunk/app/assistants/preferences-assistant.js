@@ -63,7 +63,8 @@ PreferencesAssistant.prototype.setup = function(){
         choices: [
             {label: $L('prefer.english'), value: "en_us"},
             {label: $L('prefer.czech'), value: "cs"},
-            {label: $L('prefer.french'), value: "fr"}
+            {label: $L('prefer.french'), value: "fr"},
+	    {label: $L('prefer.chinese'), value: "zh_cn"}
         ],
         modelProperty:'locale'
     };
