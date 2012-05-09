@@ -127,11 +127,17 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
         if (larger == 0) 
             return;
 
-        maxImageDim = Mojo.Environment.DeviceInfo.screenWidth;
+		/* Mojo applications are designed for resolution width 320 px.
+		  For Pre3 (screen width 480 px) is application scaled up.
+		  So, we can't use Mojo.Environment.DeviceInfo.screenWidth, but constant 320!
+		  https://developer.palm.com/content/resources/develop/getting_ready_for_new_devices.html
+		*/
+        maxImageDim = 320;
+        //maxImageDim = Mojo.Environment.DeviceInfo.screenWidth;
         //magic = 0.00028;
         magic = 0.00017820;
         scale = Math.round( larger / (magic * maxImageDim) );
-        
+        		
         //417 x -503
         premissWidth = Math.round((realWidth / scale) / magic);
         premissHeight = Math.round((realHeight / scale) / magic);
@@ -161,6 +167,17 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
         }
         elem.width = premissWidth;
         elem.height = premissHeight;
+				
+		var dbgMsg = "screen: "+
+				Mojo.Environment.DeviceInfo.screenWidth+"x"+Mojo.Environment.DeviceInfo.screenHeight+" px"+
+				", corners: " + p1.lat + " " + p1.lon + " " + p2.lat+ " " + p2.lon + ""+
+				", area: "+Math.round(realWidth)+"x"+Math.round(realHeight)+" m"+
+				", canvas: "+Math.round(premissWidth)+"x"+Math.round(premissHeight)+" px";
+				
+		Mojo.Log.error("dimensions: "+dbgMsg);
+		Mojo.Log.error("osm url: "+loc);
+		
+		//$('resolution_debug').innerHTML = dbgMsg;
 				
 		var img = new Image();
 		inst = this;
