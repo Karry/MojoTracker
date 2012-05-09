@@ -399,11 +399,11 @@ InfoAssistant.prototype.handleAltitudeResult = function(result){
 	
     this.config = Config.getInstance();
 	var canvasElem = document.getElementById('altitudeCanvas');
-	canvasElem.width =  Mojo.Environment.DeviceInfo.screenWidth;
-	canvasElem.height =  Mojo.Environment.DeviceInfo.screenWidth * 0.62500;
+	canvasElem.width = 320; // Mojo.Environment.DeviceInfo.screenWidth;
+	canvasElem.height =  canvasElem.width * 0.62500;
     var canvas = document.getElementById('altitudeCanvas').getContext('2d');
 	
-	var pixelPerSecond = (Mojo.Environment.DeviceInfo.screenWidth-27) / (this.timeMax - this.timeMin);
+	var pixelPerSecond = (canvasElem.width-27) / (this.timeMax - this.timeMin);
 	var lastPixel = 0;
 	var part = -1;
 	var lastTime = -1;
@@ -473,11 +473,11 @@ InfoAssistant.prototype.handleSpeedResult = function(result){
 
     this.config = Config.getInstance();
 	var canvasElem = document.getElementById('speedCanvas');
-	canvasElem.width =  Mojo.Environment.DeviceInfo.screenWidth;
-	canvasElem.height =  Mojo.Environment.DeviceInfo.screenWidth * 0.62500;	
+	canvasElem.width = 320; //Mojo.Environment.DeviceInfo.screenWidth;
+	canvasElem.height = canvasElem.width * 0.62500;	
     var canvas = document.getElementById('speedCanvas').getContext('2d');
         
-	var pixelPerSecond = (Mojo.Environment.DeviceInfo.screenWidth-27) / (this.timeMax - this.timeMin);
+	var pixelPerSecond = (canvasElem.width-27) / (this.timeMax - this.timeMin);
 	var lastPixel = 0;
 	var part = -1;
 	var lastTime = -1;
