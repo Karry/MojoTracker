@@ -30,6 +30,15 @@ AppAssistant.prototype.handleCommand = function(event)
             case Mojo.Menu.prefsCmd:
                 Mojo.Controller.stageController.pushScene("preferences");
                 break;
+            case "exportAllGpx":
+                TracksAssistant.getInstance().exportAll("gpx");
+                break;
+            case "exportAllKml":
+                TracksAssistant.getInstance().exportAll("kml");
+                break;
+            case "exportAllWaypoints":
+                TracksAssistant.getInstance().exportAll("loc");
+                break;
         }
     }
 };

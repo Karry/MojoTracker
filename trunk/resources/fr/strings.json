@@ -1,5 +1,5 @@
 {
-    "app.version": "0.3.1",
+    "app.version": "0.3.2",
     
     "Save track": "Sauver la trace",
     "Current information" : "Infos actuelles",
@@ -57,6 +57,7 @@
     "Delete": "Effacer",
     "Track stored to #{trackname}.": "Trace stockée dans #{trackname}.",
     "Are you sure you want to delete the track #{trackname}?": "Êtes-vous certain d'effacer la trace #{trackname}?",
+    "Exported #{count} tracks.": "Exported #{count} tracks.",
     
     "prefer.view": "Affichage",
     "prefer.export": "Export",
@@ -87,7 +88,7 @@
     "It is open track! Nothing will be done.": "Cette trace est encore chargée! Rien n'a été fait.",
     
     "dialog.exportInfoTitle": "Info",
-    "dialog.exportTitle": "Exporter la trace",
+    "dialog.exportTitle #{trackname}": "Exporter la trace #{trackname}",
     
     "wpntDialog.title": "Titre",
     "wpntDialogTitleLabel": "Titre",
