@@ -1,5 +1,5 @@
 {
-    "app.version": "0.3.1",
+    "app.version": "0.3.2",
 
     "Save track": "记录路径",
     "Current information" : "实时信息",
@@ -58,6 +58,7 @@
     "Delete": "删除",
     "Track stored to #{trackname}.": "路径存储于 #{trackname}.",
     "Are you sure you want to delete the track #{trackname}?": "您确实要删除 #{trackname} 路径吗？",
+    "Exported #{count} tracks.": "Exported #{count} tracks.",
 
     "Success": "完成",
     "Timeout": "超时",
@@ -115,7 +116,7 @@
     "It is open track! Nothing will be done.": "仅将路径设为开启状态！不会有其他操作。",    
 
     "dialog.exportInfoTitle": "信息",
-    "dialog.exportTitle": "导出路径",
+    "dialog.exportTitle #{trackname}": "导出路径 #{trackname}",
 
     "wpntDialog.title": "标题",
     "wpntDialogTitleLabel": "标题",

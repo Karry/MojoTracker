@@ -27,7 +27,7 @@
     "prefer.discardPoints": "Max. error",
     
     "dialog.exportInfoTitle": "Info",
-    "dialog.exportTitle": "Export track",
+    "dialog.exportTitle #{trackname}": "Export track #{trackname}",
     
     "wpntDialog.title": "Title",
     "wpntDialogTitleLabel": "Title",

@@ -41,7 +41,8 @@ FirstAssistant.prototype.setup = function(){
 								this.saveTrackToggleModel.value = this.saveTrack;
 								this.controller.modelChanged(this.saveTrackToggleModel, this);
 								
-								this.showTrackInformations();								
+								this.showTrackInformations();
+								this.startActivity();								
 							}.bind(this), this.tableErrorHandler.bind(this));
 					}catch (e){
 						$('errormsg').update("DB Error: " + e);
@@ -159,7 +160,9 @@ FirstAssistant.prototype.handleSaveTrackHandleAction = function(event){
 }
 
 FirstAssistant.prototype.createNewTrack = function(){
-	this.setScreenTimeout(1);
+	
+	this.startActivity();
+	
 	now = new Date();
 	tracename = "G" + this.formatDate(now, 1);
 	try{
@@ -220,7 +223,8 @@ FirstAssistant.prototype.closeTrack = function(){
 
     this.showTrackInformations();
     mojotracker.closeTrack();
-	this.setScreenTimeout(2);
+	
+	this.stopActivity();
 }
 
 FirstAssistant.prototype.handleGpsResponse = function(event){
@@ -389,60 +393,27 @@ FirstAssistant.prototype.tableErrorHandler = function(transaction, error)
 	return true;
 }
 
-/**
- * The activity’s expected duration is provided in milliseconds
- * and cannot exceed 900,000 milliseconds (15 minutes).
- * The power management service automatically terminates your activity
- * request at the end of its duration or 15 minutes, whichever is shorter.
- */
-FirstAssistant.prototype.setScreenTimeout = function(stop){
-	appID = 'com.osm.mojotracker-1';
-	if (stop == 1){
-		this.controller.serviceRequest('palm://com.palm.power/com/palm/power',
-		                               {
-		                                  method: 'activityStart',	
-		                                  parameters:
-									      {
-			                                 id: appID, 
-		                                     duration_ms: '900000' // MAX DURATION IS 15 MINUTES
-		                                  },
-		                                  onSuccess: this.activitySuccess.bind(this),
-		                                  onFailure: this.activityFailed.bind(this)
-	                                   }  );
-		
-		// reset activity each 10 minutes
-		this.activityTimeout = setTimeout( function(){
-				// reset tracking, it sometimes stops work
+FirstAssistant.prototype.startActivity = function(){
+	this.stopActivity();
+	
+	this.activity = new MojoActivity(this.controller, {
+			activityReset : function(){
+				Mojo.Log.error("reset activity...");
 				this.stopTracking();
 				this.startTracking();
-                this.setScreenTimeout(2);
-                this.setScreenTimeout(1);
-            }.bind(this), 10 * 60 * 1000);
-		
-	}
-	if (stop == 2){
-		this.controller.serviceRequest('palm://com.palm.power/com/palm/power',
-		                               {
-		                                  method: 'activityEnd',	
-		                                  parameters:
-										  {
-		                                      id: appID
-		                                  },
-		                                  onSuccess: this.activitySuccess.bind(this),
-		                                  onFailure: this.activityFailed.bind(this)
-	                                   }   );
-    if (this.activityTimeout)
-        clearTimeout( this.activityTimeout );
-		
-	}
+			}.bind(this),
+			activityFailed : function(){
+				this.showDialog("Error", 'Screen Power Error');
+				$('statusmsg').update('Screen Power Error'); 
+			}.bind(this)
+		});
 }
 
-FirstAssistant.prototype.activitySuccess = function(){
-}
-
-FirstAssistant.prototype.activityFailed = function(){
-	this.showDialog("Error", 'Screen Power Error');
-	$('statusmsg').update('Screen Power Error'); 
+FirstAssistant.prototype.stopActivity = function(){
+	if (this.activity){
+		this.activity.destroy();
+		this.activity = null;
+	}
 }
 
 FirstAssistant.prototype.activate = function(event){

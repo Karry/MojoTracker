@@ -37,7 +37,8 @@ ProgressDialogAssistant.prototype.close = function(){
     this.widget.mojo.close();
 }
 
-ProgressDialogAssistant.prototype.setProgress = function(value, max, message){
+ProgressDialogAssistant.prototype.setProgress = function(value, max, message, title){
+    $('title').innerHTML = title;
     $('message').innerHTML = message;
     this.progress = value / max;
     this.model.progress = this.progress;

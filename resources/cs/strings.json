@@ -1,5 +1,5 @@
 {
-    "app.version": "0.3.1",
+    "app.version": "0.3.2",
     
     "Save track": "Ukládat cestu",
     "Current information" : "Aktuální informace",
@@ -47,6 +47,7 @@
     "Delete": "Smazat",
     "Track stored to #{trackname}.": "Cesta byla uložena do #{trackname}.",
     "Are you sure you want to delete the track #{trackname}?": "Jste si jist že chcete smazat cestu #{trackname}?",
+    "Exported #{count} tracks.": "Exportováno #{count} cest.",
     
     "Map Preview": "Náhled mapy",
     "Map is drawing...": "Mapa se vykresluje...",
@@ -79,7 +80,7 @@
     "It is open track! Nothing will be done.":"It is open track! Nothing will be done.",
     
     "dialog.exportInfoTitle": "Info",
-    "dialog.exportTitle": "Exportuji cestu",
+    "dialog.exportTitle #{trackname}": "Exportuji cestu #{trackname}",
     
     "wpntDialog.title": "Přidat místo",
     "wpntDialogTitleLabel": "Název",

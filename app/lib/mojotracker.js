@@ -461,7 +461,7 @@ Mojotracker.prototype.createLocXmlContent = function(controller, name, callback,
     }
 	
 	try{
-		name = name+".loc";
+		//name = name+".loc";
 		
 		var data = "";
 		data += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<loc version=\"1.0\" src=\"MojoTracker\">\n";
@@ -483,11 +483,11 @@ Mojotracker.prototype.createLocXmlContent = function(controller, name, callback,
 		}
 		data += "</loc>\n";
 		
-        callback.progress(1,1, $L("xml data built..."));
+        callback.progress(1,1, $L("xml data built..."), name);
 
         setTimeout(this.writeGPXFile.bind(this), 500,
                    controller, name, data,
-                   callback, 0);
+                   callback, 0, ".loc");
     } catch (e) {
         Mojo.Log.error(e);
         callback.errorHandler("Error 2: "+e);
@@ -618,7 +618,8 @@ Mojotracker.prototype.appendContent = function(type, controller, name, data, res
 			
 			if (i % 10 == 0){
 				callback.progress(i, result.rows.length, $L("building xml data (#{progress}/#{sum})...")
-					.interpolate({progress: i, sum: result.rows.length }));
+					.interpolate({progress: i, sum: result.rows.length }),
+					name);
 			}
 		} catch (e) {
 			Mojo.Log.error("Error 1: "+e);
@@ -627,22 +628,22 @@ Mojotracker.prototype.appendContent = function(type, controller, name, data, res
 	}
 	
 	Mojo.Log.error(type+" points... ("+i+"/"+result.rows.length+")");
+	var suffix = ".gpx";
 	if (i == result.rows.length){
 		if (type == "kml"){
 			data += "</coordinates></LineString></MultiGeometry></Placemark></Folder></Document></kml>\n";
-			name = name+".kml";
+			suffix = ".kml";
 		}else{// gpx
 			data += "</trkseg>\n</trk>\n";
 			data += "</gpx>\n";
-			
-			name = name+".gpx";			
+			suffix = ".gpx";
 		}
-		callback.progress(1,1, $L("xml data built..."));
+		callback.progress(1,1, $L("xml data built..."), name);
 		
 		Mojo.Log.error("content is done... ("+data.length+")");
 		setTimeout(this.writeGPXFile.bind(this), 100,
 				   controller, name, data,
-				   callback, 0);
+				   callback, 0, suffix);
 	}else{
 		setTimeout(this.appendContent.bind(this), 10,
 				   type, controller, name, data, result, i,
@@ -657,25 +658,18 @@ Mojotracker.prototype.fillZeros = function(num){
     return res;
 }
 
-Mojotracker.prototype.writeGPXFile = function(controller, name, content, callback, offset) {
-    
-    // WARNING: filemgr fails with writing from offset...
+Mojotracker.prototype.writeGPXFile = function(controller, name, content, callback, offset, suffix) {
+        
     limit = 50000;
-    largeFile = content.length > limit;
-    
-	/*
-    if (largeFile && Config.getInstance().splitExportFiles()){
-        from = 0;
-        fileName = name +"."+this.fillZeros(((offset / limit)+1));
-    }else{
-	*/
-        from = offset;
-        fileName = name ;
-    //}
+    largeFile = content.length > limit;    
+	from = offset;
+	fileName = name+suffix ;
+	
 	successRecieved = false;
 	Mojo.Log.error("write to "+fileName+" from "+offset);
     callback.progress(offset, content.length, $L("Saving data (#{offst} / #{len})...")
-                            .interpolate({offst: offset , len: content.length, i:((offset / limit)+1), count: (content.length/limit)}));
+                            .interpolate({offst: offset , len: content.length, i:((offset / limit)+1), count: (content.length/limit)}),
+							name);
     
     try {
 		// filemgr service behaves weird.. why we get two onSuccess callback?
@@ -689,15 +683,14 @@ Mojotracker.prototype.writeGPXFile = function(controller, name, content, callbac
             },
             onSuccess: function(){
                 //offset += limit;
-				Mojo.Log.error("onSuccess "+offset+" "+successRecieved);
+				Mojo.Log.error("filemgr/onSuccess "+offset+" "+successRecieved);
 				if (successRecieved)
 					return;
 				successRecieved = true;
-                if ((content.length - offset)> limit) {
-                    //this.writeGPXFile(controller, name,  content.substr(limit), errorHandler, successHandler, offset+limit);
+                if ((content.length - offset)> limit) {                    
                     setTimeout(this.writeGPXFile.bind(this), 100,
                                    controller, name, content,
-                                   callback, offset + limit);                    
+                                   callback, offset + limit, suffix);                    
                 } else {
                     callback.successHandler(fileName);
                 }
@@ -705,7 +698,7 @@ Mojotracker.prototype.writeGPXFile = function(controller, name, content, callbac
                 }.bind(this),
             onFailure: function(err) {
 
-                Mojo.Log.error("onFailure: ", err.errorText);
+                Mojo.Log.error("filemgr/onFailure: ", JSON.stringify(err));
                 callback.errorHandler(err.errorText + " ["+name + ".gpx len " + offset + "+" +content.length  + "]");
             }
             });

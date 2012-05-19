@@ -50,6 +50,22 @@ TracksAssistant.prototype.setup = function(){
     this.controller.listen(this.trackList, Mojo.Event.listReorder, this.listReorderHandler);
     this.controller.listen(this.trackList, Mojo.Event.listTap, this.handleTrackTap);
 
+	// Setup application menu
+	this.controller.setupWidget(Mojo.Menu.appMenu,
+	    {
+		omitDefaultItems: true
+	    },
+	    {
+		visible: true,
+		items:
+		[
+		    { label: $L("Export All as GPX"), command: "exportAllGpx" },
+		    { label: $L("Export All as KML"), command: "exportAllKml" },
+		    { label: $L("Export All Waypoints"), command: "exportAllWaypoints" },
+		]
+	    }
+	);
+
     // load tracks
     try{
         $('trackHeadermsg').update( $L('Loading...'));
@@ -74,7 +90,8 @@ TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results
     if ((results.rows) && (results.rows.length == 1)){
         newItem = Object.clone( results.rows.item(0) );
 		if (newItem.start)
-			newItem.startDateShort = Config.getInstance().formatUTCShortDateAndTime( new Date( Date.parse( newItem.start.replace("T"," ").replace("Z"," ")) ) );
+			newItem.startDateShort = Config.getInstance().formatUTCShortDateAndTime(
+									new Date( Date.parse( newItem.start.replace("T"," ").replace("Z"," ")) ) );
         newItem.trackLengthFormated =  Config.getInstance().userDistance( newItem.trackLength , false);
 		newItem.lengthLabel = $L('length');
 		newItem.nodesLabel = $L('nodes');
@@ -94,6 +111,40 @@ TracksAssistant.prototype.exportData = function(track, type){
     }
     
     Mojotracker.getInstance().exportData(this.controller, track, callback, type);
+}
+
+TracksAssistant.prototype.exportAll = function(type){
+
+	var activity = new MojoActivity(this.controller, {
+			activityReset : function(){},
+			activityFailed : function(){}
+		});
+
+	var index = -1;
+    var callback = {
+        errorHandler : function(){
+			activity.destroy();
+			this.createStoreErrorHandler();
+		}.bind(this),
+        successHandler : null,
+        progress : this.showProgress.bind(this)
+    }
+	
+	callback.successHandler = function(){
+				index ++;
+				if (this.currentModel.items.length == index){
+					activity.destroy();
+					this.showDialog( $L("Exported #{count} tracks.").interpolate(
+												{count:this.currentModel.items.length}));
+				}else{
+					Mojotracker.getInstance().exportData(
+							this.controller,
+							this.currentModel.items[index],
+							callback, type);
+				}
+			}.bind(this),
+	// start export all tracks...
+	callback.successHandler();
 }
 
 TracksAssistant.prototype.handleTrackTap = function(event){
@@ -207,13 +258,15 @@ TracksAssistant.prototype.showDialog = function(title, message){
     this.controller.showAlertDialog(uncancellableAlertAttributes);
 }
 
-TracksAssistant.prototype.showProgress = function(value, max, message){
+TracksAssistant.prototype.showProgress = function(value, max, message, trackname){
+	var title = $L('dialog.exportTitle #{trackname}').interpolate(
+												{trackname:"\"" + trackname +"\""});
     if (this.progressDialog){
-        this.progressDialog.setProgress(value, max, message);
+        this.progressDialog.setProgress(value, max, message, title);
         return;
     }
     
-    this.progressDialog = new ProgressDialogAssistant(this.controller, value, max, message, $L('dialog.exportTitle'));
+    this.progressDialog = new ProgressDialogAssistant(this.controller, value, max, message, title);
         
     this.controller.showDialog({
            template: 'dialogs/progress-dialog',

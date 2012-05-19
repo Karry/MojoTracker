@@ -5,6 +5,7 @@
     {"source": "app/assistants/waypoint-dialog-assistant.js" },
     {"source": "app/assistants/input-dialog-assistant.js" },
     {"source": "app/lib/mojotracker.js" },
+    {"source": "app/lib/mojoactivity.js" },
     {"source": "app/lib/config.js" },
     {
         "scenes": "first",
