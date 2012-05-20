@@ -122,9 +122,9 @@ TracksAssistant.prototype.exportAll = function(type){
 
 	var index = -1;
     var callback = {
-        errorHandler : function(){
+        errorHandler : function(msg){
 			activity.destroy();
-			this.createStoreErrorHandler();
+			this.createStoreErrorHandler(msg);
 		}.bind(this),
         successHandler : null,
         progress : this.showProgress.bind(this)
