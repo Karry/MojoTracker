@@ -455,8 +455,9 @@ Mojotracker.prototype.createLocXmlContent = function(controller, name, callback,
         return;
     }
     if (waypoints.length == 0){
-        callback.errorHandler( $L("This track has no waypoints"));
-        Mojo.Log.error("This track has no waypoints");
+        //callback.errorHandler( $L("This track has no waypoints"));
+		callback.successHandler(name, $L("This track has no waypoints"));
+        Mojo.Log.error("Track "+name+" has no waypoints");
         return;
     }
 	
