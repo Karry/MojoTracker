@@ -660,17 +660,20 @@ Mojotracker.prototype.fillZeros = function(num){
 
 Mojotracker.prototype.writeGPXFile = function(controller, name, content, callback, offset, suffix) {
         
-    limit = 50000;
-    largeFile = content.length > limit;    
-	from = offset;
-	fileName = name+suffix ;
+    var limit = 50000;
+    var largeFile = content.length > limit;    
+	var from = offset;
+	var fileName = name+suffix ;
 	
-	successRecieved = false;
+	var successRecieved = false;
 	Mojo.Log.error("write to "+fileName+" from "+offset);
     callback.progress(offset, content.length, $L("Saving data (#{offst} / #{len})...")
                             .interpolate({offst: offset , len: content.length, i:((offset / limit)+1), count: (content.length/limit)}),
 							name);
     
+	if (!this.filemgrFailures)
+		this.filemgrFailures = 0;
+	
     try {
 		// filemgr service behaves weird.. why we get two onSuccess callback?
 		// uaaaa... I want opensource file service!
@@ -686,6 +689,7 @@ Mojotracker.prototype.writeGPXFile = function(controller, name, content, callbac
 				Mojo.Log.error("filemgr/onSuccess "+offset+" "+successRecieved);
 				if (successRecieved)
 					return;
+				this.filemgrFailures = 0;
 				successRecieved = true;
                 if ((content.length - offset)> limit) {                    
                     setTimeout(this.writeGPXFile.bind(this), 100,
@@ -697,10 +701,17 @@ Mojotracker.prototype.writeGPXFile = function(controller, name, content, callbac
                     
                 }.bind(this),
             onFailure: function(err) {
-
-                Mojo.Log.error("filemgr/onFailure: ", JSON.stringify(err));
-                callback.errorHandler(err.errorText + " ["+name + ".gpx len " + offset + "+" +content.length  + "]");
-            }
+				this.filemgrFailures++;
+                Mojo.Log.error("filemgr/onFailure ("+this.filemgrFailures+"): ", JSON.stringify(err));
+				if (this.filemgrFailures == 3){
+					callback.errorHandler(err.errorText + " ["+name + ".gpx len " + offset + "+" +content.length  + "]");
+				}else{
+					// try again
+                    setTimeout(this.writeGPXFile.bind(this), 100,
+                                   controller, name, content,
+                                   callback, offset, suffix);					
+				}
+            }.bind(this)
             });
 
 	} catch (e) {
