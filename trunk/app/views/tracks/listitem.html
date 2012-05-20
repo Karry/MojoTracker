@@ -1,4 +1,7 @@
-<div class="palm row textfield multi-line removable" x-mojo-gesture='Mojo.Gesture.HorizontalDrag' >
+<div class="palm row textfield multi-line removable"
+	 x-mojo-gesture='Mojo.Gesture.HorizontalDrag'
+	 style="height: 70px">
+	
 	<div class="palm-row-wrapper">
 		<!--
 		<div class="export-track" onclick="TracksAssistant.getInstance().storeGpx('#{name}')"></div>
@@ -9,9 +12,14 @@
 		<div class="preview">
 			#{startDateShort}
 			&nbsp;
+			#{lengthLabel}: #{trackLengthFormated}
+			&nbsp;
+			#{durationLabel}: #{trackDuration}
+		</div>
+		<div class="preview">
 			#{nodesLabel}: #{nodes}
 			&nbsp;
-			#{lengthLabel}: #{trackLengthFormated}
+			#{waypointsLabel}: #{waypoints}
 		</div>
 		
 	</div>

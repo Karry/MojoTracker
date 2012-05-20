@@ -88,15 +88,33 @@ TracksAssistant.prototype.tableErrorHandler = function(transaction, error){
 
 TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results){
     if ((results.rows) && (results.rows.length == 1)){
-        newItem = Object.clone( results.rows.item(0) );
-		if (newItem.start)
-			newItem.startDateShort = Config.getInstance().formatUTCShortDateAndTime(
-									new Date( Date.parse( newItem.start.replace("T"," ").replace("Z"," ")) ) );
+        var newItem = Object.clone( results.rows.item(0) );
+		if (newItem.start){
+			newItem.startTime = new Date( Date.parse( newItem.start.replace("T"," ").replace("Z"," ")) );
+			newItem.startDateShort = Config.getInstance().formatUTCShortDateAndTime(newItem.startTime );
+			if (newItem.stop){
+				newItem.stopTime = new Date( Date.parse( newItem.stop.replace("T"," ").replace("Z"," ")) );
+				var trackLength = newItem.stopTime.getTime() - newItem.startTime.getTime();
+				newItem.trackDuration = Config.getInstance().formatTime( new Date(trackLength), true);
+			}
+		}
+		Mojo.Log.error("track: "+JSON.stringify(newItem));
         newItem.trackLengthFormated =  Config.getInstance().userDistance( newItem.trackLength , false);
 		newItem.lengthLabel = $L('length');
 		newItem.nodesLabel = $L('nodes');
-        this.currentModel.items.push(newItem);
-        this.trackList.mojo.noticeAddedItems(this.currentModel.items.length, [newItem]);
+		newItem.durationLabel = $L('duration');
+		newItem.waypointsLabel = $L('waypoints');
+		
+		// at last, get number of waypoints
+		Mojotracker.getInstance().getWaypoints(  newItem.name,
+				function(tx, waypointsResult){
+					newItem.waypoints = waypointsResult.rows.length;
+					this.currentModel.items.push(newItem);
+					this.trackList.mojo.noticeAddedItems(this.currentModel.items.length, [newItem]);
+				}.bind(this),
+				this.tableErrorHandler.bind(this)
+				);
+		
         //$('trackHeadermsg').update('result: ' + results +"["+results.rows.length+"]");
     }else{
         $('trackHeadermsg').update('DB returned bad result ['+results.rows.length+']');
@@ -229,8 +247,12 @@ TracksAssistant.prototype.createStoreErrorHandler = function(e){
     this.showDialog($L("Error"),e);
 }
 
-TracksAssistant.prototype.createStoreSuccessHandler = function(name){
-    this.showDialog($L("dialog.exportInfoTitle"),$L("Track stored to #{trackname}.").interpolate({trackname:"\"" + name +"\""}));
+TracksAssistant.prototype.createStoreSuccessHandler = function(name, msg){
+	if (msg){
+		this.showDialog($L("Info"),msg);
+	}else{
+		this.showDialog($L("dialog.exportInfoTitle"),$L("Track stored to #{trackname}.").interpolate({trackname:"\"" + name +"\""}));
+	}
 }
 
 TracksAssistant.prototype.showDialog = function(title, message){    
