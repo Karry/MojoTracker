@@ -111,6 +111,7 @@ TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results
 					newItem.waypoints = waypointsResult.rows.length;
 					this.currentModel.items.push(newItem);
 					this.trackList.mojo.noticeAddedItems(this.currentModel.items.length, [newItem]);
+					this.updateHeader();
 				}.bind(this),
 				this.tableErrorHandler.bind(this)
 				);
@@ -307,17 +308,22 @@ TracksAssistant.prototype.createTrackNamesHandler = function(transaction, result
             mojotracker.getTrackInfo( item, this.createTrackInfoHandler.bind(this), this.tableErrorHandler.bind(this) );
         }
         this.trackCount = results.rows.length;
-        this.updateHeader()
+        this.updateHeader();
     }else{
         $('trackHeadermsg').update($L('bad DB result...'));
     }
 }
 
 TracksAssistant.prototype.updateHeader = function(){
-	if (this.trackCount < 5)
-		$('trackHeadermsg').update( $L('trck.savedTracks_' + this.trackCount) );
-	else
-		$('trackHeadermsg').update(''+this.trackCount+' '+ $L('trck.savedTracks_many') );
+	if (this.trackCount > this.currentModel.items.length){
+		$('trackHeadermsg').update($L('trck.loading').interpolate({count: this.currentModel.items.length,
+																  sum: this.trackCount}) );		
+	}else{
+		if (this.trackCount < 5)
+			$('trackHeadermsg').update( $L('trck.savedTracks_' + this.trackCount) );
+		else
+			$('trackHeadermsg').update($L('trck.savedTracks_many').interpolate({count: this.trackCount}) );
+	}
 }
 
 // Called for Mojo.Event.listAdd events.

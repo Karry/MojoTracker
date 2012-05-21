@@ -1,26 +1,34 @@
-<div class="palm row textfield multi-line removable"
+
+<div class="palm-row removable"
 	 x-mojo-gesture='Mojo.Gesture.HorizontalDrag'
-	 style="height: 70px">
+	 x-mojo-tap-highlight="momentary"
+	 >
+	<!-- style="height: 70px" textfield multi-line removable palm-row-wrapper-->
 	
 	<div class="palm-row-wrapper">
 		<!--
+	<div class="palm-row-wrapper">
 		<div class="export-track" onclick="TracksAssistant.getInstance().storeGpx('#{name}')"></div>
+		
+		title unwrapped
+		preview
 		-->
-		<div class="title unwrapped">
+		<div class="" style="padding: 2px 0px 2px 8px">
 			#{display_name}
 		</div>
-		<div class="preview">
-			#{startDateShort}
-			&nbsp;
-			#{lengthLabel}: #{trackLengthFormated}
-			&nbsp;
-			#{durationLabel}: #{trackDuration}
+		<div style="padding-bottom: 3px">
+			<div class="preview">
+				#{startDateShort}
+				&nbsp;
+				#{lengthLabel}: #{trackLengthFormated}
+				&nbsp;
+				#{durationLabel}: #{trackDuration}
+			</div>
+			<div class="preview">
+				#{nodesLabel}: #{nodes}
+				&nbsp;
+				#{waypointsLabel}: #{waypoints}
+			</div>
 		</div>
-		<div class="preview">
-			#{nodesLabel}: #{nodes}
-			&nbsp;
-			#{waypointsLabel}: #{waypoints}
-		</div>
-		
 	</div>
 </div>
