@@ -122,7 +122,7 @@
     "dialog.exportInfoTitle": "信息",
     "dialog.exportTitle #{trackname}": "导出路径 #{trackname}",
 
-    "wpntDialog.title": "标题",
+    "wpntDialog.title": "增加路点",
     "wpntDialogTitleLabel": "标题",
     "wpntDialogDesctiptionLabel": "说明",
     "wpntDialogSave": "保存",

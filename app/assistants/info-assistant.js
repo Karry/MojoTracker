@@ -268,10 +268,12 @@ InfoAssistant.prototype.handleAllPointsResult = function(result, waypoints){
 
         img.addEventListener('load', strokeFcn, false);
 		img.addEventListener("error", function(e){
-				$('mapStatus').innerHTML = $L("Loading map from OpenStreetMap.org failed (server is probably busy)");
+				if ($('mapStatus'))
+					$('mapStatus').innerHTML = $L("Loading map from OpenStreetMap.org failed (server is probably busy)");
 			}, false); 
 		img.addEventListener("abort", function(e){
-				$('mapStatus').innerHTML = $L("Loading map from OpenStreetMap.org aborted");
+				if ($('mapStatus'))
+					$('mapStatus').innerHTML = $L("Loading map from OpenStreetMap.org aborted");
 			}, false); 
 		strokeFcn();
 	 }

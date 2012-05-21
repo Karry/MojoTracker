@@ -94,7 +94,7 @@
     "dialog.exportInfoTitle": "Info",
     "dialog.exportTitle #{trackname}": "Exporter la trace #{trackname}",
     
-    "wpntDialog.title": "Titre",
+    "wpntDialog.title": "Ajouter un point de passage",
     "wpntDialogTitleLabel": "Titre",
     "wpntDialogDesctiptionLabel": "Description",
     "wpntDialogSave": "Sauver",
