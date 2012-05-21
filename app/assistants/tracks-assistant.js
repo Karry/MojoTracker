@@ -94,8 +94,13 @@ TracksAssistant.prototype.createTrackInfoHandler = function(transaction, results
 			newItem.startDateShort = Config.getInstance().formatUTCShortDateAndTime(newItem.startTime );
 			if (newItem.stop){
 				newItem.stopTime = new Date( Date.parse( newItem.stop.replace("T"," ").replace("Z"," ")) );
-				var trackLength = newItem.stopTime.getTime() - newItem.startTime.getTime();
-				newItem.trackDuration = Config.getInstance().formatTime( new Date(trackLength), true);
+				var now = new Date();
+				var trackLength = newItem.stopTime.getTime() - newItem.startTime.getTime(); // - ( now.getTimezoneOffset()*-60*1000 );
+				var d = new Date(trackLength);
+				// WTF? when I create Date object with miliseconds in parameter, resulted timezone is GTM+1, but I'm in GTM+2...
+				// (new Date(0)).getTimezoneOffset() returned -60
+				// (new Date()).getTimezoneOffset() returned -120
+				newItem.trackDuration = Config.getInstance().formatTime( new Date(d.getTime() + (d.getTimezoneOffset()*60000)), true);
 			}
 		}
 		Mojo.Log.error("track: "+JSON.stringify(newItem));
