@@ -30,7 +30,7 @@
     "dialog.exportInfoTitle": "Info",
     "dialog.exportTitle #{trackname}": "Export track #{trackname}",
     
-    "wpntDialog.title": "Title",
+    "wpntDialog.title": "Add Waypoint",
     "wpntDialogTitleLabel": "Title",
     "wpntDialogDesctiptionLabel": "Desctiption",
     "wpntDialogSave": "Save",
