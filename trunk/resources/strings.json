@@ -7,8 +7,9 @@
     "trck.savedTracks_2":"Two Saved Tracks",
     "trck.savedTracks_3":"Three Saved Tracks",
     "trck.savedTracks_4":"Four Saved Tracks",
-    "trck.savedTracks_many":"Saved Tracks",
-        
+    "trck.savedTracks_many":"#{count} Saved Tracks",
+    "trck.loading": "Loading... (#{count}/#{sum})",
+    
     "prefer.view": "View",
     "prefer.export": "Export",
     "prefer.preferences":"Preferences",
