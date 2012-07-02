@@ -291,7 +291,8 @@ FirstAssistant.prototype.handleGpsResponse = function(event){
     // display compas
 	compass = document.getElementById("compass");
 	compass.style.display = "block";
-    opacity = 0.3;
+    opacity = 1; // 0.3
+	compass.src = 'images/compass_inactive.png';
 	if (event.heading > 0 ){
         /** in case, when GPS is disabled (only if GSM fix is available),
          * event.heading should be -1 and event.errorCode should be 4,
@@ -299,6 +300,7 @@ FirstAssistant.prototype.handleGpsResponse = function(event){
          * work if we go _directly_ to north...
          */
         opacity = 1; // 0.8
+		compass.src = 'images/compass.png';
 		var rot = 360 - direction;
 		//compass.style.MozTransform = "rotate(" + rot + "deg)";
 		compass.style.webkitTransform = "rotate(" + rot + "deg)";
