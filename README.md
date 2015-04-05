@@ -1,6 +1,6 @@
 # MojoTracker
 
-MojoTracker is an aplication for WebOS mobile platform used on Palm mobile devices like Palm Pre. It show current position informations from device GPS reciever, and/or from GSM cell. It allows logs your tracks to internal database and show basic statistics. Later, you can export logs to standard gpx file directly on your phone.
+MojoTracker is an aplication for WebOS mobile platform used on Palm mobile devices like Palm Pre (released in year 2009). It show current position informations from device GPS reciever, and/or from GSM cell. It allows logs your tracks to internal database and show basic statistics. Later, you can export logs to standard gpx file directly on your phone.
 
 It can be used for many purposes. For touristics, contributing to [OpenStreatMap project](http://www.openstreetmap.org/), localizing our photos with [GPS Sync Kipi plugin](http://www.kipi-plugins.org/drupal/node/16') inside [digiKam photo manager](http://www.digikam.org/drupal/node/349')...
 
