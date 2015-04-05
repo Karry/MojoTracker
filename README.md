@@ -12,6 +12,10 @@ It can be used for many purposes. For touristics, contributing to [OpenStreatMap
   * [Howto contribute](https://github.com/Karry/MojoTracker/blob/wiki/HowtoContribute.md)
   * [Related aplications](https://github.com/Karry/MojoTracker/blob/wiki/RelatedApps.md)
 
+## Download
+
+Binary packages (ipk format) are available in "releases" branch. Latest version is [0.3.3](https://github.com/Karry/MojoTracker/blob/releases/com.osm.mojotracker_0.3.3_all.ipk?raw=true).
+
 ## Video
 
 <a href='http://www.youtube.com/watch?feature=player_embedded&v=RuE90URHX84' target='_blank'><img src='http://img.youtube.com/vi/RuE90URHX84/0.jpg' width='425' height=344 /></a>
