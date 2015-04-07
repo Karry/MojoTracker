@@ -1,3 +1,5 @@
+<img src="images/icon64.png" />
+
 # MojoTracker
 
 MojoTracker is an aplication for WebOS mobile platform used on Palm mobile devices like Palm Pre (released in year 2009). It show current position informations from device GPS reciever, and/or from GSM cell. It allows logs your tracks to internal database and show basic statistics. Later, you can export logs to standard gpx file directly on your phone.
